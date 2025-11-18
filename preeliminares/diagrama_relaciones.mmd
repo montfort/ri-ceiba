@@ -1,0 +1,99 @@
+erDiagram
+
+    USUARIO {
+        UUID id PK
+        VARCHAR nombre_usuario
+        VARCHAR email
+        TEXT[] roles
+        BOOLEAN activo
+    }
+
+    REPORTE_INCIDENCIA {
+        UUID id PK
+        SMALLINT estado
+        UUID usuario_id FK
+        TIMESTAMPTZ datetime
+        TIMESTAMPTZ datetime_hechos
+        SMALLINT sexo_id FK
+        INT edad
+        SMALLINT delito_id FK
+        INT zona_id FK
+        INT sector_id FK
+        INT cuadrante_id FK
+        SMALLINT tipo_de_atencion_id FK
+        SMALLINT tipo_de_accion
+        TEXT hechos_reportados
+        TEXT acciones_realizadas
+        SMALLINT traslados
+        TEXT observaciones
+    }
+
+    AUDITORIA {
+        SERIAL id PK
+        VARCHAR codigo
+        UUID usuario_id FK
+        UUID id_relacionado
+        TIMESTAMPTZ datetime
+        INET ip
+    }
+
+    ZONA {
+        SERIAL id PK
+        VARCHAR nombre
+        BOOLEAN activo
+    }
+
+    SECTOR {
+        SERIAL id PK
+        INT zona_id FK
+        VARCHAR nombre
+        BOOLEAN activo
+    }
+
+    CUADRANTE {
+        SERIAL id PK
+        INT sector_id FK
+        VARCHAR nombre
+        BOOLEAN activo
+    }
+
+    CAT_SEXOS {
+        SMALLINT id PK
+        VARCHAR label
+    }
+
+    CAT_DELITOS {
+        SMALLINT id PK
+        VARCHAR label
+    }
+
+    CAT_TIPO_ATENCION {
+        SMALLINT id PK
+        VARCHAR label
+    }
+
+    REPORTE_AUTOMATICO {
+        UUID id PK
+        TIMESTAMPTZ fecha_generacion
+        TEXT contenido_md
+        BYTEA contenido_word
+        VARCHAR creado_por
+    }
+
+    MODELO_REPORTE {
+        UUID id PK
+        VARCHAR nombre
+        TEXT contenido_md
+    }
+
+    USUARIO ||--o{ REPORTE_INCIDENCIA : crea
+    USUARIO ||--o{ AUDITORIA : genera
+    ZONA ||--o{ SECTOR : contiene
+    SECTOR ||--o{ CUADRANTE : contiene
+    REPORTE_INCIDENCIA }o--|| ZONA : pertenece
+    REPORTE_INCIDENCIA }o--|| SECTOR : pertenece
+    REPORTE_INCIDENCIA }o--|| CUADRANTE : pertenece
+    REPORTE_INCIDENCIA }o--|| CAT_SEXOS : usa
+    REPORTE_INCIDENCIA }o--|| CAT_DELITOS : usa
+    REPORTE_INCIDENCIA }o--|| CAT_TIPO_ATENCION : usa
+    REPORTE_AUTOMATICO }o--|| MODELO_REPORTE : basado_en
