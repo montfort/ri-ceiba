@@ -29,17 +29,36 @@
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
-  <!-- Security Analyzers (RS-002 Mitigation) -->
+  <!-- Security Analyzers (T020h - RS-002, RS-006 Mitigation) -->
   <ItemGroup>
+    <!-- Microsoft built-in analyzers -->
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <!-- SonarAnalyzer for code quality and security issues -->
     <PackageReference Include="SonarAnalyzer.CSharp" Version="10.4.0.108396">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <!-- SecurityCodeScan for security vulnerabilities including SQL injection -->
+    <PackageReference Include="SecurityCodeScan.VS2019" Version="5.6.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
+
+  <!-- Security Analyzer Configuration (T020h) -->
+  <PropertyGroup>
+    <!-- Treat security warnings as errors (SQL injection, XSS, etc.) -->
+    <WarningsAsErrors>$(WarningsAsErrors);SCS0002;SCS0014;SCS0026;SCS0029</WarningsAsErrors>
+    <!-- SCS0002: SQL Injection (Entity Framework) -->
+    <!-- SCS0014: SQL Injection (raw SQL) -->
+    <!-- SCS0026: XSS vulnerabilities -->
+    <!-- SCS0029: Cross-Site Request Forgery -->
+  </PropertyGroup>
 
   <!-- Common Package References -->
   <ItemGroup Condition="'$(MSBuildProjectExtension)' != '.dcproj'">

@@ -82,10 +82,10 @@ Based on plan.md Clean Architecture structure:
 - [X] T020b [P] RS-001 Mitigation: Implement custom AuthorizationMiddleware to log unauthorized attempts in src/Ceiba.Web/Middleware/AuthorizationLoggingMiddleware.cs
 - [ ] T020c [P] RS-001 Mitigation: Create authorization test matrix (Role × Functionality) in tests/Ceiba.Integration.Tests/AuthorizationMatrixTests.cs
 - [ ] T020d [P] RS-001 Mitigation: Configure OWASP ZAP security scanning in CI/CD pipeline (.github/workflows/security-scan.yml)
-- [ ] T020e [P] RS-001 Mitigation: Create security code review checklist in .github/PULL_REQUEST_TEMPLATE.md
+- [X] T020e [P] RS-001 Mitigation: Create security code review checklist in .github/PULL_REQUEST_TEMPLATE.md
 - [X] T020f [P] RS-002 Mitigation: Configure Content Security Policy (CSP) headers in src/Ceiba.Web/Program.cs
 - [ ] T020g [P] RS-002 Mitigation: Configure SonarQube + Snyk security scanning in CI/CD (.github/workflows/security-scan.yml)
-- [ ] T020h [P] RS-002 Mitigation: Add Roslyn analyzers for SQL concatenation detection (Directory.Build.props)
+- [X] T020h [P] RS-002 Mitigation: Add Roslyn analyzers for SQL concatenation detection (Directory.Build.props)
 - [ ] T020i [P] RS-002 Mitigation: Create input validation integration tests in tests/Ceiba.Integration.Tests/InputValidationTests.cs
 - [ ] T020j [P] RS-002 Mitigation: Implement zero-raw-SQL policy check script in scripts/security/check-no-raw-sql.sh
 

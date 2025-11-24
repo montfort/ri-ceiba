@@ -4,5 +4,11 @@
         <name>Ceiba.Infrastructure.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Infrastructure.Tests.AuditInterceptorTests">
+            <summary>
+            Unit tests for audit logging save changes interceptor.
+            Tests audit trail creation for all entity modifications.
+            </summary>
+        </member>
     </members>
 </doc>

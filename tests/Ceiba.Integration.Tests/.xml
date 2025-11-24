@@ -4,5 +4,11 @@
         <name>Ceiba.Integration.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Integration.Tests.DbContextTests">
+            <summary>
+            Integration tests for CeibaDbContext.
+            Tests database configuration, relationships, and constraints.
+            </summary>
+        </member>
     </members>
 </doc>
