@@ -4,6 +4,7 @@ using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Services;
 using Ceiba.Web.Components;
+using Ceiba.Web.Configuration;
 using Ceiba.Web.Middleware;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -60,8 +61,12 @@ try
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
+    // Configurar feature flags (T019d)
+    builder.Services.Configure<FeatureFlags>(builder.Configuration.GetSection("FeatureFlags"));
+
     // Registrar servicios de aplicación (T016)
     builder.Services.AddScoped<IAuditService, AuditService>();
+    builder.Services.AddScoped<SeedDataService>(); // T020
     builder.Services.AddHttpContextAccessor(); // Para obtener UserId en DbContext
 
     // Configurar factory para DbContext con UserId del request actual
@@ -165,14 +170,18 @@ try
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
 
-    // Migración automática en desarrollo (T019)
+    // Migración automática y seed data en desarrollo (T019, T020)
     if (app.Environment.IsDevelopment())
     {
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
         await db.Database.MigrateAsync();
-
         Log.Information("Database migrations applied successfully");
+
+        // Seed initial data (T020)
+        var seedService = scope.ServiceProvider.GetRequiredService<SeedDataService>();
+        await seedService.SeedAsync();
+        Log.Information("Database seeded successfully");
     }
 
     Log.Information("Ceiba application starting...");

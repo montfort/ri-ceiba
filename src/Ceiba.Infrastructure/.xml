@@ -42,6 +42,31 @@
             Defines table name, column mappings, indexes, and relationships.
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Data.MigrationBackupService">
+            <summary>
+            T019c: RT-004 Mitigation - Migration backup service
+            Provides programmatic database backup before migrations.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Data.MigrationBackupService.CreatePreMigrationBackupAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Creates a backup before applying a migration.
+            </summary>
+            <param name="migrationName">Name of the migration being applied</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Path to the backup file, or null if backup failed</returns>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Data.SeedDataService">
+            <summary>
+            Service to seed initial data into the database.
+            Creates default roles, admin user, and sample catalogs.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Data.SeedDataService.SeedAsync">
+            <summary>
+            Seeds all initial data. Idempotent - safe to run multiple times.
+            </summary>
+        </member>
         <member name="T:Ceiba.Infrastructure.Identity.IdentityConfiguration">
             <summary>
             Configuración de ASP.NET Identity según requisitos de seguridad.
@@ -107,6 +132,18 @@
             ○ Match if at a word boundary.<br/>
             </code>
             </remarks>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
         </member>
         <member name="T:Ceiba.Infrastructure.Services.AuditService">
             <summary>

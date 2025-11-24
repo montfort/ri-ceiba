@@ -4,6 +4,90 @@
         <name>Ceiba.Web</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Web.Configuration.FeatureFlags">
+            <summary>
+            T019d: RT-004 Mitigation - Feature flag configuration system.
+            Allows enabling/disabling features without code changes or migrations.
+            Configured via appsettings.json.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableReporteTipoB">
+            <summary>
+            Enable Type B incident reports (future feature).
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableReporteTipoC">
+            <summary>
+            Enable Type C incident reports (future feature).
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableAutomatedReports">
+            <summary>
+            Enable automated report generation with AI.
+            Default: true (core feature from US4)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableAINarrative">
+            <summary>
+            Enable AI narrative summarization.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableEmailNotifications">
+            <summary>
+            Enable email notifications.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnablePDFExport">
+            <summary>
+            Enable PDF export functionality.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableJSONExport">
+            <summary>
+            Enable JSON export functionality.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableBulkOperations">
+            <summary>
+            Enable bulk operations (batch export, etc.).
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableAdvancedSearch">
+            <summary>
+            Enable advanced search with full-text indexing.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableSelfRegistration">
+            <summary>
+            Enable user self-registration (for testing environments).
+            Default: false (production should use admin-created accounts only)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.MaintenanceMode">
+            <summary>
+            Enable maintenance mode (blocks all non-admin access).
+            Default: false
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Configuration.FeatureFlagExtensions">
+            <summary>
+            Extension methods for feature flag checks.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Configuration.FeatureFlagExtensions.RequireFeature(Ceiba.Web.Configuration.FeatureFlags,System.Func{Ceiba.Web.Configuration.FeatureFlags,System.Boolean},System.String)">
+            <summary>
+            Checks if a feature is enabled.
+            Throws InvalidOperationException if feature is disabled.
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Middleware.AuthorizationLoggingMiddleware">
             <summary>
             RS-001 Mitigation: Authorization logging middleware.

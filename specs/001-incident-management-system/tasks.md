@@ -70,14 +70,14 @@ Based on plan.md Clean Architecture structure:
 - [X] T018b [P] RS-003 Mitigation: Implement PII redaction enricher for Serilog in src/Ceiba.Infrastructure/Logging/PIIRedactionEnricher.cs
 - [X] T018c [P] RS-003 Mitigation: Configure log encryption at rest using file system encryption (documentation added - OS-level encryption)
 - [X] T018d [P] RS-003 Mitigation: Implement log retention policy (30 days app logs, indefinite audit) in configuration
-- [ ] T018e [P] RS-003 Mitigation: Create automated log scanning script in scripts/security/scan-logs-for-sensitive-data.sh
+- [X] T018e [P] RS-003 Mitigation: Create automated log scanning script in scripts/security/scan-logs-for-sensitive-data.sh
 - [X] T019 Create initial EF Core migration in src/Ceiba.Infrastructure/Data/Migrations/
 - [X] T019a [P] RT-004 Mitigation: Add campos_adicionales (JSONB) and schema_version fields to ReporteIncidencia entity for extensibility (schema_version added, campos_adicionales will be added in US1)
 - [X] T019b [P] RT-004 Mitigation: Create MIGRATIONS.md changelog file at repository root
-- [ ] T019c [P] RT-004 Mitigation: Implement pre-migration backup script in src/Ceiba.Infrastructure/Data/MigrationBackup.cs
-- [ ] T019d [P] RT-004 Mitigation: Add feature flag configuration system in src/Ceiba.Web/Configuration/FeatureFlags.cs
-- [ ] T019e [P] RT-004 Mitigation: Create migration validation scripts (row count, FK integrity) in scripts/migrations/validate-migration.sh
-- [ ] T020 Create seed data service in src/Ceiba.Infrastructure/Data/SeedDataService.cs
+- [X] T019c [P] RT-004 Mitigation: Implement pre-migration backup service in src/Ceiba.Infrastructure/Data/MigrationBackupService.cs + scripts/migrations/backup-before-migration.sh
+- [X] T019d [P] RT-004 Mitigation: Add feature flag configuration system in src/Ceiba.Web/Configuration/FeatureFlags.cs
+- [X] T019e [P] RT-004 Mitigation: Create migration validation scripts (row count, FK integrity) in scripts/migrations/validate-migration.sh
+- [X] T020 Create seed data service in src/Ceiba.Infrastructure/Data/SeedDataService.cs
 - [X] T020a [P] RS-001 Mitigation: Create authorization policy handlers in src/Ceiba.Web/Program.cs (policies configured directly in Program.cs)
 - [X] T020b [P] RS-001 Mitigation: Implement custom AuthorizationMiddleware to log unauthorized attempts in src/Ceiba.Web/Middleware/AuthorizationLoggingMiddleware.cs
 - [ ] T020c [P] RS-001 Mitigation: Create authorization test matrix (Role × Functionality) in tests/Ceiba.Integration.Tests/AuthorizationMatrixTests.cs
