@@ -4,6 +4,25 @@
         <name>Ceiba.Web</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Web.Middleware.AuthorizationLoggingMiddleware">
+            <summary>
+            RS-001 Mitigation: Authorization logging middleware.
+            Logs all unauthorized access attempts for security monitoring.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.ErrorHandlingMiddleware">
+            <summary>
+            Global exception handling middleware.
+            Catches unhandled exceptions, logs them, and returns appropriate error responses.
+            Implements secure error handling (no sensitive data in production).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.UserAgentValidationMiddleware">
+            <summary>
+            RS-005 Mitigation: User-Agent validation middleware.
+            Detects and blocks suspicious session hijacking attempts by validating User-Agent consistency.
+            </summary>
+        </member>
         <member name="T:Program">
             <summary>
             Auto-generated public partial Program class for top-level statement apps.

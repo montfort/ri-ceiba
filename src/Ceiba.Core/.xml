@@ -4,5 +4,344 @@
         <name>Ceiba.Core</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Core.Entities.BaseEntity">
+            <summary>
+            Base entity class with common audit fields.
+            All entities should inherit from this class to ensure consistent audit tracking.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.BaseEntity.CreatedAt">
+            <summary>
+            UTC timestamp when the entity was created.
+            Automatically set by the database interceptor.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.BaseEntityWithUser">
+            <summary>
+            Base entity class for entities with a user creator.
+            Extends BaseEntity with user tracking.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.BaseEntityWithUser.UsuarioId">
+            <summary>
+            User who created or last modified this entity.
+            References Usuario.Id (ASP.NET Identity user).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.BaseCatalogEntity">
+            <summary>
+            Base entity class for catalog entities that can be activated/deactivated.
+            Extends BaseEntityWithUser with active status flag.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.BaseCatalogEntity.Activo">
+            <summary>
+            Indicates if this catalog entry is active.
+            Inactive entries are hidden from user selection but retained for historical data.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.CatalogoSugerencia">
+            <summary>
+            Configurable suggestion catalog for text field autocomplete.
+            Allows ADMIN users to configure suggestion lists for specific fields.
+            Fields: sexo, delito, tipo_de_atencion
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Id">
+            <summary>
+            Unique identifier for the suggestion.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Campo">
+            <summary>
+            Target field name for this suggestion.
+            Valid values: "sexo", "delito", "tipo_de_atencion"
+            Required, max 50 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Valor">
+            <summary>
+            Suggestion value to display in autocomplete.
+            Example: "Masculino", "Robo", "Orientación"
+            Required, max 200 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Orden">
+            <summary>
+            Display order for suggestions (ascending).
+            Lower numbers appear first in dropdown.
+            Default: 0
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Cuadrante">
+            <summary>
+            Geographic quadrant entity (lowest level in geographic hierarchy).
+            Belongs to a Sector, which belongs to a Zona.
+            Example: "Cuadrante 1-A", "Cuadrante Norte-1"
+            Part of hierarchical catalog: Zona → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Id">
+            <summary>
+            Unique identifier for the cuadrante.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Nombre">
+            <summary>
+            Display name of the cuadrante.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.SectorId">
+            <summary>
+            Foreign key to the parent Sector.
+            Required - cuadrante must belong to a sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Sector">
+            <summary>
+            Navigation property: Parent sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this cuadrante.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.RegistroAuditoria">
+            <summary>
+            Audit log entry for all system operations.
+            Immutable record of who did what, when.
+            Retention: Indefinite (never deleted per FR-035b).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Id">
+            <summary>
+            Unique identifier for the audit log entry.
+            Uses BIGINT to support high volume logging.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Codigo">
+            <summary>
+            Action code identifying the operation performed.
+            See AuditActionCode class for standard codes.
+            Required, max 50 characters.
+            Example: "AUTH_LOGIN", "REPORT_CREATE", "USER_SUSPEND"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.IdRelacionado">
+            <summary>
+            ID of the related entity (if applicable).
+            Example: Report ID for REPORT_CREATE, User ID for USER_SUSPEND
+            Nullable - system-level operations may not have a related entity.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.TablaRelacionada">
+            <summary>
+            Table name of the related entity.
+            Example: "REPORTE_INCIDENCIA", "USUARIO", "ZONA"
+            Nullable - system-level operations may not have a related table.
+            Max 50 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.UsuarioId">
+            <summary>
+            User who performed the action.
+            References Usuario.Id (ASP.NET Identity user).
+            Nullable - system-triggered operations have NULL user.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Ip">
+            <summary>
+            Client IP address from which the action originated.
+            Supports both IPv4 and IPv6 (max 45 characters).
+            Nullable - may not be available for background jobs.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Detalles">
+            <summary>
+            Additional details in JSON format.
+            Stores context-specific information about the operation.
+            Example: {"old_value": "Borrador", "new_value": "Entregado"}
+            Nullable - simple operations may not need extra details.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ReporteIncidencia">
+            <summary>
+            Incident report entity (Type A).
+            Core entity for police incident reporting system.
+            Full implementation in Phase 3 (User Story 1).
+            This is a placeholder to support Phase 2 foundational relationships.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Id">
+            <summary>
+            Unique identifier for the report.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TipoReporte">
+            <summary>
+            Report type identifier.
+            Default: "A" (Type A report)
+            Extensible for future types (B, C, etc.)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Estado">
+            <summary>
+            Report state.
+            0 = Borrador (Draft)
+            1 = Entregado (Submitted)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.ZonaId">
+            <summary>
+            Foreign key to Zona.
+            Required - every report must have a geographic zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Zona">
+            <summary>
+            Navigation property: Zone where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.SectorId">
+            <summary>
+            Foreign key to Sector.
+            Required - every report must have a geographic sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Sector">
+            <summary>
+            Navigation property: Sector where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.CuadranteId">
+            <summary>
+            Foreign key to Cuadrante.
+            Required - every report must have a geographic quadrant.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Cuadrante">
+            <summary>
+            Navigation property: Quadrant where incident occurred.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Sector">
+            <summary>
+            Geographic sector entity (middle level in geographic hierarchy).
+            Belongs to a Zona, contains multiple Cuadrantes.
+            Example: "Sector 1", "Sector A"
+            Part of hierarchical catalog: Zona → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Id">
+            <summary>
+            Unique identifier for the sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Nombre">
+            <summary>
+            Display name of the sector.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.ZonaId">
+            <summary>
+            Foreign key to the parent Zona.
+            Required - sector must belong to a zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Zona">
+            <summary>
+            Navigation property: Parent zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Cuadrantes">
+            <summary>
+            Navigation property: Cuadrantes within this sector.
+            Cascade delete configured in EF Core configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this sector.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Zona">
+            <summary>
+            Geographic zone entity (highest level in geographic hierarchy).
+            Example: "Zona Norte", "Zona Sur", "Zona Centro"
+            Part of hierarchical catalog: Zona → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Id">
+            <summary>
+            Unique identifier for the zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Nombre">
+            <summary>
+            Display name of the zone.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Sectores">
+            <summary>
+            Navigation property: Sectors within this zone.
+            Cascade delete configured in EF Core configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this zone.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Enums.AuditActionCode">
+            <summary>
+            Standard audit action codes for system operations.
+            All critical operations must be logged with one of these codes.
+            Follows convention: ENTITY_ACTION pattern.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAuditService">
+            <summary>
+            Service interface for manual audit logging.
+            Used for operations that need explicit audit trails beyond automatic interceptor logging.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAuditService.LogAsync(System.String,System.Nullable{System.Int32},System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Logs an audit event with full details.
+            </summary>
+            <param name="codigo">Audit action code (see AuditActionCode)</param>
+            <param name="idRelacionado">Optional related entity ID</param>
+            <param name="tablaRelacionada">Optional related table name</param>
+            <param name="detalles">Optional additional details (JSON)</param>
+            <param name="ip">Optional client IP address</param>
+            <param name="cancellationToken">Cancellation token</param>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAuditService.QueryAsync(System.Nullable{System.Guid},System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Queries audit logs with filtering.
+            </summary>
+            <param name="usuarioId">Filter by user</param>
+            <param name="codigo">Filter by action code</param>
+            <param name="fechaInicio">Filter by start date</param>
+            <param name="fechaFin">Filter by end date</param>
+            <param name="skip">Pagination: records to skip</param>
+            <param name="take">Pagination: records to take (max 500)</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>List of audit log entries</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.AuditLogDto">
+            <summary>
+            DTO for audit log query results.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.AuditLogDto.#ctor(System.Int64,System.String,System.Nullable{System.Int32},System.String,System.DateTime,System.Nullable{System.Guid},System.String,System.String,System.String)">
+            <summary>
+            DTO for audit log query results.
+            </summary>
+        </member>
     </members>
 </doc>
