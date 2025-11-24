@@ -1,0 +1,400 @@
+openapi: 3.0.3
+info:
+  title: Ceiba Reports API
+  description: Incident report management endpoints
+  version: 1.0.0
+
+paths:
+  /api/reports:
+    get:
+      summary: List reports
+      description: CREADOR sees own reports, REVISOR sees all
+      operationId: listReports
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: zonaId
+          in: query
+          schema:
+            type: integer
+        - name: delito
+          in: query
+          schema:
+            type: string
+        - name: fechaDesde
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: fechaHasta
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            default: createdAt
+        - name: sortDesc
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: Paginated list of reports
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportListResponse'
+
+    post:
+      summary: Create new report
+      description: Only CREADOR can create reports
+      operationId: createReport
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportRequest'
+      responses:
+        '201':
+          description: Report created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '403':
+          description: Not authorized (not CREADOR)
+
+  /api/reports/{id}:
+    get:
+      summary: Get report by ID
+      operationId: getReport
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Report details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+        '404':
+          description: Report not found
+
+    put:
+      summary: Update report
+      description: CREADOR can edit own drafts, REVISOR can edit any
+      operationId: updateReport
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportRequest'
+      responses:
+        '200':
+          description: Report updated
+        '403':
+          description: Not authorized to edit
+
+  /api/reports/{id}/submit:
+    post:
+      summary: Submit report (change to entregado)
+      description: Only CREADOR can submit own drafts
+      operationId: submitReport
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Report submitted
+        '403':
+          description: Not authorized
+
+  /api/reports/export/pdf:
+    post:
+      summary: Export reports to PDF
+      description: Only REVISOR can export
+      operationId: exportPdf
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reportIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /api/reports/export/json:
+    post:
+      summary: Export reports to JSON
+      description: Only REVISOR can export
+      operationId: exportJson
+      tags: [Reports]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reportIds:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: JSON file
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Identity.Application
+
+  schemas:
+    CreateReportRequest:
+      type: object
+      required:
+        - datetimeHechos
+        - sexo
+        - edad
+        - delito
+        - zonaId
+        - sectorId
+        - cuadranteId
+        - turnoCeiba
+        - tipoDeAtencion
+        - tipoDeAccion
+        - hechosReportados
+        - accionesRealizadas
+        - traslados
+      properties:
+        tipoReporte:
+          type: string
+          default: 'A'
+        datetimeHechos:
+          type: string
+          format: date-time
+        sexo:
+          type: string
+        edad:
+          type: integer
+          minimum: 1
+          maximum: 149
+        lgbtttiqPlus:
+          type: boolean
+        situacionCalle:
+          type: boolean
+        migrante:
+          type: boolean
+        discapacidad:
+          type: boolean
+        delito:
+          type: string
+        zonaId:
+          type: integer
+        sectorId:
+          type: integer
+        cuadranteId:
+          type: integer
+        turnoCeiba:
+          type: integer
+        tipoDeAtencion:
+          type: string
+        tipoDeAccion:
+          type: integer
+          enum: [1, 2, 3]
+        hechosReportados:
+          type: string
+        accionesRealizadas:
+          type: string
+        traslados:
+          type: integer
+          enum: [0, 1, 2]
+        observaciones:
+          type: string
+
+    UpdateReportRequest:
+      type: object
+      properties:
+        datetimeHechos:
+          type: string
+          format: date-time
+        sexo:
+          type: string
+        edad:
+          type: integer
+        lgbtttiqPlus:
+          type: boolean
+        situacionCalle:
+          type: boolean
+        migrante:
+          type: boolean
+        discapacidad:
+          type: boolean
+        delito:
+          type: string
+        zonaId:
+          type: integer
+        sectorId:
+          type: integer
+        cuadranteId:
+          type: integer
+        turnoCeiba:
+          type: integer
+        tipoDeAtencion:
+          type: string
+        tipoDeAccion:
+          type: integer
+        hechosReportados:
+          type: string
+        accionesRealizadas:
+          type: string
+        traslados:
+          type: integer
+        observaciones:
+          type: string
+
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        tipoReporte:
+          type: string
+        estado:
+          type: integer
+        usuarioId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        datetimeHechos:
+          type: string
+          format: date-time
+        sexo:
+          type: string
+        edad:
+          type: integer
+        lgbtttiqPlus:
+          type: boolean
+        situacionCalle:
+          type: boolean
+        migrante:
+          type: boolean
+        discapacidad:
+          type: boolean
+        delito:
+          type: string
+        zona:
+          $ref: '#/components/schemas/CatalogItem'
+        sector:
+          $ref: '#/components/schemas/CatalogItem'
+        cuadrante:
+          $ref: '#/components/schemas/CatalogItem'
+        turnoCeiba:
+          type: integer
+        tipoDeAtencion:
+          type: string
+        tipoDeAccion:
+          type: integer
+        hechosReportados:
+          type: string
+        accionesRealizadas:
+          type: string
+        traslados:
+          type: integer
+        observaciones:
+          type: string
+
+    ReportListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportResponse'
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    CatalogItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string

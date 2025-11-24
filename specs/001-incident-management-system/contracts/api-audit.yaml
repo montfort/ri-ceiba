@@ -1,0 +1,485 @@
+openapi: 3.0.3
+info:
+  title: Ceiba Audit API
+  description: Audit log and automated reports endpoints
+  version: 1.0.0
+
+paths:
+  # Audit Logs (ADMIN only)
+  /api/audit/logs:
+    get:
+      summary: List audit logs
+      description: Only ADMIN can access
+      operationId: listAuditLogs
+      tags: [Audit]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: usuarioId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: codigo
+          in: query
+          schema:
+            type: string
+        - name: fechaDesde
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: fechaHasta
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: Paginated audit logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogListResponse'
+        '403':
+          description: Not authorized (not ADMIN)
+
+  /api/audit/logs/{id}:
+    get:
+      summary: Get audit log detail
+      operationId: getAuditLog
+      tags: [Audit]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Audit log detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogResponse'
+
+  # Automated Reports (REVISOR only)
+  /api/automated-reports:
+    get:
+      summary: List automated reports
+      description: Only REVISOR can access
+      operationId: listAutomatedReports
+      tags: [AutomatedReports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: fechaDesde
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: fechaHasta
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: enviado
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of automated reports
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomatedReportListResponse'
+        '403':
+          description: Not authorized (not REVISOR)
+
+  /api/automated-reports/{id}:
+    get:
+      summary: Get automated report
+      operationId: getAutomatedReport
+      tags: [AutomatedReports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Automated report detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutomatedReportResponse'
+
+    put:
+      summary: Update automated report
+      operationId: updateAutomatedReport
+      tags: [AutomatedReports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAutomatedReportRequest'
+      responses:
+        '200':
+          description: Report updated
+
+  /api/automated-reports/{id}/resend:
+    post:
+      summary: Resend automated report email
+      operationId: resendAutomatedReport
+      tags: [AutomatedReports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email resent
+
+  /api/automated-reports/{id}/download:
+    get:
+      summary: Download Word document
+      operationId: downloadAutomatedReport
+      tags: [AutomatedReports]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Word document
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+
+  # Report Templates (REVISOR only)
+  /api/report-templates:
+    get:
+      summary: List report templates
+      operationId: listReportTemplates
+      tags: [Templates]
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: List of templates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportTemplateResponse'
+
+  /api/report-templates/{id}:
+    get:
+      summary: Get template
+      operationId: getReportTemplate
+      tags: [Templates]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Template detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportTemplateResponse'
+
+    put:
+      summary: Update template
+      operationId: updateReportTemplate
+      tags: [Templates]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReportTemplateRequest'
+      responses:
+        '200':
+          description: Template updated
+
+  # Public Catalogs (for form dropdowns)
+  /api/catalogs/zonas:
+    get:
+      summary: Get active zones
+      operationId: getActiveZonas
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Active zones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CatalogItem'
+
+  /api/catalogs/sectores/{zonaId}:
+    get:
+      summary: Get sectors for zone
+      operationId: getSectoresByZona
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: zonaId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sectors for zone
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CatalogItem'
+
+  /api/catalogs/cuadrantes/{sectorId}:
+    get:
+      summary: Get quadrants for sector
+      operationId: getCuadrantesBySector
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: sectorId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Quadrants for sector
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CatalogItem'
+
+  /api/catalogs/sugerencias/{campo}:
+    get:
+      summary: Get suggestions for field
+      operationId: getSugerenciasByCampo
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: campo
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [sexo, delito, tipo_de_atencion]
+      responses:
+        '200':
+          description: Suggestions for field
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Identity.Application
+
+  schemas:
+    AuditLogResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        codigo:
+          type: string
+        idRelacionado:
+          type: integer
+        tablaRelacionada:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        usuarioId:
+          type: string
+          format: uuid
+        nombreUsuario:
+          type: string
+        ip:
+          type: string
+        detalles:
+          type: object
+
+    AuditLogListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogResponse'
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    AutomatedReportResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        fechaInicio:
+          type: string
+          format: date-time
+        fechaFin:
+          type: string
+          format: date-time
+        contenidoMarkdown:
+          type: string
+        estadisticas:
+          type: object
+          properties:
+            totalReportes:
+              type: integer
+            delitosFrecuentes:
+              type: array
+              items:
+                type: object
+            zonasConMasIncidencias:
+              type: array
+              items:
+                type: object
+        enviado:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    AutomatedReportListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AutomatedReportResponse'
+        totalCount:
+          type: integer
+        page:
+          type: integer
+        pageSize:
+          type: integer
+
+    UpdateAutomatedReportRequest:
+      type: object
+      properties:
+        contenidoMarkdown:
+          type: string
+
+    ReportTemplateResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        contenidoMarkdown:
+          type: string
+        activo:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdateReportTemplateRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        contenidoMarkdown:
+          type: string
+        activo:
+          type: boolean
+
+    CatalogItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string

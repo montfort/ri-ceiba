@@ -1,0 +1,596 @@
+openapi: 3.0.3
+info:
+  title: Ceiba Admin API
+  description: Administration endpoints (ADMIN role only)
+  version: 1.0.0
+
+paths:
+  # User Management
+  /api/admin/users:
+    get:
+      summary: List all users
+      operationId: listUsers
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+        - name: rol
+          in: query
+          schema:
+            type: string
+            enum: [CREADOR, REVISOR, ADMIN]
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+    post:
+      summary: Create new user
+      operationId: createUser
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error (e.g., duplicate email)
+
+  /api/admin/users/{id}:
+    get:
+      summary: Get user by ID
+      operationId: getUser
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+    put:
+      summary: Update user
+      operationId: updateUser
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+
+    delete:
+      summary: Delete user
+      operationId: deleteUser
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted
+
+  /api/admin/users/{id}/suspend:
+    post:
+      summary: Suspend user
+      operationId: suspendUser
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User suspended
+
+  /api/admin/users/{id}/activate:
+    post:
+      summary: Activate user
+      operationId: activateUser
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User activated
+
+  # Catalog Management - Zonas
+  /api/admin/zonas:
+    get:
+      summary: List all zones
+      operationId: listZonas
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of zones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ZonaResponse'
+
+    post:
+      summary: Create zone
+      operationId: createZona
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateZonaRequest'
+      responses:
+        '201':
+          description: Zone created
+
+  /api/admin/zonas/{id}:
+    put:
+      summary: Update zone
+      operationId: updateZona
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateZonaRequest'
+      responses:
+        '200':
+          description: Zone updated
+
+  # Catalog Management - Sectores
+  /api/admin/sectores:
+    get:
+      summary: List sectors
+      operationId: listSectores
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: zonaId
+          in: query
+          schema:
+            type: integer
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of sectors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SectorResponse'
+
+    post:
+      summary: Create sector
+      operationId: createSector
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSectorRequest'
+      responses:
+        '201':
+          description: Sector created
+
+  /api/admin/sectores/{id}:
+    put:
+      summary: Update sector
+      operationId: updateSector
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSectorRequest'
+      responses:
+        '200':
+          description: Sector updated
+
+  # Catalog Management - Cuadrantes
+  /api/admin/cuadrantes:
+    get:
+      summary: List quadrants
+      operationId: listCuadrantes
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: sectorId
+          in: query
+          schema:
+            type: integer
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of quadrants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CuadranteResponse'
+
+    post:
+      summary: Create quadrant
+      operationId: createCuadrante
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCuadranteRequest'
+      responses:
+        '201':
+          description: Quadrant created
+
+  /api/admin/cuadrantes/{id}:
+    put:
+      summary: Update quadrant
+      operationId: updateCuadrante
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCuadranteRequest'
+      responses:
+        '200':
+          description: Quadrant updated
+
+  # Suggestion Lists
+  /api/admin/sugerencias:
+    get:
+      summary: List suggestions
+      operationId: listSugerencias
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: campo
+          in: query
+          schema:
+            type: string
+            enum: [sexo, delito, tipo_de_atencion]
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SugerenciaResponse'
+
+    post:
+      summary: Create suggestion
+      operationId: createSugerencia
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSugerenciaRequest'
+      responses:
+        '201':
+          description: Suggestion created
+
+  /api/admin/sugerencias/{id}:
+    put:
+      summary: Update suggestion
+      operationId: updateSugerencia
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSugerenciaRequest'
+      responses:
+        '200':
+          description: Suggestion updated
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Identity.Application
+
+  schemas:
+    CreateUserRequest:
+      type: object
+      required: [nombreUsuario, email, password, roles]
+      properties:
+        nombreUsuario:
+          type: string
+          minLength: 3
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 10
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [CREADOR, REVISOR, ADMIN]
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        nombreUsuario:
+          type: string
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombreUsuario:
+          type: string
+        email:
+          type: string
+        activo:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        roles:
+          type: array
+          items:
+            type: string
+
+    CreateZonaRequest:
+      type: object
+      required: [nombre]
+      properties:
+        nombre:
+          type: string
+
+    UpdateZonaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        activo:
+          type: boolean
+
+    ZonaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        activo:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateSectorRequest:
+      type: object
+      required: [nombre, zonaId]
+      properties:
+        nombre:
+          type: string
+        zonaId:
+          type: integer
+
+    UpdateSectorRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        activo:
+          type: boolean
+
+    SectorResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        zonaId:
+          type: integer
+        activo:
+          type: boolean
+
+    CreateCuadranteRequest:
+      type: object
+      required: [nombre, sectorId]
+      properties:
+        nombre:
+          type: string
+        sectorId:
+          type: integer
+
+    UpdateCuadranteRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        activo:
+          type: boolean
+
+    CuadranteResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        sectorId:
+          type: integer
+        activo:
+          type: boolean
+
+    CreateSugerenciaRequest:
+      type: object
+      required: [campo, valor]
+      properties:
+        campo:
+          type: string
+          enum: [sexo, delito, tipo_de_atencion]
+        valor:
+          type: string
+        orden:
+          type: integer
+
+    UpdateSugerenciaRequest:
+      type: object
+      properties:
+        valor:
+          type: string
+        orden:
+          type: integer
+        activo:
+          type: boolean
+
+    SugerenciaResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        campo:
+          type: string
+        valor:
+          type: string
+        orden:
+          type: integer
+        activo:
+          type: boolean

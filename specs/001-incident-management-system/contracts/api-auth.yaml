@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: Ceiba Auth API
+  description: Authentication and authorization endpoints
+  version: 1.0.0
+
+paths:
+  /api/auth/login:
+    post:
+      summary: User login
+      operationId: login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials or account suspended
+
+  /api/auth/logout:
+    post:
+      summary: User logout
+      operationId: logout
+      tags: [Auth]
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout successful
+
+  /api/auth/me:
+    get:
+      summary: Get current user info
+      operationId: getCurrentUser
+      tags: [Auth]
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current user data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Not authenticated
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Identity.Application
+
+  schemas:
+    LoginRequest:
+      type: object
+      required: [nombreUsuario, password]
+      properties:
+        nombreUsuario:
+          type: string
+          minLength: 3
+        password:
+          type: string
+          minLength: 10
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    UserInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nombreUsuario:
+          type: string
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [CREADOR, REVISOR, ADMIN]

@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \".specify/scripts/powershell/check-prerequisites.ps1\" -Json -PathsOnly)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \".specify/scripts/powershell/setup-plan.ps1\" -Json)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \".specify/scripts/powershell/update-agent-context.ps1\" -AgentType claude)",
+      "Bash(powershell -ExecutionPolicy Bypass -File \".specify/scripts/powershell/check-prerequisites.ps1\" -Json)",
+      "Bash(powershell -ExecutionPolicy Bypass -File:*)",
+      "Bash(dotnet --version:*)",
+      "Bash(docker:*)",
+      "Bash(git --version:*)",
+      "Bash(pwsh:*)",
+      "Bash(powershell -Command \"$PSVersionTable.PSVersion\")",
+      "Bash(pandoc:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(dotnet --list-sdks:*)",
+      "Bash(git config:*)",
+      "Bash(gh auth status:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -Command \"Write-Output ''PowerShell execution test OK''\")",
+      "Bash(dotnet new:*)",
+      "Bash(powershell -Command \"pandoc --version\")",
+      "Bash(psql:*)",
+      "Bash(pg_dump:*)",
+      "Bash(pg_restore:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(test:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
