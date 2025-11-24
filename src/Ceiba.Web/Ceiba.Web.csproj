@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Ceiba.Core\Ceiba.Core.csproj" />
+    <ProjectReference Include="..\Ceiba.Application\Ceiba.Application.csproj" />
+    <ProjectReference Include="..\Ceiba.Infrastructure\Ceiba.Infrastructure.csproj" />
+    <ProjectReference Include="..\Ceiba.Shared\Ceiba.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="SonarAnalyzer.CSharp" Version="10.15.0.120848" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+
+</Project>

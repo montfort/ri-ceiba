@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  ceiba-db:
+    image: postgres:18-alpine
+    container_name: ceiba-db-prod
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ceiba}
+      POSTGRES_USER: ${DB_USER:-ceiba}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/lib/ceiba/db:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-ceiba} -d ${DB_NAME:-ceiba}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ceiba-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ASP.NET Core + Blazor Server Application
+  ceiba-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ceiba-web-prod
+    restart: always
+    depends_on:
+      ceiba-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080;https://+:8081
+      ASPNETCORE_HTTPS_PORT: 8081
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /app/certs/ceiba.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: ${CERT_PASSWORD:?Certificate password required}
+      ConnectionStrings__DefaultConnection: "Host=ceiba-db;Port=5432;Database=${DB_NAME:-ceiba};Username=${DB_USER:-ceiba};Password=${DB_PASSWORD:?Database password required};Pooling=true;SSL Mode=Require;"
+      # Email Configuration
+      Email__Host: ${SMTP_HOST:?SMTP host required}
+      Email__Port: ${SMTP_PORT:-587}
+      Email__Username: ${SMTP_USER:?SMTP username required}
+      Email__Password: ${SMTP_PASSWORD:?SMTP password required}
+      Email__From: ${EMAIL_FROM:-noreply@ceiba.ssc.cdmx.gob.mx}
+      # AI Configuration
+      AI__Provider: ${AI_PROVIDER:-OpenAI}
+      AI__ApiKey: ${AI_API_KEY:?AI API key required}
+      AI__Model: ${AI_MODEL:-gpt-4}
+      # Automated Reports
+      AutomatedReports__GenerationTime: ${REPORT_TIME:-06:00:00}
+      AutomatedReports__Recipients: ${REPORT_RECIPIENTS:-[]}
+      # Security
+      Session__TimeoutMinutes: 30
+      Session__Cookie__SecurePolicy: Always
+      Session__Cookie__SameSite: Strict
+      # Logging
+      Serilog__MinimumLevel__Default: Warning
+      Serilog__MinimumLevel__Override__Microsoft: Error
+      Serilog__MinimumLevel__Override__System: Error
+      Serilog__WriteTo__0__Name: File
+      Serilog__WriteTo__0__Args__path: /app/logs/ceiba-.log
+      Serilog__WriteTo__0__Args__rollingInterval: Day
+      Serilog__WriteTo__0__Args__retainedFileCountLimit: 30
+    ports:
+      - "443:8081"
+      - "80:8080"
+    volumes:
+      - /var/lib/ceiba/logs:/app/logs
+      - /etc/ceiba/certs:/app/certs:ro
+      - /etc/ceiba/appsettings.Production.json:/app/appsettings.Production.json:ro
+    networks:
+      - ceiba-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+networks:
+  ceiba-network:
+    driver: bridge

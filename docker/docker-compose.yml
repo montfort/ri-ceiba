@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  ceiba-db:
+    image: postgres:18-alpine
+    container_name: ceiba-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ceiba
+      POSTGRES_USER: ceiba
+      POSTGRES_PASSWORD: ceiba123
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ceiba-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ceiba -d ceiba"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ceiba-network
+
+  # ASP.NET Core + Blazor Server Application
+  ceiba-web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: ceiba-web
+    restart: unless-stopped
+    depends_on:
+      ceiba-db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Host=ceiba-db;Port=5432;Database=ceiba;Username=ceiba;Password=ceiba123;Pooling=true;"
+      # Email Configuration (Update with real SMTP settings)
+      Email__Host: smtp.example.com
+      Email__Port: 587
+      Email__Username: noreply@example.com
+      Email__Password: changeme
+      Email__From: noreply@ceiba.local
+      # AI Configuration (Update with real API keys)
+      AI__Provider: OpenAI
+      AI__ApiKey: changeme
+      AI__Model: gpt-4
+      # Automated Reports
+      AutomatedReports__GenerationTime: "06:00:00"
+      AutomatedReports__Recipients: '["admin@ceiba.local"]'
+      # Logging
+      Serilog__MinimumLevel__Default: Information
+      Serilog__MinimumLevel__Override__Microsoft: Warning
+      Serilog__MinimumLevel__Override__System: Warning
+    ports:
+      - "5000:8080"
+    volumes:
+      - ceiba-app-logs:/app/logs
+    networks:
+      - ceiba-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  ceiba-db-data:
+    driver: local
+  ceiba-app-logs:
+    driver: local
+
+networks:
+  ceiba-network:
+    driver: bridge

@@ -1,0 +1,111 @@
+## MCP Configuration
+.mcp.json
+
+## .NET Build Output
+bin/
+obj/
+out/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+[Dd]ebugPublic/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vscode/
+*.code-workspace
+
+## ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+TestResults/
+coverage/
+*.received.*
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+.nuget/
+
+## Entity Framework Migrations
+**/Migrations/*.Designer.cs
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Blazor
+**/wwwroot/css/*.min.css
+**/wwwroot/js/*.min.js
+.blazor/
+
+## Environment & Secrets
+*.env
+*.env.*
+!*.env.example
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+secrets.json
+*.pfx
+*.key
+*.crt
+
+## OS Files
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*~
+.~lock.*
+
+## Logs
+*.log
+logs/
+
+## Docker
+.dockerignore
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## Database
+*.db
+*.sqlite
+*.sqlite3
+
+## Backup files
+*.bak
+*.backup
+
+## Temporary files
+*.tmp
+*.temp
