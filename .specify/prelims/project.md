@@ -70,7 +70,7 @@ Finalmente, la aplicación debe ser fácil de usar, con una interfaz intuitiva q
 
 ## Modelos de datos
 
-A continuación están los modelos de datos que vamos a emplear en esta aplicación. Puedes crear otros modelos auxiliares si los consideras necesarios. Nota que necesitamos campos para registro de fecha y hora de creación de la entidad de datos, el tipo de datos actualmente está como "timestamp", por favor, ajusta el tipo de datos apropiado para el gestor de base de datos, Firebase Firestore, que vamos a emplear.
+A continuación están los modelos de datos que vamos a emplear en esta aplicación. Puedes crear otros modelos auxiliares si los consideras necesarios. Nota que necesitamos campos para registro de fecha y hora de creación de la entidad de datos, el tipo de datos actualmente está como "timestamp", por favor, ajusta el tipo de datos apropiado para el gestor de base de datos, PostgreSQL, que vamos a emplear. Ajusta también los tipos de datos según convenga.
 
 ### Reportes de Incidencias
 
