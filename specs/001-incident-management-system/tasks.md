@@ -117,15 +117,15 @@ Based on plan.md Clean Architecture structure:
 - [X] T029 [P] [US1] Create Cuadrante entity in src/Ceiba.Core/Entities/Cuadrante.cs
 - [X] T030 [P] [US1] Create CatalogoSugerencia entity in src/Ceiba.Core/Entities/CatalogoSugerencia.cs
 - [X] T031 [US1] Create ReporteIncidencia entity with state logic in src/Ceiba.Core/Entities/ReporteIncidencia.cs
-- [ ] T032 [US1] Create EF configurations for US1 entities in src/Ceiba.Infrastructure/Data/Configurations/
+- [X] T032 [US1] Create EF configurations for US1 entities in src/Ceiba.Infrastructure/Data/Configurations/
 
 #### Services
 
-- [ ] T033 [P] [US1] Create IReportService interface in src/Ceiba.Core/Interfaces/IReportService.cs
-- [ ] T034 [P] [US1] Create ICatalogService interface in src/Ceiba.Core/Interfaces/ICatalogService.cs
+- [X] T033 [P] [US1] Create IReportService interface in src/Ceiba.Core/Interfaces/IReportService.cs
+- [X] T034 [P] [US1] Create ICatalogService interface in src/Ceiba.Core/Interfaces/ICatalogService.cs
 - [ ] T035 [US1] Implement ReportService in src/Ceiba.Application/Services/ReportService.cs
 - [ ] T036 [US1] Implement CatalogService for cascading dropdowns in src/Ceiba.Application/Services/CatalogService.cs
-- [ ] T037 [US1] Create report DTOs in src/Ceiba.Shared/DTOs/ReportDTOs.cs
+- [X] T037 [US1] Create report DTOs in src/Ceiba.Shared/DTOs/ReportDTOs.cs
 - [ ] T038 [US1] Create FluentValidation validators in src/Ceiba.Application/Validators/ReportValidators.cs
 
 #### API & UI
