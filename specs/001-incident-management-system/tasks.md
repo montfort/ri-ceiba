@@ -101,22 +101,22 @@ Based on plan.md Clean Architecture structure:
 
 ### Tests for User Story 1
 
-- [ ] T021 [P] [US1] Contract test for POST /api/reports in tests/Ceiba.Integration.Tests/ReportContractTests.cs
-- [ ] T022 [P] [US1] Contract test for PUT /api/reports/{id} in tests/Ceiba.Integration.Tests/ReportContractTests.cs
-- [ ] T023 [P] [US1] Contract test for POST /api/reports/{id}/submit in tests/Ceiba.Integration.Tests/ReportContractTests.cs
-- [ ] T024 [P] [US1] Unit test for ReportService create/edit in tests/Ceiba.Application.Tests/ReportServiceTests.cs
-- [ ] T025 [P] [US1] Unit test for report state transitions in tests/Ceiba.Core.Tests/ReporteIncidenciaTests.cs
-- [ ] T026 [P] [US1] Component test for report form in tests/Ceiba.Web.Tests/ReportFormComponentTests.cs
+- [X] T021 [P] [US1] Contract test for POST /api/reports in tests/Ceiba.Integration.Tests/ReportContractTests.cs
+- [X] T022 [P] [US1] Contract test for PUT /api/reports/{id} in tests/Ceiba.Integration.Tests/ReportContractTests.cs
+- [X] T023 [P] [US1] Contract test for POST /api/reports/{id}/submit in tests/Ceiba.Integration.Tests/ReportContractTests.cs
+- [X] T024 [P] [US1] Unit test for ReportService create/edit in tests/Ceiba.Application.Tests/ReportServiceTests.cs
+- [X] T025 [P] [US1] Unit test for report state transitions in tests/Ceiba.Core.Tests/ReporteIncidenciaTests.cs
+- [X] T026 [P] [US1] Component test for report form in tests/Ceiba.Web.Tests/ReportFormComponentTests.cs
 
 ### Implementation for User Story 1
 
 #### Entities
 
-- [ ] T027 [P] [US1] Create Zona entity in src/Ceiba.Core/Entities/Zona.cs
-- [ ] T028 [P] [US1] Create Sector entity in src/Ceiba.Core/Entities/Sector.cs
-- [ ] T029 [P] [US1] Create Cuadrante entity in src/Ceiba.Core/Entities/Cuadrante.cs
-- [ ] T030 [P] [US1] Create CatalogoSugerencia entity in src/Ceiba.Core/Entities/CatalogoSugerencia.cs
-- [ ] T031 [US1] Create ReporteIncidencia entity with state logic in src/Ceiba.Core/Entities/ReporteIncidencia.cs
+- [X] T027 [P] [US1] Create Zona entity in src/Ceiba.Core/Entities/Zona.cs
+- [X] T028 [P] [US1] Create Sector entity in src/Ceiba.Core/Entities/Sector.cs
+- [X] T029 [P] [US1] Create Cuadrante entity in src/Ceiba.Core/Entities/Cuadrante.cs
+- [X] T030 [P] [US1] Create CatalogoSugerencia entity in src/Ceiba.Core/Entities/CatalogoSugerencia.cs
+- [X] T031 [US1] Create ReporteIncidencia entity with state logic in src/Ceiba.Core/Entities/ReporteIncidencia.cs
 - [ ] T032 [US1] Create EF configurations for US1 entities in src/Ceiba.Infrastructure/Data/Configurations/
 
 #### Services
