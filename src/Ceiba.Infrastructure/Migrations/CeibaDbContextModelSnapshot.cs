@@ -193,6 +193,15 @@ namespace Ceiba.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AccionesRealizadas")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("acciones_realizadas");
+
+                    b.Property<string>("CamposAdicionales")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("campos_adicionales");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamptz")
@@ -203,15 +212,86 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("cuadrante_id");
 
+                    b.Property<DateTime>("DatetimeHechos")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("datetime_hechos");
+
+                    b.Property<string>("Delito")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("delito");
+
+                    b.Property<bool>("Discapacidad")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("discapacidad");
+
+                    b.Property<int>("Edad")
+                        .HasColumnType("integer")
+                        .HasColumnName("edad");
+
                     b.Property<short>("Estado")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
                         .HasDefaultValue((short)0)
                         .HasColumnName("estado");
 
+                    b.Property<string>("HechosReportados")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("hechos_reportados");
+
+                    b.Property<bool>("LgbtttiqPlus")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("lgbtttiq_plus");
+
+                    b.Property<bool>("Migrante")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("migrante");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("text")
+                        .HasColumnName("observaciones");
+
+                    b.Property<string>("SchemaVersion")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("1.0")
+                        .HasColumnName("schema_version");
+
                     b.Property<int>("SectorId")
                         .HasColumnType("integer")
                         .HasColumnName("sector_id");
+
+                    b.Property<string>("Sexo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("sexo");
+
+                    b.Property<bool>("SituacionCalle")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("situacion_calle");
+
+                    b.Property<short>("TipoDeAccion")
+                        .HasColumnType("smallint")
+                        .HasColumnName("tipo_de_accion");
+
+                    b.Property<string>("TipoDeAtencion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("tipo_de_atencion");
 
                     b.Property<string>("TipoReporte")
                         .IsRequired()
@@ -220,6 +300,18 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasColumnType("character varying(10)")
                         .HasDefaultValue("A")
                         .HasColumnName("tipo_reporte");
+
+                    b.Property<short>("Traslados")
+                        .HasColumnType("smallint")
+                        .HasColumnName("traslados");
+
+                    b.Property<int>("TurnoCeiba")
+                        .HasColumnType("integer")
+                        .HasColumnName("turno_ceiba");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
 
                     b.Property<Guid>("UsuarioId")
                         .HasColumnType("uuid")
@@ -231,13 +323,44 @@ namespace Ceiba.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt")
+                        .IsDescending()
+                        .HasDatabaseName("idx_reporte_fecha");
+
                     b.HasIndex("CuadranteId");
+
+                    b.HasIndex("Delito")
+                        .HasDatabaseName("idx_reporte_delito");
+
+                    b.HasIndex("Estado")
+                        .HasDatabaseName("idx_reporte_estado");
 
                     b.HasIndex("SectorId");
 
-                    b.HasIndex("ZonaId");
+                    b.HasIndex("UsuarioId")
+                        .HasDatabaseName("idx_reporte_usuario");
 
-                    b.ToTable("REPORTE_INCIDENCIA", (string)null);
+                    b.HasIndex("ZonaId")
+                        .HasDatabaseName("idx_reporte_zona");
+
+                    b.HasIndex("CreatedAt", "Estado", "Delito")
+                        .IsDescending(true, false, false)
+                        .HasDatabaseName("idx_reporte_composite_revisor");
+
+                    b.HasIndex("Estado", "ZonaId", "CreatedAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("idx_reporte_composite_search");
+
+                    b.ToTable("REPORTE_INCIDENCIA", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_REPORTE_EDAD", "edad > 0 AND edad < 150");
+
+                            t.HasCheckConstraint("CK_REPORTE_ESTADO", "estado IN (0, 1)");
+
+                            t.HasCheckConstraint("CK_REPORTE_TIPO_ACCION", "tipo_de_accion IN (1, 2, 3)");
+
+                            t.HasCheckConstraint("CK_REPORTE_TRASLADOS", "traslados IN (0, 1, 2)");
+                        });
                 });
 
             modelBuilder.Entity("Ceiba.Core.Entities.Sector", b =>
@@ -543,19 +666,22 @@ namespace Ceiba.Infrastructure.Migrations
                         .WithMany("Reportes")
                         .HasForeignKey("CuadranteId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_REPORTE_CUADRANTE");
 
                     b.HasOne("Ceiba.Core.Entities.Sector", "Sector")
                         .WithMany("Reportes")
                         .HasForeignKey("SectorId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_REPORTE_SECTOR");
 
                     b.HasOne("Ceiba.Core.Entities.Zona", "Zona")
                         .WithMany("Reportes")
                         .HasForeignKey("ZonaId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("FK_REPORTE_ZONA");
 
                     b.Navigation("Cuadrante");
 
