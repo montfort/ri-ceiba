@@ -170,8 +170,7 @@
             <summary>
             Incident report entity (Type A).
             Core entity for police incident reporting system.
-            Full implementation in Phase 3 (User Story 1).
-            This is a placeholder to support Phase 2 foundational relationships.
+            US1: T031
             </summary>
         </member>
         <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Id">
@@ -189,8 +188,58 @@
         <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Estado">
             <summary>
             Report state.
-            0 = Borrador (Draft)
-            1 = Entregado (Submitted)
+            0 = Borrador (Draft) - editable by CREADOR
+            1 = Entregado (Submitted) - not editable by CREADOR
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.DatetimeHechos">
+            <summary>
+            Date and time when the incident occurred.
+            Required field, stored in UTC.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Sexo">
+            <summary>
+            Gender of the person involved.
+            Suggested values configured in CatalogoSugerencia.
+            Examples: "Masculino", "Femenino", "No binario"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Edad">
+            <summary>
+            Age of the person involved.
+            Validation: 1-149
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.LgbtttiqPlus">
+            <summary>
+            LGBTTTIQ+ community member indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.SituacionCalle">
+            <summary>
+            Homeless person indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Migrante">
+            <summary>
+            Migrant person indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Discapacidad">
+            <summary>
+            Disability indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Delito">
+            <summary>
+            Crime/incident type.
+            Suggested values configured in CatalogoSugerencia.
+            Examples: "Violencia familiar", "Robo", "Lesiones"
             </summary>
         </member>
         <member name="P:Ceiba.Core.Entities.ReporteIncidencia.ZonaId">
@@ -208,6 +257,7 @@
             <summary>
             Foreign key to Sector.
             Required - every report must have a geographic sector.
+            Must belong to the selected Zona.
             </summary>
         </member>
         <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Sector">
@@ -219,11 +269,137 @@
             <summary>
             Foreign key to Cuadrante.
             Required - every report must have a geographic quadrant.
+            Must belong to the selected Sector.
             </summary>
         </member>
         <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Cuadrante">
             <summary>
             Navigation property: Quadrant where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TurnoCeiba">
+            <summary>
+            Ceiba shift identifier.
+            Required field identifying the shift during which the incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TipoDeAtencion">
+            <summary>
+            Type of attention/service provided.
+            Suggested values configured in CatalogoSugerencia.
+            Examples: "Presencial", "Telefónica", "Derivación"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TipoDeAccion">
+            <summary>
+            Type of action taken.
+            1 = ATOS (Atención y Orientación)
+            2 = Capacitación
+            3 = Prevención
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.HechosReportados">
+            <summary>
+            Detailed description of the reported facts/incident.
+            Required field, long text.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.AccionesRealizadas">
+            <summary>
+            Actions taken by the officer in response to the incident.
+            Required field, long text.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Traslados">
+            <summary>
+            Transfer status.
+            0 = Sin traslados (No transfers)
+            1 = Con traslados (With transfers)
+            2 = No aplica (Not applicable)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Observaciones">
+            <summary>
+            Additional observations/notes.
+            Optional field, long text.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.UpdatedAt">
+            <summary>
+            Last update timestamp (UTC).
+            Nullable - only set after updates.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.CamposAdicionales">
+            <summary>
+            Extensible JSON fields for future report types (RT-004 mitigation).
+            Allows adding new fields without schema migrations.
+            Example: {"campo_especifico_B": "valor", "otro_campo": 123}
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.SchemaVersion">
+            <summary>
+            Schema version for migration tracking (RT-004 mitigation).
+            Default: "1.0"
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.IsBorrador">
+            <summary>
+            Checks if the report is in Borrador (draft) state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.IsEntregado">
+            <summary>
+            Checks if the report is in Entregado (submitted) state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.Submit">
+            <summary>
+            Submits the report, changing estado from 0 to 1.
+            Irreversible transition.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown if report is already submitted</exception>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.CanBeEditedByCreador(System.Guid)">
+            <summary>
+            Checks if the report can be edited by a CREADOR user.
+            CREADOR can only edit their own reports while in Borrador state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.CanBeSubmittedByCreador(System.Guid)">
+            <summary>
+            Checks if the report can be submitted by a CREADOR user.
+            CREADOR can only submit their own reports while in Borrador state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.Validate">
+            <summary>
+            Validates the entity's field values.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.ValidateTipoDeAccion">
+            <summary>
+            Validates that TipoDeAccion is one of the allowed values (1, 2, 3).
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.ValidateTraslados">
+            <summary>
+            Validates that Traslados is one of the allowed values (0, 1, 2).
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.SetCamposAdicionales(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Sets additional fields in the JSONB column.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.GetCamposAdicionales">
+            <summary>
+            Gets additional fields from the JSONB column.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ValidationResult">
+            <summary>
+            Validation result container.
             </summary>
         </member>
         <member name="T:Ceiba.Core.Entities.Sector">
@@ -303,6 +479,26 @@
             Follows convention: ENTITY_ACTION pattern.
             </summary>
         </member>
+        <member name="T:Ceiba.Core.Exceptions.ValidationException">
+            <summary>
+            Exception thrown when a validation error occurs.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.ForbiddenException">
+            <summary>
+            Exception thrown when an unauthorized access attempt occurs (403 Forbidden).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.BadRequestException">
+            <summary>
+            Exception thrown when a bad request occurs (400 Bad Request).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.NotFoundException">
+            <summary>
+            Exception thrown when a resource is not found (404 Not Found).
+            </summary>
+        </member>
         <member name="T:Ceiba.Core.Interfaces.IAuditService">
             <summary>
             Service interface for manual audit logging.
@@ -342,6 +538,113 @@
             <summary>
             DTO for audit log query results.
             </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ICatalogService">
+            <summary>
+            Service interface for catalog operations (Zona, Sector, Cuadrante, Suggestions).
+            US1: T034
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetZonasAsync">
+            <summary>
+            Gets all active zones.
+            </summary>
+            <returns>List of zones</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetSectoresByZonaAsync(System.Int32)">
+            <summary>
+            Gets sectors for a specific zone.
+            </summary>
+            <param name="zonaId">Zone ID</param>
+            <returns>List of sectors in the zone</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetCuadrantesBySectorAsync(System.Int32)">
+            <summary>
+            Gets quadrants for a specific sector.
+            </summary>
+            <param name="sectorId">Sector ID</param>
+            <returns>List of quadrants in the sector</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetSuggestionsAsync(System.String)">
+            <summary>
+            Gets suggestions for a specific field.
+            </summary>
+            <param name="campo">Field name (sexo, delito, tipo_de_atencion)</param>
+            <returns>List of suggestions ordered by orden field</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.ValidateHierarchyAsync(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Validates the geographic hierarchy (Zona → Sector → Cuadrante).
+            Ensures that the sector belongs to the zona and the cuadrante belongs to the sector.
+            </summary>
+            <param name="zonaId">Zone ID</param>
+            <param name="sectorId">Sector ID</param>
+            <param name="cuadranteId">Quadrant ID</param>
+            <returns>True if hierarchy is valid, false otherwise</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IReportRepository">
+            <summary>
+            Repository interface for ReporteIncidencia entity.
+            Data access layer abstraction.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IReportService">
+            <summary>
+            Service interface for report management operations.
+            US1: T033
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.CreateReportAsync(Ceiba.Shared.DTOs.CreateReportDto,System.Guid)">
+            <summary>
+            Creates a new incident report in Borrador state.
+            </summary>
+            <param name="createDto">Report creation data</param>
+            <param name="usuarioId">ID of the CREADOR user creating the report</param>
+            <returns>Created report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.UpdateReportAsync(System.Int32,Ceiba.Shared.DTOs.UpdateReportDto,System.Guid,System.Boolean)">
+            <summary>
+            Updates an existing report.
+            CREADOR can only edit their own reports in Borrador state.
+            REVISOR can edit any report regardless of state.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="updateDto">Update data</param>
+            <param name="usuarioId">ID of the user performing the update</param>
+            <param name="isRevisor">Whether the user has REVISOR role</param>
+            <returns>Updated report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.SubmitReportAsync(System.Int32,System.Guid)">
+            <summary>
+            Submits a report, changing estado from Borrador (0) to Entregado (1).
+            Only the creator can submit their own reports while in Borrador state.
+            This transition is irreversible.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="usuarioId">ID of the CREADOR user submitting the report</param>
+            <returns>Updated report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.GetReportByIdAsync(System.Int32,System.Guid,System.Boolean)">
+            <summary>
+            Gets a report by ID.
+            CREADOR can only view their own reports.
+            REVISOR can view all reports.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="usuarioId">ID of the user requesting the report</param>
+            <param name="isRevisor">Whether the user has REVISOR role</param>
+            <returns>Report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.ListReportsAsync(Ceiba.Shared.DTOs.ReportFilterDto,System.Guid,System.Boolean)">
+            <summary>
+            Lists reports with filtering and pagination.
+            CREADOR sees only their own reports.
+            REVISOR sees all reports.
+            </summary>
+            <param name="filter">Filter criteria</param>
+            <param name="usuarioId">ID of the user requesting the list</param>
+            <param name="isRevisor">Whether the user has REVISOR role</param>
+            <returns>Paginated list of reports</returns>
         </member>
     </members>
 </doc>

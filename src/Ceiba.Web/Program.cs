@@ -1,7 +1,9 @@
+using Ceiba.Application.Services;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
+using Ceiba.Infrastructure.Repositories;
 using Ceiba.Infrastructure.Services;
 using Ceiba.Web.Components;
 using Ceiba.Web.Configuration;
@@ -68,6 +70,11 @@ try
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<SeedDataService>(); // T020
     builder.Services.AddHttpContextAccessor(); // Para obtener UserId en DbContext
+
+    // Registrar servicios de User Story 1 (T045)
+    builder.Services.AddScoped<IReportService, ReportService>();
+    builder.Services.AddScoped<ICatalogService, CatalogService>();
+    builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
     // Configurar factory para DbContext con UserId del request actual
     builder.Services.AddScoped(provider =>

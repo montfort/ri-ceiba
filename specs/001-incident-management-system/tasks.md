@@ -123,21 +123,21 @@ Based on plan.md Clean Architecture structure:
 
 - [X] T033 [P] [US1] Create IReportService interface in src/Ceiba.Core/Interfaces/IReportService.cs
 - [X] T034 [P] [US1] Create ICatalogService interface in src/Ceiba.Core/Interfaces/ICatalogService.cs
-- [ ] T035 [US1] Implement ReportService in src/Ceiba.Application/Services/ReportService.cs
-- [ ] T036 [US1] Implement CatalogService for cascading dropdowns in src/Ceiba.Application/Services/CatalogService.cs
+- [X] T035 [US1] Implement ReportService in src/Ceiba.Application/Services/ReportService.cs
+- [X] T036 [US1] Implement CatalogService for cascading dropdowns in src/Ceiba.Infrastructure/Services/CatalogService.cs
 - [X] T037 [US1] Create report DTOs in src/Ceiba.Shared/DTOs/ReportDTOs.cs
-- [ ] T038 [US1] Create FluentValidation validators in src/Ceiba.Application/Validators/ReportValidators.cs
+- [X] T038 [US1] Create FluentValidation validators in src/Ceiba.Application/Validators/ReportValidators.cs
 
 #### API & UI
 
-- [ ] T039 [US1] Create ReportsController in src/Ceiba.Web/Controllers/ReportsController.cs
-- [ ] T040 [US1] Create CatalogsController for dropdowns in src/Ceiba.Web/Controllers/CatalogsController.cs
-- [ ] T041 [US1] Create ReportForm.razor component in src/Ceiba.Web/Components/Pages/Reports/ReportForm.razor
-- [ ] T042 [US1] Create ReportList.razor for CREADOR history in src/Ceiba.Web/Components/Pages/Reports/ReportList.razor
-- [ ] T043 [US1] Create cascading dropdown component in src/Ceiba.Web/Components/Shared/CascadingSelect.razor
-- [ ] T044 [US1] Create suggestion autocomplete component in src/Ceiba.Web/Components/Shared/SuggestionInput.razor
-- [ ] T045 [US1] Add authorization policy for CREADOR role in src/Ceiba.Web/Program.cs
-- [ ] T046 [US1] Add EF migration for US1 entities
+- [X] T039 [US1] Create ReportsController in src/Ceiba.Web/Controllers/ReportsController.cs
+- [X] T040 [US1] Create CatalogsController for dropdowns in src/Ceiba.Web/Controllers/CatalogsController.cs
+- [X] T041 [US1] Create ReportForm.razor component in src/Ceiba.Web/Components/Pages/Reports/ReportForm.razor
+- [X] T042 [US1] Create ReportList.razor for CREADOR history in src/Ceiba.Web/Components/Pages/Reports/ReportList.razor
+- [X] T043 [US1] Create cascading dropdown component in src/Ceiba.Web/Components/Shared/CascadingSelect.razor
+- [X] T044 [US1] Create suggestion autocomplete component in src/Ceiba.Web/Components/Shared/SuggestionInput.razor
+- [X] T045 [US1] Add authorization policy for CREADOR role in src/Ceiba.Web/Program.cs
+- [X] T046 [US1] Add EF migration for US1 entities
 
 **Checkpoint**: User Story 1 complete - CREADOR can create and submit reports independently
 

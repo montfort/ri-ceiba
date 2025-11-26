@@ -88,6 +88,76 @@
             Throws InvalidOperationException if feature is disabled.
             </summary>
         </member>
+        <member name="T:Ceiba.Web.Controllers.CatalogsController">
+            <summary>
+            API controller for catalog operations (Zona, Sector, Cuadrante, Suggestions).
+            US1: T040
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetZonas">
+            <summary>
+            Gets all active zones.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetSectores(System.Int32)">
+            <summary>
+            Gets sectors for a specific zone.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetCuadrantes(System.Int32)">
+            <summary>
+            Gets quadrants for a specific sector.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetSuggestions(System.String)">
+            <summary>
+            Gets suggestions for a specific field.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.ValidateHierarchy(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Validates the geographic hierarchy (Zona → Sector → Cuadrante).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Controllers.ReportsController">
+            <summary>
+            API controller for incident report management.
+            US1: T039
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.ListReports(Ceiba.Shared.DTOs.ReportFilterDto)">
+            <summary>
+            Lists reports with filtering and pagination.
+            CREADOR sees only their own reports.
+            REVISOR sees all reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.GetReport(System.Int32)">
+            <summary>
+            Gets a report by ID.
+            CREADOR can only view their own reports.
+            REVISOR can view all reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.CreateReport(Ceiba.Shared.DTOs.CreateReportDto)">
+            <summary>
+            Creates a new report.
+            Only CREADOR can create reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.UpdateReport(System.Int32,Ceiba.Shared.DTOs.UpdateReportDto)">
+            <summary>
+            Updates an existing report.
+            CREADOR can only edit their own reports while in Borrador state.
+            REVISOR can edit any report regardless of state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.SubmitReport(System.Int32)">
+            <summary>
+            Submits a report (changes estado from Borrador to Entregado).
+            Only CREADOR can submit their own reports.
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Middleware.AuthorizationLoggingMiddleware">
             <summary>
             RS-001 Mitigation: Authorization logging middleware.

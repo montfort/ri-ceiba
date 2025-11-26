@@ -27,7 +27,8 @@
         </member>
         <member name="T:Ceiba.Infrastructure.Data.Configurations.ReporteIncidenciaConfiguration">
             <summary>
-            Configuración mínima para Phase 2. Se completará en User Story 1.
+            EF Core configuration for ReporteIncidencia entity (Type A).
+            US1: T032
             </summary>
         </member>
         <member name="T:Ceiba.Infrastructure.Data.Configurations.SectorConfiguration">
@@ -145,10 +146,34 @@
         <member name="M:Ceiba.Infrastructure.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.US1_AddReportFields">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US1_AddReportFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US1_AddReportFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US1_AddReportFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Ceiba.Infrastructure.Repositories.ReportRepository">
+            <summary>
+            Repository implementation for ReporteIncidencia entity.
+            US1: T035 (supporting implementation)
+            </summary>
+        </member>
         <member name="T:Ceiba.Infrastructure.Services.AuditService">
             <summary>
             Implementation of audit logging service.
             Provides manual audit logging and query capabilities.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.CatalogService">
+            <summary>
+            Service implementation for catalog operations (Zona, Sector, Cuadrante, Suggestions).
+            US1: T036
             </summary>
         </member>
         <member name="T:System.Text.RegularExpressions.Generated.PasswordRegex_0">

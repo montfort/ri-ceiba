@@ -4,5 +4,23 @@
         <name>Ceiba.Application</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Application.Services.ReportService">
+            <summary>
+            Service implementation for report management operations.
+            US1: T035
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Validators.CreateReportDtoValidator">
+            <summary>
+            FluentValidation validator for CreateReportDto.
+            US1: T038
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Validators.UpdateReportDtoValidator">
+            <summary>
+            FluentValidation validator for UpdateReportDto.
+            US1: T038
+            </summary>
+        </member>
     </members>
 </doc>

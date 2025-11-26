@@ -1,0 +1,68 @@
+@using Ceiba.Shared.DTOs
+@typeparam TValue
+
+<div class="form-group @CssClass">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label for="@Id" class="form-label">@Label @(Required ? "*" : "")</label>
+    }
+
+    <select id="@Id"
+            class="form-select @(IsInvalid ? "is-invalid" : "")"
+            @bind="CurrentValue"
+            disabled="@(Disabled || IsLoading)"
+            @attributes="AdditionalAttributes">
+        @if (IsLoading)
+        {
+            <option value="">Cargando...</option>
+        }
+        else if (Items == null || !Items.Any())
+        {
+            <option value="">@EmptyMessage</option>
+        }
+        else
+        {
+            <option value="">@PlaceholderText</option>
+            @foreach (var item in Items)
+            {
+                <option value="@item.Id">@item.Nombre</option>
+            }
+        }
+    </select>
+
+    @if (IsInvalid && !string.IsNullOrEmpty(ValidationMessage))
+    {
+        <div class="invalid-feedback">@ValidationMessage</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public TValue? Value { get; set; }
+    [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
+    [Parameter] public List<CatalogItemDto>? Items { get; set; }
+    [Parameter] public bool Required { get; set; } = false;
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public bool IsLoading { get; set; } = false;
+    [Parameter] public bool IsInvalid { get; set; } = false;
+    [Parameter] public string ValidationMessage { get; set; } = string.Empty;
+    [Parameter] public string PlaceholderText { get; set; } = "Seleccione una opción";
+    [Parameter] public string EmptyMessage { get; set; } = "No hay opciones disponibles";
+    [Parameter] public string CssClass { get; set; } = string.Empty;
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private TValue? CurrentValue
+    {
+        get => Value;
+        set
+        {
+            if (!EqualityComparer<TValue?>.Default.Equals(value, Value))
+            {
+                Value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+}

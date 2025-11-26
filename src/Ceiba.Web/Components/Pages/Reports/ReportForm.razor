@@ -1,0 +1,673 @@
+@page "/reports/new"
+@page "/reports/edit/{ReportId:int}"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using Ceiba.Core.Exceptions
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IReportService ReportService
+@inject ICatalogService CatalogService
+@inject NavigationManager Navigation
+@inject ILogger<ReportForm> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "CREADOR")]
+
+<PageTitle>@(IsEditMode ? "Editar Reporte" : "Nuevo Reporte")</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        @(IsEditMode ? "Editar Reporte de Incidencia" : "Nuevo Reporte de Incidencia")
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-3">Cargando formulario...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @ErrorMessage
+                            <button type="button" class="btn-close" @onclick="() => ErrorMessage = null"></button>
+                        </div>
+                    }
+                    else if (CannotEdit)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-lock-fill me-2"></i>
+                            Este reporte ya fue entregado y no puede ser editado. Solo los revisores pueden modificar reportes entregados.
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" @onclick="NavigateToList">
+                                <i class="bi bi-arrow-left me-2"></i>Volver a Mis Reportes
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+
+                            <!-- Section 1: Datos de los Hechos -->
+                            <h5 class="border-bottom pb-2 mb-3">
+                                <i class="bi bi-calendar-event me-2"></i>Datos de los Hechos
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="datetimeHechos" class="form-label">Fecha y Hora de los Hechos *</label>
+                                    <InputDate id="datetimeHechos" class="form-control" @bind-Value="Model.DatetimeHechos" Type="InputDateType.DateTimeLocal" />
+                                    <ValidationMessage For="@(() => Model.DatetimeHechos)" />
+                                </div>
+                            </div>
+
+                            <!-- Section 2: Datos de la Víctima/Persona Atendida -->
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="bi bi-person me-2"></i>Datos de la Víctima/Persona Atendida
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <SuggestionInput Id="sexo"
+                                                     Label="Sexo"
+                                                     Value="@Model.Sexo"
+                                                     ValueChanged="@OnSexoChanged"
+                                                     Suggestions="@SexoSuggestions"
+                                                     Required="true"
+                                                     PlaceholderText="Ingrese el sexo" />
+                                    <ValidationMessage For="@(() => Model.Sexo)" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="edad" class="form-label">Edad *</label>
+                                    <InputNumber id="edad" class="form-control" @bind-Value="Model.Edad" />
+                                    <ValidationMessage For="@(() => Model.Edad)" />
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <InputCheckbox id="lgbtttiqPlus" class="form-check-input" @bind-Value="Model.LgbtttiqPlus" />
+                                        <label class="form-check-label" for="lgbtttiqPlus">
+                                            LGBTTTIQ+
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <InputCheckbox id="situacionCalle" class="form-check-input" @bind-Value="Model.SituacionCalle" />
+                                        <label class="form-check-label" for="situacionCalle">
+                                            Situación de Calle
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <InputCheckbox id="migrante" class="form-check-input" @bind-Value="Model.Migrante" />
+                                        <label class="form-check-label" for="migrante">
+                                            Migrante
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <InputCheckbox id="discapacidad" class="form-check-input" @bind-Value="Model.Discapacidad" />
+                                        <label class="form-check-label" for="discapacidad">
+                                            Discapacidad
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Ubicación Geográfica -->
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="bi bi-geo-alt me-2"></i>Ubicación Geográfica
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <CascadingSelect Id="zona"
+                                                     Label="Zona"
+                                                     TValue="int"
+                                                     Value="@Model.ZonaId"
+                                                     ValueChanged="@OnZonaChanged"
+                                                     Items="@Zonas"
+                                                     Required="true"
+                                                     IsLoading="@IsLoadingCatalogs"
+                                                     PlaceholderText="Seleccione una zona" />
+                                    <ValidationMessage For="@(() => Model.ZonaId)" />
+                                </div>
+                                <div class="col-md-4">
+                                    <CascadingSelect Id="sector"
+                                                     Label="Sector"
+                                                     TValue="int"
+                                                     Value="@Model.SectorId"
+                                                     ValueChanged="@OnSectorChanged"
+                                                     Items="@Sectores"
+                                                     Required="true"
+                                                     Disabled="@(Model.ZonaId == 0)"
+                                                     IsLoading="@IsLoadingSectores"
+                                                     PlaceholderText="Primero seleccione una zona" />
+                                    <ValidationMessage For="@(() => Model.SectorId)" />
+                                </div>
+                                <div class="col-md-4">
+                                    <CascadingSelect Id="cuadrante"
+                                                     Label="Cuadrante"
+                                                     TValue="int"
+                                                     Value="@Model.CuadranteId"
+                                                     ValueChanged="@OnCuadranteChanged"
+                                                     Items="@Cuadrantes"
+                                                     Required="true"
+                                                     Disabled="@(Model.SectorId == 0)"
+                                                     IsLoading="@IsLoadingCuadrantes"
+                                                     PlaceholderText="Primero seleccione un sector" />
+                                    <ValidationMessage For="@(() => Model.CuadranteId)" />
+                                </div>
+                            </div>
+
+                            <!-- Section 4: Tipo de Incidencia -->
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="bi bi-exclamation-circle me-2"></i>Tipo de Incidencia
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <SuggestionInput Id="delito"
+                                                     Label="Delito"
+                                                     Value="@Model.Delito"
+                                                     ValueChanged="@OnDelitoChanged"
+                                                     Suggestions="@DelitoSuggestions"
+                                                     Required="true"
+                                                     PlaceholderText="Ingrese el tipo de delito" />
+                                    <ValidationMessage For="@(() => Model.Delito)" />
+                                </div>
+                                <div class="col-md-6">
+                                    <SuggestionInput Id="tipoDeAtencion"
+                                                     Label="Tipo de Atención"
+                                                     Value="@Model.TipoDeAtencion"
+                                                     ValueChanged="@OnTipoAtencionChanged"
+                                                     Suggestions="@TipoDeAtencionSuggestions"
+                                                     Required="true"
+                                                     PlaceholderText="Ingrese el tipo de atención" />
+                                    <ValidationMessage For="@(() => Model.TipoDeAtencion)" />
+                                </div>
+                            </div>
+
+                            <!-- Section 5: Detalles Operativos -->
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="bi bi-list-check me-2"></i>Detalles Operativos
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="turnoCeiba" class="form-label">Turno CEIBA *</label>
+                                    <InputSelect id="turnoCeiba" class="form-select" @bind-Value="Model.TurnoCeiba">
+                                        <option value="0">Seleccione un turno</option>
+                                        <option value="1">Turno 1 (Matutino)</option>
+                                        <option value="2">Turno 2 (Vespertino)</option>
+                                        <option value="3">Turno 3 (Nocturno)</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => Model.TurnoCeiba)" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="tipoDeAccion" class="form-label">Tipo de Acción *</label>
+                                    <InputSelect id="tipoDeAccion" class="form-select" @bind-Value="Model.TipoDeAccion">
+                                        <option value="0">Seleccione una acción</option>
+                                        <option value="1">Preventiva</option>
+                                        <option value="2">Reactiva</option>
+                                        <option value="3">Seguimiento</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => Model.TipoDeAccion)" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="traslados" class="form-label">Traslados *</label>
+                                    <InputSelect id="traslados" class="form-select" @bind-Value="Model.Traslados">
+                                        <option value="0">Sin traslado</option>
+                                        <option value="1">Hospital</option>
+                                        <option value="2">Ministerio Público</option>
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => Model.Traslados)" />
+                                </div>
+                            </div>
+
+                            <!-- Section 6: Narrativa -->
+                            <h5 class="border-bottom pb-2 mb-3 mt-4">
+                                <i class="bi bi-file-text me-2"></i>Narrativa del Incidente
+                            </h5>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="hechosReportados" class="form-label">Hechos Reportados *</label>
+                                    <InputTextArea id="hechosReportados" class="form-control" @bind-Value="Model.HechosReportados" rows="5" />
+                                    <small class="form-text text-muted">Mínimo 10 caracteres, máximo 10,000</small>
+                                    <ValidationMessage For="@(() => Model.HechosReportados)" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="accionesRealizadas" class="form-label">Acciones Realizadas *</label>
+                                    <InputTextArea id="accionesRealizadas" class="form-control" @bind-Value="Model.AccionesRealizadas" rows="5" />
+                                    <small class="form-text text-muted">Mínimo 10 caracteres, máximo 10,000</small>
+                                    <ValidationMessage For="@(() => Model.AccionesRealizadas)" />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label for="observaciones" class="form-label">Observaciones</label>
+                                    <InputTextArea id="observaciones" class="form-control" @bind-Value="Model.Observaciones" rows="3" />
+                                    <small class="form-text text-muted">Opcional, máximo 5,000 caracteres</small>
+                                    <ValidationMessage For="@(() => Model.Observaciones)" />
+                                </div>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                                <button type="button" class="btn btn-secondary" @onclick="NavigateToList" disabled="@IsSaving">
+                                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                                </button>
+                                <div>
+                                    @if (IsEditMode && ExistingReport?.Estado == 0)
+                                    {
+                                        <button type="button" class="btn btn-success me-2" @onclick="HandleSubmit" disabled="@IsSaving">
+                                            @if (IsSaving)
+                                            {
+                                                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            }
+                                            <i class="bi bi-check-circle me-2"></i>Guardar y Entregar
+                                        </button>
+                                    }
+                                    <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                        @if (IsSaving)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        }
+                                        <i class="bi bi-save me-2"></i>@(IsEditMode ? "Actualizar Borrador" : "Guardar Borrador")
+                                    </button>
+                                </div>
+                            </div>
+                        </EditForm>
+
+                        @if (SuccessMessage != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                @SuccessMessage
+                                <button type="button" class="btn-close" @onclick="() => SuccessMessage = null"></button>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int? ReportId { get; set; }
+
+    private CreateReportDto Model { get; set; } = new();
+    private ReportDto? ExistingReport { get; set; }
+    private bool IsEditMode => ReportId.HasValue;
+    private bool IsLoading { get; set; } = true;
+    private bool IsSaving { get; set; } = false;
+    private bool IsLoadingCatalogs { get; set; } = true;
+    private bool IsLoadingSectores { get; set; } = false;
+    private bool IsLoadingCuadrantes { get; set; } = false;
+    private bool CannotEdit { get; set; } = false;
+    private string? ErrorMessage { get; set; }
+    private string? SuccessMessage { get; set; }
+    private Guid CurrentUserId { get; set; }
+
+    // Catalog data
+    private List<CatalogItemDto> Zonas { get; set; } = new();
+    private List<CatalogItemDto> Sectores { get; set; } = new();
+    private List<CatalogItemDto> Cuadrantes { get; set; } = new();
+    private List<string> SexoSuggestions { get; set; } = new();
+    private List<string> DelitoSuggestions { get; set; } = new();
+    private List<string> TipoDeAtencionSuggestions { get; set; } = new();
+
+    private int _previousZonaId = 0;
+    private int _previousSectorId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get current user ID
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                ErrorMessage = "No se pudo obtener el ID del usuario autenticado.";
+                IsLoading = false;
+                return;
+            }
+            CurrentUserId = userId;
+
+            // Load catalogs in parallel
+            await Task.WhenAll(
+                LoadZonasAsync(),
+                LoadSuggestionsAsync()
+            );
+
+            // Load existing report if in edit mode
+            if (IsEditMode)
+            {
+                await LoadExistingReportAsync();
+            }
+            else
+            {
+                Model.TipoReporte = "A";
+                Model.DatetimeHechos = DateTime.Now;
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing report form");
+            ErrorMessage = "Error al cargar el formulario. Por favor, intente nuevamente.";
+        }
+        finally
+        {
+            IsLoading = false;
+            IsLoadingCatalogs = false;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Watch for zona changes to load sectores
+        if (Model.ZonaId != _previousZonaId && Model.ZonaId > 0)
+        {
+            _previousZonaId = Model.ZonaId;
+            Model.SectorId = 0;
+            Model.CuadranteId = 0;
+            Sectores.Clear();
+            Cuadrantes.Clear();
+            await LoadSectoresAsync(Model.ZonaId);
+        }
+
+        // Watch for sector changes to load cuadrantes
+        if (Model.SectorId != _previousSectorId && Model.SectorId > 0)
+        {
+            _previousSectorId = Model.SectorId;
+            Model.CuadranteId = 0;
+            Cuadrantes.Clear();
+            await LoadCuadrantesAsync(Model.SectorId);
+        }
+    }
+
+    private async Task LoadExistingReportAsync()
+    {
+        try
+        {
+            ExistingReport = await ReportService.GetReportByIdAsync(ReportId!.Value, CurrentUserId, false);
+
+            // Check if user can edit
+            if (ExistingReport.Estado != 0)
+            {
+                CannotEdit = true;
+                return;
+            }
+
+            // Map to form model
+            Model = new CreateReportDto
+            {
+                TipoReporte = ExistingReport.TipoReporte,
+                DatetimeHechos = ExistingReport.DatetimeHechos.ToLocalTime(),
+                Sexo = ExistingReport.Sexo,
+                Edad = ExistingReport.Edad,
+                LgbtttiqPlus = ExistingReport.LgbtttiqPlus,
+                SituacionCalle = ExistingReport.SituacionCalle,
+                Migrante = ExistingReport.Migrante,
+                Discapacidad = ExistingReport.Discapacidad,
+                Delito = ExistingReport.Delito,
+                ZonaId = ExistingReport.Zona.Id,
+                SectorId = ExistingReport.Sector.Id,
+                CuadranteId = ExistingReport.Cuadrante.Id,
+                TurnoCeiba = ExistingReport.TurnoCeiba,
+                TipoDeAtencion = ExistingReport.TipoDeAtencion,
+                TipoDeAccion = ExistingReport.TipoDeAccion,
+                HechosReportados = ExistingReport.HechosReportados,
+                AccionesRealizadas = ExistingReport.AccionesRealizadas,
+                Traslados = ExistingReport.Traslados,
+                Observaciones = ExistingReport.Observaciones
+            };
+
+            // Load dependent catalogs
+            await LoadSectoresAsync(Model.ZonaId);
+            await LoadCuadrantesAsync(Model.SectorId);
+        }
+        catch (ForbiddenException)
+        {
+            ErrorMessage = "No tiene permisos para editar este reporte.";
+        }
+        catch (NotFoundException)
+        {
+            ErrorMessage = "El reporte solicitado no existe.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading report {ReportId}", ReportId);
+            ErrorMessage = "Error al cargar el reporte.";
+        }
+    }
+
+    private async Task LoadZonasAsync()
+    {
+        try
+        {
+            Zonas = await CatalogService.GetZonasAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading zonas");
+        }
+    }
+
+    private async Task LoadSectoresAsync(int zonaId)
+    {
+        IsLoadingSectores = true;
+        try
+        {
+            Sectores = await CatalogService.GetSectoresByZonaAsync(zonaId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading sectores for zona {ZonaId}", zonaId);
+        }
+        finally
+        {
+            IsLoadingSectores = false;
+        }
+    }
+
+    private async Task LoadCuadrantesAsync(int sectorId)
+    {
+        IsLoadingCuadrantes = true;
+        try
+        {
+            Cuadrantes = await CatalogService.GetCuadrantesBySectorAsync(sectorId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading cuadrantes for sector {SectorId}", sectorId);
+        }
+        finally
+        {
+            IsLoadingCuadrantes = false;
+        }
+    }
+
+    private async Task LoadSuggestionsAsync()
+    {
+        try
+        {
+            var tasks = new[]
+            {
+                CatalogService.GetSuggestionsAsync("sexo"),
+                CatalogService.GetSuggestionsAsync("delito"),
+                CatalogService.GetSuggestionsAsync("tipo_de_atencion")
+            };
+
+            var results = await Task.WhenAll(tasks);
+            SexoSuggestions = results[0];
+            DelitoSuggestions = results[1];
+            TipoDeAtencionSuggestions = results[2];
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading suggestions");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        IsSaving = true;
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        try
+        {
+            if (IsEditMode)
+            {
+                // Update existing report
+                var updateDto = MapToUpdateDto();
+                await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, false);
+                SuccessMessage = "Reporte actualizado exitosamente como borrador.";
+            }
+            else
+            {
+                // Create new report
+                var report = await ReportService.CreateReportAsync(Model, CurrentUserId);
+                SuccessMessage = "Reporte creado exitosamente como borrador.";
+
+                // Navigate to edit mode
+                Navigation.NavigateTo($"/reports/edit/{report.Id}");
+            }
+        }
+        catch (ValidationException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving report");
+            ErrorMessage = "Error al guardar el reporte. Por favor, intente nuevamente.";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (!IsEditMode || ExistingReport?.Estado != 0)
+            return;
+
+        IsSaving = true;
+        ErrorMessage = null;
+
+        try
+        {
+            // First update the report
+            var updateDto = MapToUpdateDto();
+            await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, false);
+
+            // Then submit it
+            await ReportService.SubmitReportAsync(ReportId!.Value, CurrentUserId);
+
+            // Navigate to list
+            Navigation.NavigateTo("/reports");
+        }
+        catch (ValidationException ex)
+        {
+            ErrorMessage = ex.Message;
+            IsSaving = false;
+        }
+        catch (ForbiddenException ex)
+        {
+            ErrorMessage = ex.Message;
+            IsSaving = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error submitting report {ReportId}", ReportId);
+            ErrorMessage = "Error al entregar el reporte. Por favor, intente nuevamente.";
+            IsSaving = false;
+        }
+    }
+
+    private UpdateReportDto MapToUpdateDto()
+    {
+        return new UpdateReportDto
+        {
+            DatetimeHechos = Model.DatetimeHechos,
+            Sexo = Model.Sexo,
+            Edad = Model.Edad,
+            LgbtttiqPlus = Model.LgbtttiqPlus,
+            SituacionCalle = Model.SituacionCalle,
+            Migrante = Model.Migrante,
+            Discapacidad = Model.Discapacidad,
+            Delito = Model.Delito,
+            ZonaId = Model.ZonaId,
+            SectorId = Model.SectorId,
+            CuadranteId = Model.CuadranteId,
+            TurnoCeiba = Model.TurnoCeiba,
+            TipoDeAtencion = Model.TipoDeAtencion,
+            TipoDeAccion = Model.TipoDeAccion,
+            HechosReportados = Model.HechosReportados,
+            AccionesRealizadas = Model.AccionesRealizadas,
+            Traslados = Model.Traslados,
+            Observaciones = Model.Observaciones
+        };
+    }
+
+    private void NavigateToList()
+    {
+        Navigation.NavigateTo("/reports");
+    }
+
+    // Helper methods for two-way binding
+    private Task OnZonaChanged(int? value)
+    {
+        Model.ZonaId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private Task OnSectorChanged(int? value)
+    {
+        Model.SectorId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private Task OnCuadranteChanged(int? value)
+    {
+        Model.CuadranteId = value ?? 0;
+        return Task.CompletedTask;
+    }
+
+    private Task OnSexoChanged(string? value)
+    {
+        Model.Sexo = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnDelitoChanged(string? value)
+    {
+        Model.Delito = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTipoAtencionChanged(string? value)
+    {
+        Model.TipoDeAtencion = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+}

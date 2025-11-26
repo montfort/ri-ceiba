@@ -4,5 +4,42 @@
         <name>Ceiba.Shared</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Shared.DTOs.CreateReportDto">
+            <summary>
+            DTO for creating a new incident report.
+            US1: T037
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.UpdateReportDto">
+            <summary>
+            DTO for updating an existing report.
+            All fields are optional - only provided fields will be updated.
+            US1: T037
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ReportDto">
+            <summary>
+            DTO for report responses.
+            US1: T037
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CatalogItemDto">
+            <summary>
+            DTO for catalog items (Zona, Sector, Cuadrante).
+            US1: T037
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ReportFilterDto">
+            <summary>
+            DTO for report filtering and search.
+            US1: T037
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ReportListResponse">
+            <summary>
+            DTO for paginated report list response.
+            US1: T037
+            </summary>
+        </member>
     </members>
 </doc>

@@ -208,7 +208,7 @@ public class ReporteIncidenciaTests
         // Arrange
         var report = new ReporteIncidencia
         {
-            TipoDeAccion = tipoDeAccion
+            TipoDeAccion = (short)tipoDeAccion
         };
 
         // Act
@@ -227,7 +227,7 @@ public class ReporteIncidenciaTests
         // Arrange
         var report = new ReporteIncidencia
         {
-            TipoDeAccion = tipoDeAccion
+            TipoDeAccion = (short)tipoDeAccion
         };
 
         // Act
@@ -246,7 +246,7 @@ public class ReporteIncidenciaTests
         // Arrange
         var report = new ReporteIncidencia
         {
-            Traslados = traslados
+            Traslados = (short)traslados
         };
 
         // Act
@@ -265,7 +265,7 @@ public class ReporteIncidenciaTests
         // Arrange
         var report = new ReporteIncidencia
         {
-            Traslados = traslados
+            Traslados = (short)traslados
         };
 
         // Act

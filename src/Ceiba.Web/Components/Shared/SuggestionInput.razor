@@ -1,0 +1,156 @@
+@using System.Timers
+@using Microsoft.AspNetCore.Components
+@implements IDisposable
+
+<div class="form-group autocomplete @CssClass">
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        <label for="@Id" class="form-label">@Label @(Required ? "*" : "")</label>
+    }
+
+    <div class="position-relative">
+        <input id="@Id"
+               type="text"
+               class="form-control @(IsInvalid ? "is-invalid" : "")"
+               placeholder="@PlaceholderText"
+               value="@CurrentValue"
+               @oninput="OnInputChanged"
+               @onfocus="OnFocus"
+               @onblur="OnBlur"
+               disabled="@Disabled"
+               autocomplete="off"
+               @attributes="AdditionalAttributes" />
+
+        @if (ShowSuggestions && FilteredSuggestions.Any())
+        {
+            <ul class="dropdown-menu show position-absolute w-100" style="max-height: 200px; overflow-y: auto;">
+                @foreach (var suggestion in FilteredSuggestions)
+                {
+                    <li>
+                        <button type="button"
+                                class="dropdown-item"
+                                @onclick="() => SelectSuggestion(suggestion)"
+                                @onmousedown:preventDefault>
+                            @suggestion
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+
+    @if (IsInvalid && !string.IsNullOrEmpty(ValidationMessage))
+    {
+        <div class="invalid-feedback d-block">@ValidationMessage</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Id { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+    [Parameter] public List<string> Suggestions { get; set; } = new();
+    [Parameter] public bool Required { get; set; } = false;
+    [Parameter] public bool Disabled { get; set; } = false;
+    [Parameter] public bool IsInvalid { get; set; } = false;
+    [Parameter] public string ValidationMessage { get; set; } = string.Empty;
+    [Parameter] public string PlaceholderText { get; set; } = string.Empty;
+    [Parameter] public string CssClass { get; set; } = string.Empty;
+    [Parameter] public int MinCharacters { get; set; } = 1;
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string? CurrentValue
+    {
+        get => Value;
+        set
+        {
+            if (value != Value)
+            {
+                Value = value;
+                ValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    private bool ShowSuggestions { get; set; } = false;
+    private List<string> FilteredSuggestions { get; set; } = new();
+    private System.Timers.Timer? _debounceTimer;
+
+    protected override void OnInitialized()
+    {
+        _debounceTimer = new System.Timers.Timer(300);
+        _debounceTimer.Elapsed += OnDebounceElapsed;
+        _debounceTimer.AutoReset = false;
+    }
+
+    private void OnInputChanged(ChangeEventArgs e)
+    {
+        var inputValue = e.Value?.ToString() ?? string.Empty;
+        CurrentValue = inputValue;
+
+        _debounceTimer?.Stop();
+        _debounceTimer?.Start();
+    }
+
+    private void OnDebounceElapsed(object? sender, ElapsedEventArgs e)
+    {
+        InvokeAsync(() =>
+        {
+            FilterSuggestions();
+            StateHasChanged();
+        });
+    }
+
+    private void FilterSuggestions()
+    {
+        if (string.IsNullOrWhiteSpace(CurrentValue) || CurrentValue.Length < MinCharacters)
+        {
+            FilteredSuggestions = new List<string>();
+            ShowSuggestions = false;
+            return;
+        }
+
+        FilteredSuggestions = Suggestions
+            .Where(s => s.Contains(CurrentValue, StringComparison.OrdinalIgnoreCase))
+            .Take(10)
+            .ToList();
+
+        ShowSuggestions = FilteredSuggestions.Any();
+    }
+
+    private void OnFocus()
+    {
+        if (!string.IsNullOrWhiteSpace(CurrentValue) && CurrentValue.Length >= MinCharacters)
+        {
+            FilterSuggestions();
+        }
+    }
+
+    private void OnBlur()
+    {
+        // Delay hiding to allow click events on suggestions
+        Task.Delay(200).ContinueWith(_ => InvokeAsync(() =>
+        {
+            ShowSuggestions = false;
+            StateHasChanged();
+        }));
+    }
+
+    private void SelectSuggestion(string suggestion)
+    {
+        CurrentValue = suggestion;
+        ShowSuggestions = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        if (_debounceTimer != null)
+        {
+            _debounceTimer.Elapsed -= OnDebounceElapsed;
+            _debounceTimer.Dispose();
+        }
+    }
+}
