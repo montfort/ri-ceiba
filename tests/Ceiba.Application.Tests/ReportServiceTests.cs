@@ -1,9 +1,11 @@
 using Ceiba.Application.Services;
 using Ceiba.Core.Entities;
+using Ceiba.Core.Exceptions;
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs;
 using FluentAssertions;
 using Moq;
+using System.Text.Json;
 using Xunit;
 
 namespace Ceiba.Application.Tests;
@@ -83,9 +85,9 @@ public class ReportServiceTests
                 "REPORT_CREATE",
                 It.IsAny<int>(),
                 "REPORTE_INCIDENCIA",
-                usuarioId,
                 It.IsAny<string>(),
-                It.IsAny<object>()
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()
             ),
             Times.Once
         );
@@ -218,9 +220,9 @@ public class ReportServiceTests
                 "REPORT_UPDATE",
                 reportId,
                 "REPORTE_INCIDENCIA",
-                usuarioId,
                 It.IsAny<string>(),
-                It.IsAny<object>()
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()
             ),
             Times.Once
         );
@@ -334,9 +336,9 @@ public class ReportServiceTests
                 "REPORT_SUBMIT",
                 reportId,
                 "REPORTE_INCIDENCIA",
-                usuarioId,
                 It.IsAny<string>(),
-                It.IsAny<object>()
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()
             ),
             Times.Once
         );

@@ -4,5 +4,11 @@
         <name>Ceiba.Application.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Application.Tests.ReportServiceTests">
+            <summary>
+            Unit tests for ReportService (US1)
+            Tests create/edit functionality per T024
+            </summary>
+        </member>
     </members>
 </doc>

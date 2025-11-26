@@ -4,5 +4,11 @@
         <name>Ceiba.Web.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Web.Tests.ReportFormComponentTests">
+            <summary>
+            Component tests for ReportForm Blazor component (US1)
+            Tests form rendering and interaction per T026
+            </summary>
+        </member>
     </members>
 </doc>

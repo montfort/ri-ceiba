@@ -10,5 +10,11 @@
             Tests database configuration, relationships, and constraints.
             </summary>
         </member>
+        <member name="T:Ceiba.Integration.Tests.ReportContractTests">
+            <summary>
+            Contract tests for Report API endpoints
+            Validates API contracts defined in api-reports.yaml
+            </summary>
+        </member>
     </members>
 </doc>

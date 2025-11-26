@@ -38,7 +38,7 @@ public class ReportFormComponentTests : TestContext
         SetupCatalogMocks();
 
         // Act
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Assert: Verify all required fields are present
         cut.Find("input[name='sexo']").Should().NotBeNull();
@@ -63,7 +63,7 @@ public class ReportFormComponentTests : TestContext
         SetupCatalogMocks();
 
         // Act
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Assert: Verify boolean checkbox fields
         cut.Find("input[name='lgbtttiqPlus'][type='checkbox']").Should().NotBeNull();
@@ -79,7 +79,7 @@ public class ReportFormComponentTests : TestContext
         SetupCatalogMocks();
 
         // Act
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Assert: Verify action buttons are present
         var submitButton = cut.Find("button[type='submit']");
@@ -113,7 +113,7 @@ public class ReportFormComponentTests : TestContext
         SetupCatalogMocks();
 
         // Act
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
         await Task.Delay(100); // Wait for async initialization
 
         // Assert: Verify zona options are rendered
@@ -142,7 +142,7 @@ public class ReportFormComponentTests : TestContext
 
         SetupCatalogMocks();
 
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Act: Select a zona
         var zonaSelect = cut.Find("select[name='zonaId']");
@@ -174,7 +174,7 @@ public class ReportFormComponentTests : TestContext
 
         SetupCatalogMocks();
 
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Act: Select a sector
         var sectorSelect = cut.Find("select[name='sectorId']");
@@ -198,7 +198,7 @@ public class ReportFormComponentTests : TestContext
     {
         // Arrange
         SetupCatalogMocks();
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Fill form
         await FillFormWithValidDataAsync(cut);
@@ -222,7 +222,7 @@ public class ReportFormComponentTests : TestContext
     {
         // Arrange
         SetupCatalogMocks();
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Fill form
         await FillFormWithValidDataAsync(cut);
@@ -248,7 +248,7 @@ public class ReportFormComponentTests : TestContext
     {
         // Arrange
         SetupCatalogMocks();
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
 
         // Act: Try to submit empty form
         var form = cut.Find("form");
@@ -269,7 +269,7 @@ public class ReportFormComponentTests : TestContext
             .Setup(s => s.CreateReportAsync(It.IsAny<CreateReportDto>(), It.IsAny<Guid>()))
             .ReturnsAsync(new ReportDto { Id = 1, Estado = 0 });
 
-        var cut = RenderComponent<ReportForm>();
+        var cut = Render<ReportForm>();
         await FillFormWithValidDataAsync(cut);
 
         // Act: Save draft
