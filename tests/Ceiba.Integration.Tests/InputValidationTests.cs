@@ -1,13 +1,38 @@
 using System.Net;
 using System.Net.Http.Json;
-using Ceiba.Application.DTOs;
 using Ceiba.Core.Entities;
 using Ceiba.Infrastructure.Data;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Ceiba.Integration.Tests;
+
+// Temporary DTOs for testing - will be replaced with actual DTOs from Ceiba.Application
+public record CreateReportDto
+{
+    public string TipoReporte { get; init; } = string.Empty;
+    public string Sexo { get; init; } = string.Empty;
+    public int Edad { get; init; }
+    public string Delito { get; init; } = string.Empty;
+    public int ZonaId { get; init; }
+    public int SectorId { get; init; }
+    public int CuadranteId { get; init; }
+    public string TurnoCeiba { get; init; } = string.Empty;
+    public string TipoDeAtencion { get; init; } = string.Empty;
+    public string TipoDeAccion { get; init; } = string.Empty;
+    public string HechosReportados { get; init; } = string.Empty;
+    public string AccionesRealizadas { get; init; } = string.Empty;
+    public string Traslados { get; init; } = string.Empty;
+}
+
+public record ReportDto
+{
+    public int Id { get; init; }
+    public string HechosReportados { get; init; } = string.Empty;
+    public string Delito { get; init; } = string.Empty;
+}
 
 /// <summary>
 /// T020i: RS-002 Mitigation - Input Validation Integration Tests
@@ -69,7 +94,7 @@ public class InputValidationTests : IClassFixture<CeibaWebApplicationFactory>
 
         // Verify no SQL injection occurred by checking database integrity
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Database should still be intact
         var reportsExist = await dbContext.ReportesIncidencia.AnyAsync();
@@ -102,7 +127,7 @@ public class InputValidationTests : IClassFixture<CeibaWebApplicationFactory>
 
         // Verify database integrity
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
         var usersTable = await dbContext.Users.AnyAsync();
         // If we can query, SQL injection was prevented
     }

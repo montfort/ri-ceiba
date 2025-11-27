@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
-using Ceiba.Application.DTOs;
 using Ceiba.Core.Entities;
 using Ceiba.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -29,7 +29,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
     {
         using var scope = _factory.Services.CreateScope();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         var user = new Usuario
         {
@@ -60,7 +60,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
     private async Task<ReporteIncidencia> CreateTestReport(string userId)
     {
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         var zona = await dbContext.Zonas.FirstOrDefaultAsync() ?? new Zona { Nombre = "Test Zona" };
         if (zona.Id == 0)
@@ -141,7 +141,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var report = await CreateTestReport(userId);
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act
         report.HechosReportados = "Updated facts";
@@ -163,7 +163,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var report = await CreateTestReport(userId);
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Change to entregado
         report.Estado = "entregado";
@@ -241,7 +241,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var report = await CreateTestReport(creadorId);
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act
         var allReports = await dbContext.ReportesIncidencia.ToListAsync();
@@ -264,7 +264,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         report.Estado = "entregado";
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act - REVISOR can edit even entregado reports
         report.AccionesRealizadas = "Revisado por supervisor";
@@ -391,7 +391,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var (userId, _) = await CreateAndAuthenticateUser("CREADOR");
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act
         var user = await dbContext.Users.FindAsync(userId);
@@ -412,7 +412,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var (adminId, _) = await CreateAndAuthenticateUser("ADMIN");
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act
         var newZona = new Zona { Nombre = "Nueva Zona Admin", Active = true };
@@ -433,7 +433,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var (adminId, _) = await CreateAndAuthenticateUser("ADMIN");
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act
         var auditLogs = await dbContext.Auditorias.ToListAsync();
@@ -524,7 +524,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var (userId, _) = await CreateAndAuthenticateUser("CREADOR");
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         var user = await dbContext.Users.FindAsync(userId);
         user.Active = false;
@@ -545,7 +545,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var (userId, _) = await CreateAndAuthenticateUser("CREADOR");
 
         using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Act
         // Attempt to access admin functionality (simulated)
