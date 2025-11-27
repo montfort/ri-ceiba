@@ -1,0 +1,183 @@
+# OWASP ZAP Rules Configuration for Ceiba Project
+# T020d: RS-001 Mitigation - Security Scanning Rules
+#
+# Format: RULE_ID	THRESHOLD	[COMMENT]
+# RULE_ID: ZAP rule identifier
+# THRESHOLD: FAIL, WARN, INFO, IGNORE, OFF
+# COMMENT: Optional description
+#
+# OWASP Top 10 2021 Coverage:
+# A01:2021 - Broken Access Control
+# A02:2021 - Cryptographic Failures
+# A03:2021 - Injection
+# A04:2021 - Insecure Design
+# A05:2021 - Security Misconfiguration
+# A06:2021 - Vulnerable and Outdated Components
+# A07:2021 - Identification and Authentication Failures
+# A08:2021 - Software and Data Integrity Failures
+# A09:2021 - Security Logging and Monitoring Failures
+# A10:2021 - Server-Side Request Forgery (SSRF)
+
+# A01:2021 - Broken Access Control
+10011	FAIL	Cookie Without Secure Flag
+10015	FAIL	Incomplete or No Cache-control Header Set
+10017	FAIL	Cross-Domain JavaScript Source File Inclusion
+10021	WARN	X-Content-Type-Options Header Missing
+10023	FAIL	Information Disclosure - Debug Error Messages
+10027	FAIL	Information Disclosure - Suspicious Comments
+10028	WARN	Open Redirect
+10032	WARN	Viewstate
+10048	FAIL	Remote Code Execution - Shell Shock
+10049	WARN	Content Cacheability
+10055	FAIL	CSP: Wildcard Directive
+10056	FAIL	CSP: script-src unsafe-inline
+10057	FAIL	CSP: script-src unsafe-eval
+10058	FAIL	CSP: Notices
+10061	FAIL	X-AspNet-Version Response Header
+10062	FAIL	PII Disclosure
+10063	FAIL	Permissions Policy Header Not Set
+10096	FAIL	Timestamp Disclosure
+10098	FAIL	Cross-Domain Misconfiguration
+
+# A02:2021 - Cryptographic Failures
+10052	FAIL	X-ChromeLogger-Data (XCOLD) Header Information Leak
+10070	FAIL	Secure Pages Include Mixed Content
+10080	FAIL	Weak Authentication Method
+10094	FAIL	Base64 Disclosure
+10095	FAIL	Backup File Disclosure
+10097	FAIL	Hash Disclosure
+10105	FAIL	Weak Authentication Method (Basic Auth)
+
+# A03:2021 - Injection
+40012	FAIL	Cross Site Scripting (Reflected)
+40013	FAIL	Cross Site Scripting (Persistent)
+40014	FAIL	Cross Site Scripting (Persistent - Prime)
+40016	FAIL	Cross Site Scripting (Persistent - Spider)
+40017	FAIL	Cross Site Scripting (Persistent - JSON)
+40018	FAIL	SQL Injection
+40019	FAIL	SQL Injection - MySQL
+40020	FAIL	SQL Injection - Hypersonic SQL
+40021	FAIL	SQL Injection - Oracle
+40022	FAIL	SQL Injection - PostgreSQL
+40023	FAIL	Possible Username Enumeration
+40024	FAIL	SQL Injection - SQLite
+40025	FAIL	LDAP Injection
+40026	FAIL	HTTP Parameter Pollution
+40027	FAIL	SQL Injection - MsSQL
+40028	FAIL	CRLF Injection
+40029	FAIL	Server Side Template Injection
+40032	FAIL	.htaccess Information Leak
+40034	FAIL	.env Information Leak
+90019	FAIL	Server Side Code Injection
+90020	FAIL	Remote OS Command Injection
+90021	FAIL	XPath Injection
+90022	FAIL	Application Error Disclosure
+90023	FAIL	XML External Entity Attack
+90024	FAIL	Generic Padding Oracle
+90025	FAIL	Expression Language Injection
+90026	FAIL	SOAP Action Spoofing
+90027	FAIL	Cookie Slack Detector
+90028	FAIL	Insecure HTTP Method
+90029	FAIL	ELMAH Information Leak
+90033	FAIL	Loosely Scoped Cookie
+
+# A04:2021 - Insecure Design (custom business logic checks)
+10009	WARN	In Page Banner Information Leak
+10010	WARN	Cookie No HttpOnly Flag
+10020	WARN	X-Frame-Options Header Not Set
+10054	WARN	Cookie without SameSite Attribute
+10099	WARN	Source Code Disclosure
+
+# A05:2021 - Security Misconfiguration
+10016	WARN	Web Browser XSS Protection Not Enabled
+10019	FAIL	Content-Type Header Missing
+10029	WARN	Cookie Poisoning
+10031	WARN	User Controllable Charset
+10035	FAIL	Strict-Transport-Security Header Not Set
+10036	FAIL	HTTP Server Response Header
+10037	FAIL	Server Leaks Information via "X-Powered-By" HTTP Response Header Field(s)
+10038	FAIL	Content Security Policy (CSP) Header Not Set
+10039	WARN	X-Backend-Server Header Information Leak
+10040	FAIL	Secure Pages Include Mixed Content (Including Scripts)
+10041	FAIL	HTTP to HTTPS Insecure Transition in Form Post
+10042	FAIL	HTTPS to HTTP Insecure Transition in Form Post
+10043	FAIL	User Controllable JavaScript Event (XSS)
+10044	FAIL	Big Redirect Detected (Potential Sensitive Information Leak)
+10045	FAIL	Source Code Disclosure - /WEB-INF folder
+10047	FAIL	HTTPS Content Available via HTTP
+10050	FAIL	Retrieved from Cache
+10051	FAIL	Relative Path Confusion
+10053	FAIL	Apache Range Header DoS (CVE-2011-3192)
+10104	FAIL	User Agent Fuzzer
+90001	FAIL	Insecure JSF ViewState
+
+# A06:2021 - Vulnerable and Outdated Components
+10003	FAIL	Vulnerable JS Library
+10004	FAIL	Cross Site Scripting (Reflected) - Deprecated
+10033	FAIL	Directory Browsing
+10034	FAIL	.git Information Leak
+10109	FAIL	Modern Web Application
+90003	FAIL	Sub Resource Integrity Attribute Missing
+
+# A07:2021 - Identification and Authentication Failures
+10008	WARN	Anti-CSRF Tokens Check
+10011	FAIL	Cookie Without Secure Flag
+10012	FAIL	Password Autocomplete in Browser
+10013	FAIL	Weak Authentication Method
+10014	FAIL	Cross Site Request Forgery
+10030	WARN	User Controllable HTML Element Attribute (Potential XSS)
+10059	FAIL	HTTP Parameter Override
+10060	FAIL	NTLM Authentication
+10092	FAIL	Content Security Policy (CSP) Header Not Set (Deprecated)
+10101	FAIL	Weak Authentication Method (Form-Based)
+
+# A08:2021 - Software and Data Integrity Failures
+10046	FAIL	Source Code Disclosure - CVS Information Leak
+10089	FAIL	Cookie Poisoning
+10091	FAIL	Charset Mismatch
+90004	FAIL	Insufficient Site Isolation Against Spectre Vulnerability
+90011	FAIL	Charset Mismatch (Header versus Meta Content-Type Charset)
+90030	FAIL	WSDL File Detection
+
+# A09:2021 - Security Logging and Monitoring Failures
+10024	WARN	Information Disclosure - Sensitive Information in URL
+10025	WARN	Information Disclosure - Sensitive Information in HTTP Referrer Header
+10026	WARN	HTTP Parameter Pollution
+90002	FAIL	Private IP Disclosure
+
+# A10:2021 - Server-Side Request Forgery (SSRF)
+90005	FAIL	Server Side Request Forgery
+90006	FAIL	CORS Header - Access-Control-Allow-Origin
+90007	FAIL	GET for POST
+
+# Custom Ceiba Security Checks
+10100	FAIL	Weak Password Policy
+10102	FAIL	Session Fixation
+10103	FAIL	Clickjacking
+90017	FAIL	HTTPS as HTTP (Proxy Detection)
+90018	FAIL	SQL Injection - Authentication Bypass
+
+# Performance/Quality (WARN only)
+10001	INFO	Informational Response Status Code
+10002	INFO	Private IP Disclosure (Development)
+10005	INFO	User Controllable HTML Element Attribute (Potential XSS)
+10006	INFO	User Controllable JavaScript Event (XSS)
+10007	INFO	User Controllable HTML Element Attribute (Potential XSS)
+10018	INFO	Information Disclosure - Suspicious Comments
+10108	INFO	Reverse Tabnabbing
+
+# Ignore Rules (false positives or not applicable)
+10081	IGNORE	HTTP Parameter Pollution (Query String Delimiter)
+10082	IGNORE	HTTP Parameter Pollution (Semicolon Delimiter)
+10083	IGNORE	HTTP Parameter Pollution (Ampersand Delimiter)
+10084	IGNORE	HTTP Parameter Pollution (HTTP POST)
+10085	IGNORE	HTTP Parameter Pollution (HTTP GET)
+10086	IGNORE	HTTP Parameter Pollution (HTTP Cookie)
+10087	IGNORE	HTTP Parameter Pollution (HTTP Header)
+10088	IGNORE	HTTP Parameter Pollution (HTTP Multipart)
+10090	IGNORE	Modern Web Application (False Positive for Blazor Server)
+10093	IGNORE	Loosely Scoped Cookie (Development Environment)
+
+# Rate Limiting and DoS Protection
+10106	WARN	Insufficient Rate Limiting
+10107	WARN	Absence of Anti-Automation
