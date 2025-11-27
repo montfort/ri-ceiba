@@ -1,6 +1,11 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Ceiba.Web</a>
+        <a class="navbar-brand" href="">
+            <i class="bi bi-shield-check me-2"></i>Ceiba
+        </a>
     </div>
 </div>
 
@@ -8,23 +13,68 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+        <AuthorizeView Context="mainAuth">
+            <Authorized>
+                <!-- Home -->
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="bi bi-house-door-fill me-2" aria-hidden="true"></span> Inicio
+                    </NavLink>
+                </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+                <!-- Reports (CREADOR role) -->
+                <AuthorizeView Roles="CREADOR" Context="creadorAuth">
+                    <Authorized>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="reports">
+                                <span class="bi bi-file-earmark-text me-2" aria-hidden="true"></span> Mis Reportes
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
+                <!-- Separator -->
+                <hr class="my-2 mx-3 border-secondary" />
+
+                <!-- User Info -->
+                <div class="nav-item px-3 py-2">
+                    <div class="text-white-50 small">
+                        <i class="bi bi-person-circle me-2"></i>
+                        @mainAuth.User.Identity?.Name
+                    </div>
+                    <div class="text-white-50 small mt-1">
+                        <i class="bi bi-shield-fill-check me-2"></i>
+                        @GetUserRoles(mainAuth)
+                    </div>
+                </div>
+
+                <!-- Logout -->
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="logout">
+                        <span class="bi bi-box-arrow-right me-2" aria-hidden="true"></span> Cerrar Sesión
+                    </NavLink>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <span class="bi bi-box-arrow-in-right me-2" aria-hidden="true"></span> Iniciar Sesión
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </nav>
 </div>
+
+@code {
+    private string GetUserRoles(AuthenticationState authState)
+    {
+        var roles = authState.User.Claims
+            .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+
+        return roles.Any() ? string.Join(", ", roles) : "Sin rol";
+    }
+}
 

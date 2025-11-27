@@ -64,7 +64,7 @@ public class SeedDataService
     private async Task SeedAdminUserAsync()
     {
         const string adminEmail = "admin@ceiba.local";
-        const string adminPassword = "Admin123!"; // ⚠️ CHANGE AFTER FIRST LOGIN
+        const string adminPassword = "Admin123!@"; // 10 caracteres - ⚠️ CHANGE AFTER FIRST LOGIN
 
         var existingAdmin = await _userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin != null)
@@ -83,14 +83,17 @@ public class SeedDataService
         var result = await _userManager.CreateAsync(adminUser, adminPassword);
         if (result.Succeeded)
         {
+            // Asignar todos los roles para pruebas (un usuario puede tener múltiples roles)
             await _userManager.AddToRoleAsync(adminUser, "ADMIN");
+            await _userManager.AddToRoleAsync(adminUser, "REVISOR");
+            await _userManager.AddToRoleAsync(adminUser, "CREADOR");
             _logger.LogWarning(
-                "Created default admin user: {Email} with password: {Password} - CHANGE IMMEDIATELY!",
+                "✓ Created default admin user: {Email} with password: {Password} - ⚠️ CHANGE IMMEDIATELY!",
                 adminEmail, adminPassword);
         }
         else
         {
-            _logger.LogError("Failed to create admin user: {Errors}",
+            _logger.LogError("✗ Failed to create admin user: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
         }
     }

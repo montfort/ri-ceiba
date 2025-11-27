@@ -164,6 +164,12 @@
             Logs all unauthorized access attempts for security monitoring.
             </summary>
         </member>
+        <member name="M:Ceiba.Web.Middleware.AuthorizationLoggingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext,Ceiba.Core.Interfaces.IAuditService)">
+            <summary>
+            Invoca el siguiente middleware y registra intentos no autorizados (403).
+            Protege contra parsing inválido del claim de usuario y captura errores del servicio de auditoría.
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Middleware.ErrorHandlingMiddleware">
             <summary>
             Global exception handling middleware.
@@ -175,11 +181,6 @@
             <summary>
             RS-005 Mitigation: User-Agent validation middleware.
             Detects and blocks suspicious session hijacking attempts by validating User-Agent consistency.
-            </summary>
-        </member>
-        <member name="T:Program">
-            <summary>
-            Auto-generated public partial Program class for top-level statement apps.
             </summary>
         </member>
     </members>

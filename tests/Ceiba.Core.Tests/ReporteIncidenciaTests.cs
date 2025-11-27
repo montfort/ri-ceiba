@@ -319,8 +319,19 @@ public class ReporteIncidenciaTests
 
         // Assert
         report.CamposAdicionales.Should().NotBeNull();
-        report.GetCamposAdicionales().Should().ContainKey("campo_custom_1");
-        report.GetCamposAdicionales()["campo_custom_1"].Should().Be("valor1");
+        report.CamposAdicionales.Should().Contain("campo_custom_1");
+        report.CamposAdicionales.Should().Contain("valor1");
+        report.CamposAdicionales.Should().Contain("campo_custom_2");
+        report.CamposAdicionales.Should().Contain("123");
+        report.CamposAdicionales.Should().Contain("campo_custom_3");
+        report.CamposAdicionales.Should().Contain("true");
+
+        // Verify we can retrieve the data
+        var campos = report.GetCamposAdicionales();
+        campos.Should().HaveCount(3);
+        campos.Should().ContainKey("campo_custom_1");
+        campos.Should().ContainKey("campo_custom_2");
+        campos.Should().ContainKey("campo_custom_3");
     }
 
     #endregion

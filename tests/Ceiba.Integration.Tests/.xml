@@ -4,6 +4,12 @@
         <name>Ceiba.Integration.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Integration.Tests.CeibaWebApplicationFactory">
+            <summary>
+            Custom WebApplicationFactory for integration tests.
+            Configures in-memory database and test-specific services.
+            </summary>
+        </member>
         <member name="T:Ceiba.Integration.Tests.DbContextTests">
             <summary>
             Integration tests for CeibaDbContext.
@@ -12,8 +18,9 @@
         </member>
         <member name="T:Ceiba.Integration.Tests.ReportContractTests">
             <summary>
-            Contract tests for Report API endpoints
-            Validates API contracts defined in api-reports.yaml
+            Contract tests for Report API endpoints (MVP - Simplified)
+            Validates that the application starts correctly and endpoints are configured
+            Full authentication testing deferred to post-MVP
             </summary>
         </member>
     </members>

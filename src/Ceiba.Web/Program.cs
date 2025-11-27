@@ -8,6 +8,7 @@ using Ceiba.Infrastructure.Services;
 using Ceiba.Web.Components;
 using Ceiba.Web.Configuration;
 using Ceiba.Web.Middleware;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -18,13 +19,6 @@ Log.Logger = new LoggerConfiguration()
         .AddJsonFile("appsettings.json")
         .Build())
     .Enrich.With<PIIRedactionEnricher>() // T018b: PII redaction
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File(
-        path: "logs/ceiba-.log",
-        rollingInterval: RollingInterval.Day,
-        retainedFileCountLimit: 30, // T018d: 30 días retención
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 try
@@ -76,6 +70,12 @@ try
     builder.Services.AddScoped<ICatalogService, CatalogService>();
     builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
+    // Configurar HttpClient para componentes Blazor
+    builder.Services.AddScoped(sp => new HttpClient
+    {
+        BaseAddress = new Uri(sp.GetRequiredService<NavigationManager>().BaseUri)
+    });
+
     // Configurar factory para DbContext con UserId del request actual
     builder.Services.AddScoped(provider =>
     {
@@ -114,7 +114,12 @@ try
     });
 
     // Configurar controladores para APIs (se usarán en User Stories)
-    builder.Services.AddControllers();
+    // Registrar controladores y soporte para vistas/antiforgery, necesario para formularios MVC
+    builder.Services.AddControllersWithViews();
+    builder.Services.AddAntiforgery(options =>
+    {
+        options.HeaderName = "X-CSRF-TOKEN";
+    });
 
     var app = builder.Build();
 
@@ -158,19 +163,36 @@ try
 
     app.UseStaticFiles();
 
-    // Sesión (antes de auth)
+    // Sesión (antes de middlewares que la consumen)
     app.UseSession();
+
+    /* Orden obligatorio de middlewares de enrutamiento y seguridad
+       - app.UseRouting() debe estar antes de cualquier middleware que dependa del endpoint seleccionado
+         (por ejemplo, UseAuthentication/UseAuthorization, UseAntiforgery, etc.).
+       - app.UseAuthentication() y app.UseAuthorization() deben ejecutarse después de UseRouting() y
+         antes de que los endpoints sean invocados.
+       - app.UseAntiforgery() (middleware de validación CSRF) debe situarse entre UseRouting() y el mapeo
+         de endpoints (MapControllers, MapRazorComponents, ...) y además después de la autenticación/authorization.
+       - Los middlewares que consumen la sesión (por ejemplo UserAgentValidationMiddleware) deben registrarse
+         después de app.UseSession().
+       Mantener este orden evita InvalidOperationException cuando un endpoint contiene metadatos antiforgery.
+    */
+
+    // Enrutamiento obligatorio antes de autenticación/antiforgery y antes de MapEndpoints
+    app.UseRouting();
 
     // Autenticación y autorización
     app.UseAuthentication();
     app.UseAuthorization();
 
+    // Middleware antiforgery: debe ejecutarse entre UseRouting() y Map*() y después de auth
+    app.UseAntiforgery();
+
     // Middleware custom (T010c, T020b)
     app.UseMiddleware<UserAgentValidationMiddleware>(); // T010c RS-005
     app.UseMiddleware<AuthorizationLoggingMiddleware>(); // T020b RS-001
 
-    // Anti-CSRF (T010d RS-005)
-    app.UseAntiforgery();
+    // Anti-CSRF: antiforgery está habilitado mediante servicios y filas de middleware
 
     app.MapStaticAssets();
     app.MapControllers(); // Para APIs REST
@@ -178,17 +200,49 @@ try
         .AddInteractiveServerRenderMode();
 
     // Migración automática y seed data en desarrollo (T019, T020)
-    if (app.Environment.IsDevelopment())
+    // Skip migrations in Testing environment (handled by WebApplicationFactory)
+    if (app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
     {
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
-        await db.Database.MigrateAsync();
-        Log.Information("Database migrations applied successfully");
 
-        // Seed initial data (T020)
-        var seedService = scope.ServiceProvider.GetRequiredService<SeedDataService>();
-        await seedService.SeedAsync();
-        Log.Information("Database seeded successfully");
+        try
+        {
+            // Verifica si puede conectarse a la base de datos
+            var canConnect = await db.Database.CanConnectAsync();
+
+            if (canConnect)
+            {
+                // Si la BD existe, aplica migraciones pendientes
+                await db.Database.MigrateAsync();
+                Log.Information("Database migrations applied successfully");
+
+                // Seed initial data (T020)
+                var seedService = scope.ServiceProvider.GetRequiredService<SeedDataService>();
+                await seedService.SeedAsync();
+                Log.Information("Database seeded successfully");
+            }
+            else
+            {
+                Log.Warning("Cannot connect to database. Please create the database manually:");
+                Log.Warning("  psql -U postgres -c \"CREATE DATABASE ceiba;\"");
+                Log.Warning("  psql -U postgres -c \"GRANT ALL PRIVILEGES ON DATABASE ceiba TO ceiba;\"");
+            }
+        }
+        catch (Npgsql.PostgresException ex) when (ex.SqlState == "42501") // Permission denied
+        {
+            Log.Error("Database connection failed: User does not have permission to create database");
+            Log.Error("Please run these commands as PostgreSQL superuser:");
+            Log.Error("  CREATE DATABASE ceiba;");
+            Log.Error("  GRANT ALL PRIVILEGES ON DATABASE ceiba TO ceiba;");
+            Log.Error("Then restart the application.");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Database migration failed");
+            throw;
+        }
     }
 
     Log.Information("Ceiba application starting...");
@@ -202,3 +256,6 @@ finally
 {
     await Log.CloseAndFlushAsync();
 }
+
+// Make Program class accessible to integration tests
+public partial class Program { }
