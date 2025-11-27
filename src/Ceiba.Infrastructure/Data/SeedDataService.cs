@@ -36,6 +36,7 @@ public class SeedDataService
 
         await SeedRolesAsync();
         await SeedAdminUserAsync();
+        await SeedTestUsersAsync(); // Add test users for each role
         await SeedSampleCatalogsAsync();
 
         _logger.LogInformation("Database seeding completed successfully");
@@ -95,6 +96,48 @@ public class SeedDataService
         {
             _logger.LogError("✗ Failed to create admin user: {Errors}",
                 string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+    }
+
+    private async Task SeedTestUsersAsync()
+    {
+        // Test users for development/testing - one per role
+        var testUsers = new[]
+        {
+            new { Email = "creador@test.com", Password = "Creador123!", Role = "CREADOR", Nombre = "Juan", Apellido = "Pérez" },
+            new { Email = "revisor@test.com", Password = "Revisor123!", Role = "REVISOR", Nombre = "María", Apellido = "González" },
+            new { Email = "admin@test.com", Password = "Admin123!Test", Role = "ADMIN", Nombre = "Carlos", Apellido = "Rodríguez" }
+        };
+
+        foreach (var testUser in testUsers)
+        {
+            var existingUser = await _userManager.FindByEmailAsync(testUser.Email);
+            if (existingUser != null)
+            {
+                _logger.LogInformation("Test user already exists: {Email}", testUser.Email);
+                continue;
+            }
+
+            var user = new IdentityUser<Guid>
+            {
+                UserName = testUser.Email,
+                Email = testUser.Email,
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(user, testUser.Password);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, testUser.Role);
+                _logger.LogInformation(
+                    "✓ Created test user: {Email} ({Nombre} {Apellido}) with role {Role}",
+                    testUser.Email, testUser.Nombre, testUser.Apellido, testUser.Role);
+            }
+            else
+            {
+                _logger.LogError("✗ Failed to create test user {Email}: {Errors}",
+                    testUser.Email, string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
         }
     }
 
