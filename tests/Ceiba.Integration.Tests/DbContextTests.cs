@@ -10,6 +10,7 @@ namespace Ceiba.Integration.Tests;
 /// Integration tests for CeibaDbContext.
 /// Tests database configuration, relationships, and constraints.
 /// </summary>
+[Collection("Integration Tests")]
 public class DbContextTests : IAsyncLifetime
 {
     private readonly string _connectionString;

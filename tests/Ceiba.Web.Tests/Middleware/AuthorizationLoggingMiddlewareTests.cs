@@ -36,7 +36,13 @@ namespace Ceiba.Web.Tests.Middleware
             var mockLogger = new Mock<ILogger<AuthorizationLoggingMiddleware>>();
             var mockAudit = new Mock<IAuditService>();
             mockAudit
-                .Setup(a => a.LogAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<string>()))
+                .Setup(a => a.LogAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
             var middleware = new AuthorizationLoggingMiddleware(next, mockLogger.Object);
@@ -46,7 +52,13 @@ namespace Ceiba.Web.Tests.Middleware
 
             // Assert
             Assert.Null(ex);
-            mockAudit.Verify(a => a.LogAsync(AuditActionCode.SECURITY_UNAUTHORIZED_ACCESS, It.IsAny<int?>(), It.IsAny<string>()), Times.Once);
+            mockAudit.Verify(a => a.LogAsync(
+                AuditActionCode.SECURITY_UNAUTHORIZED_ACCESS,
+                null,
+                null,
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -72,7 +84,13 @@ namespace Ceiba.Web.Tests.Middleware
             var mockLogger = new Mock<ILogger<AuthorizationLoggingMiddleware>>();
             var mockAudit = new Mock<IAuditService>();
             mockAudit
-                .Setup(a => a.LogAsync(It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<string>()))
+                .Setup(a => a.LogAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new Exception("boom"));
 
             var middleware = new AuthorizationLoggingMiddleware(next, mockLogger.Object);
@@ -84,16 +102,23 @@ namespace Ceiba.Web.Tests.Middleware
             Assert.Null(ex);
 
             // Verificar que se intentó llamar al servicio de auditoría
-            mockAudit.Verify(a => a.LogAsync(AuditActionCode.SECURITY_UNAUTHORIZED_ACCESS, It.IsAny<int?>(), It.IsAny<string>()), Times.Once);
+            mockAudit.Verify(a => a.LogAsync(
+                AuditActionCode.SECURITY_UNAUTHORIZED_ACCESS,
+                null,
+                null,
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()), Times.Once);
 
             // Verificar que se registró un error en el logger
+            // Note: ILogger.Log uses FormattedLogValues, so we use It.IsAnyType for the state parameter
             mockLogger.Verify(
                 x => x.Log(
                     LogLevel.Error,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => true),
+                    It.IsAny<It.IsAnyType>(),  // Changed from It.Is<It.IsAnyType>((v, t) => true)
                     It.IsAny<Exception>(),
-                    It.IsAny<Func<object, Exception, string>>()),
+                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),  // Changed Func parameter types
                 Times.AtLeastOnce);
         }
     }

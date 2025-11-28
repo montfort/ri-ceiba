@@ -11,11 +11,18 @@ namespace Ceiba.Integration.Tests;
 /// <summary>
 /// Custom WebApplicationFactory for integration tests.
 /// Configures in-memory database and test-specific services.
+/// Each instance uses a unique database name to prevent cross-test contamination.
 /// </summary>
 public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
 {
+    // Unique database name per factory instance to prevent test isolation issues
+    private readonly string _databaseName = $"CeibaTestDb_{Guid.NewGuid()}";
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Set content root to Ceiba.Web project directory
+        builder.UseContentRoot(GetContentRootPath());
+
         builder.ConfigureServices(services =>
         {
             // Remove the existing DbContext registrations (both DbContextOptions and factory)
@@ -29,9 +36,10 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
             }
 
             // Add DbContext using in-memory database for testing
+            // Use unique database name per factory instance to prevent test isolation issues
             services.AddDbContext<CeibaDbContext>((sp, options) =>
             {
-                options.UseInMemoryDatabase("CeibaTestDb");
+                options.UseInMemoryDatabase(_databaseName);
                 options.EnableSensitiveDataLogging();
             });
 
@@ -39,7 +47,7 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped(provider =>
             {
                 var optionsBuilder = new DbContextOptionsBuilder<CeibaDbContext>();
-                optionsBuilder.UseInMemoryDatabase("CeibaTestDb");
+                optionsBuilder.UseInMemoryDatabase(_databaseName);
                 optionsBuilder.EnableSensitiveDataLogging();
                 return new CeibaDbContext(optionsBuilder.Options, null);
             });
@@ -56,10 +64,15 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
         using var scope = host.Services.CreateScope();
         var services = scope.ServiceProvider;
         var db = services.GetRequiredService<CeibaDbContext>();
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
         db.Database.EnsureDeleted();
         db.Database.EnsureCreated();
 
+        // Seed roles first (required for authorization tests)
+        SeedRoles(roleManager).Wait();
+
+        // Then seed catalog data
         SeedCatalogData(db);
 
         return host;
@@ -67,6 +80,12 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
 
     private static void SeedCatalogData(CeibaDbContext context)
     {
+        // Only seed if data doesn't already exist (InMemory database is shared across tests)
+        if (context.Zonas.Any())
+        {
+            return; // Data already seeded
+        }
+
         // Seed geographic catalogs
         var zona1 = new Ceiba.Core.Entities.Zona { Id = 1, Nombre = "Zona Centro", Activo = true };
         var zona2 = new Ceiba.Core.Entities.Zona { Id = 2, Nombre = "Zona Norte", Activo = true };
@@ -96,5 +115,42 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
         context.CatalogosSugerencia.AddRange(sugerencias);
 
         context.SaveChanges();
+    }
+
+    private static async Task SeedRoles(RoleManager<IdentityRole<Guid>> roleManager)
+    {
+        // Create the three application roles required for authorization tests
+        var roles = new[] { "CREADOR", "REVISOR", "ADMIN" };
+
+        foreach (var roleName in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                var role = new IdentityRole<Guid>(roleName);
+                await roleManager.CreateAsync(role);
+            }
+        }
+    }
+
+    private static string GetContentRootPath()
+    {
+        // Get the test assembly location (e.g., tests/Ceiba.Integration.Tests/bin/Debug/net10.0/Ceiba.Integration.Tests.dll)
+        var testAssemblyPath = typeof(CeibaWebApplicationFactory).Assembly.Location;
+
+        // Navigate: Assembly location -> bin -> Debug -> net10.0 -> Ceiba.Integration.Tests (project) -> tests -> solution root
+        var testProjectDir = Directory.GetParent(testAssemblyPath)!.Parent!.Parent!.Parent!; // Ceiba.Integration.Tests directory
+        var testsDir = testProjectDir.Parent!; // tests directory
+        var solutionDir = testsDir.Parent!; // solution root (ri-ceiba)
+
+        // Build path to Ceiba.Web
+        var contentRoot = Path.Combine(solutionDir.FullName, "src", "Ceiba.Web");
+
+        if (!Directory.Exists(contentRoot))
+        {
+            throw new DirectoryNotFoundException($"Ceiba.Web content root not found at: {contentRoot}. " +
+                $"Assembly location: {testAssemblyPath}");
+        }
+
+        return contentRoot;
     }
 }
