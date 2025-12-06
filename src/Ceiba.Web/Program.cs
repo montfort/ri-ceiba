@@ -1,4 +1,5 @@
 using Ceiba.Application.Services;
+using Ceiba.Application.Services.Export;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Identity;
@@ -69,6 +70,11 @@ try
     builder.Services.AddScoped<IReportService, ReportService>();
     builder.Services.AddScoped<ICatalogService, CatalogService>();
     builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
+    // Registrar servicios de User Story 2 - Export (US2)
+    builder.Services.AddScoped<IExportService, ExportService>();
+    builder.Services.AddScoped<IPdfGenerator, PdfGenerator>();
+    builder.Services.AddScoped<IJsonExporter, JsonExporter>();
 
     // Configurar HttpClient para componentes Blazor
     builder.Services.AddScoped(sp => new HttpClient
