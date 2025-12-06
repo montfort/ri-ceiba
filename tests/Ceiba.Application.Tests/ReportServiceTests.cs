@@ -63,9 +63,42 @@ public class ReportServiceTests
             Observaciones = "Observaciones adicionales"
         };
 
+        var savedReport = new ReporteIncidencia
+        {
+            Id = 1,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = createDto.DatetimeHechos.ToUniversalTime(),
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Violencia familiar",
+            ZonaId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = 1,
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = 1,
+            HechosReportados = "Descripción detallada de los hechos reportados.",
+            AccionesRealizadas = "Acciones realizadas por el oficial.",
+            Traslados = 0,
+            Observaciones = "Observaciones adicionales",
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+        };
+
         _mockRepository
             .Setup(r => r.AddAsync(It.IsAny<ReporteIncidencia>()))
-            .ReturnsAsync((ReporteIncidencia r) => r);
+            .ReturnsAsync((ReporteIncidencia r) => { r.Id = 1; return r; });
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(1))
+            .ReturnsAsync(savedReport);
+
+        _mockCatalogService
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1))
+            .ReturnsAsync(true);
 
         // Act
         var result = await _sut.CreateReportAsync(createDto, usuarioId);
@@ -191,8 +224,36 @@ public class ReportServiceTests
             Sexo = "Masculino",
             Edad = 35,
             Delito = "Robo con violencia",
+            ZonaId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TipoDeAccion = 1,
             HechosReportados = "Actualizado con más detalles",
             AccionesRealizadas = "Acciones actualizadas"
+        };
+
+        var updatedReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow.AddHours(-3),
+            Sexo = "Masculino",
+            Edad = 35,
+            Delito = "Robo con violencia",
+            ZonaId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = 1,
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = 1,
+            HechosReportados = "Actualizado con más detalles",
+            AccionesRealizadas = "Acciones actualizadas",
+            Traslados = 0,
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
         };
 
         _mockRepository
@@ -202,6 +263,14 @@ public class ReportServiceTests
         _mockRepository
             .Setup(r => r.UpdateAsync(It.IsAny<ReporteIncidencia>()))
             .ReturnsAsync((ReporteIncidencia r) => r);
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(updatedReport);
+
+        _mockCatalogService
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1))
+            .ReturnsAsync(true);
 
         // Act
         var result = await _sut.UpdateReportAsync(reportId, updateDto, usuarioId);
@@ -275,7 +344,40 @@ public class ReportServiceTests
         var updateDto = new UpdateReportDto
         {
             Sexo = "Masculino",
+            Edad = 28,
+            Delito = "Violencia familiar",
+            ZonaId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TipoDeAccion = 1,
+            HechosReportados = "Hechos reportados",
+            AccionesRealizadas = "Acciones realizadas",
             Observaciones = "Modificado por supervisor"
+        };
+
+        var updatedReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = existingReport.UsuarioId,
+            Estado = 1,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Masculino",
+            Edad = 28,
+            Delito = "Violencia familiar",
+            ZonaId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = 1,
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = 1,
+            HechosReportados = "Hechos reportados",
+            AccionesRealizadas = "Acciones realizadas",
+            Traslados = 0,
+            Observaciones = "Modificado por supervisor",
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
         };
 
         _mockRepository
@@ -285,6 +387,14 @@ public class ReportServiceTests
         _mockRepository
             .Setup(r => r.UpdateAsync(It.IsAny<ReporteIncidencia>()))
             .ReturnsAsync((ReporteIncidencia r) => r);
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(updatedReport);
+
+        _mockCatalogService
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1))
+            .ReturnsAsync(true);
 
         // Act: REVISOR can edit any report
         var result = await _sut.UpdateReportAsync(reportId, updateDto, revisorId, isRevisor: true);
@@ -315,13 +425,41 @@ public class ReportServiceTests
             Edad = 28
         };
 
+        var submittedReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 1, // Entregado
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = 1,
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = 1,
+            HechosReportados = "Test hechos",
+            AccionesRealizadas = "Test acciones",
+            Traslados = 0,
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+        };
+
         _mockRepository
             .Setup(r => r.GetByIdAsync(reportId))
             .ReturnsAsync(draftReport);
 
         _mockRepository
             .Setup(r => r.UpdateAsync(It.IsAny<ReporteIncidencia>()))
-            .ReturnsAsync((ReporteIncidencia r) => r);
+            .ReturnsAsync((ReporteIncidencia r) => { r.Estado = 1; return r; });
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(submittedReport);
 
         // Act
         var result = await _sut.SubmitReportAsync(reportId, usuarioId);
@@ -345,7 +483,7 @@ public class ReportServiceTests
     }
 
     [Fact(DisplayName = "T024: SubmitReportAsync on already submitted report should throw")]
-    public async Task SubmitReportAsync_OnAlreadySubmittedReport_ThrowsBadRequestException()
+    public async Task SubmitReportAsync_OnAlreadySubmittedReport_ThrowsForbiddenException()
     {
         // Arrange
         var reportId = 1;
@@ -362,7 +500,7 @@ public class ReportServiceTests
             .ReturnsAsync(submittedReport);
 
         // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(
+        await Assert.ThrowsAsync<ForbiddenException>(
             () => _sut.SubmitReportAsync(reportId, usuarioId)
         );
     }

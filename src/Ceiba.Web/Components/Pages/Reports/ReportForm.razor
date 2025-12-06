@@ -473,13 +473,16 @@
     private async Task LoadSectoresAsync(int zonaId)
     {
         IsLoadingSectores = true;
+        Logger.LogInformation("Loading sectores for zona {ZonaId}", zonaId);
         try
         {
             Sectores = await CatalogService.GetSectoresByZonaAsync(zonaId);
+            Logger.LogInformation("Loaded {Count} sectores for zona {ZonaId}", Sectores.Count, zonaId);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading sectores for zona {ZonaId}", zonaId);
+            ErrorMessage = $"Error al cargar sectores: {ex.Message}";
         }
         finally
         {
@@ -490,13 +493,16 @@
     private async Task LoadCuadrantesAsync(int sectorId)
     {
         IsLoadingCuadrantes = true;
+        Logger.LogInformation("Loading cuadrantes for sector {SectorId}", sectorId);
         try
         {
             Cuadrantes = await CatalogService.GetCuadrantesBySectorAsync(sectorId);
+            Logger.LogInformation("Loaded {Count} cuadrantes for sector {SectorId}", Cuadrantes.Count, sectorId);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading cuadrantes for sector {SectorId}", sectorId);
+            ErrorMessage = $"Error al cargar cuadrantes: {ex.Message}";
         }
         finally
         {
@@ -508,17 +514,11 @@
     {
         try
         {
-            var tasks = new[]
-            {
-                CatalogService.GetSuggestionsAsync("sexo"),
-                CatalogService.GetSuggestionsAsync("delito"),
-                CatalogService.GetSuggestionsAsync("tipo_de_atencion")
-            };
-
-            var results = await Task.WhenAll(tasks);
-            SexoSuggestions = results[0];
-            DelitoSuggestions = results[1];
-            TipoDeAtencionSuggestions = results[2];
+            // Load suggestions sequentially to avoid DbContext concurrency issues
+            // Cannot use Task.WhenAll because they share the same DbContext instance
+            SexoSuggestions = await CatalogService.GetSuggestionsAsync("sexo");
+            DelitoSuggestions = await CatalogService.GetSuggestionsAsync("delito");
+            TipoDeAtencionSuggestions = await CatalogService.GetSuggestionsAsync("tipo_de_atencion");
         }
         catch (Exception ex)
         {
@@ -634,22 +634,46 @@
         Navigation.NavigateTo("/reports");
     }
 
-    // Helper methods for two-way binding
-    private Task OnZonaChanged(int? value)
+    // Helper methods for two-way binding with cascading data load
+    private async Task OnZonaChanged(int value)
     {
-        Model.ZonaId = value ?? 0;
-        return Task.CompletedTask;
+        Model.ZonaId = value;
+
+        // Reset dependent fields
+        Model.SectorId = 0;
+        Model.CuadranteId = 0;
+        Sectores.Clear();
+        Cuadrantes.Clear();
+
+        // Load sectores for the new zona
+        if (value > 0)
+        {
+            await LoadSectoresAsync(value);
+        }
+
+        StateHasChanged();
     }
 
-    private Task OnSectorChanged(int? value)
+    private async Task OnSectorChanged(int value)
     {
-        Model.SectorId = value ?? 0;
-        return Task.CompletedTask;
+        Model.SectorId = value;
+
+        // Reset dependent field
+        Model.CuadranteId = 0;
+        Cuadrantes.Clear();
+
+        // Load cuadrantes for the new sector
+        if (value > 0)
+        {
+            await LoadCuadrantesAsync(value);
+        }
+
+        StateHasChanged();
     }
 
-    private Task OnCuadranteChanged(int? value)
+    private Task OnCuadranteChanged(int value)
     {
-        Model.CuadranteId = value ?? 0;
+        Model.CuadranteId = value;
         return Task.CompletedTask;
     }
 

@@ -186,7 +186,11 @@ try
     app.UseAuthorization();
 
     // Middleware antiforgery: debe ejecutarse entre UseRouting() y Map*() y después de auth
-    app.UseAntiforgery();
+    // Excluir rutas /api/* para permitir APIs REST sin CSRF tokens
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/api"),
+        appBuilder => appBuilder.UseAntiforgery()
+    );
 
     // Middleware custom (T010c, T020b)
     app.UseMiddleware<UserAgentValidationMiddleware>(); // T010c RS-005

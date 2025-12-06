@@ -1,16 +1,58 @@
-# Scripts de Configuración de Base de Datos
+# Scripts de Base de Datos - Ceiba
 
-Este directorio contiene scripts para configurar la base de datos PostgreSQL necesaria para ejecutar la aplicación Ceiba.
+Este directorio contiene scripts para configurar, resetear y mantener la base de datos PostgreSQL de la aplicación Ceiba.
 
-## Problema Común
+## Scripts Disponibles
 
-Si ves este error al ejecutar la aplicación:
+### 1. `setup-database.ps1` - Configuración Inicial
+Crea la base de datos y el usuario por primera vez.
 
+### 2. `reset-database.ps1` - Reset Estándar
+Elimina y recrea la base de datos usando el usuario `ceiba`.
+
+### 3. `reset-database-with-postgres.ps1` - Reset con Permisos Elevados
+Elimina y recrea la base de datos usando el superusuario `postgres`. **Usa este si tienes problemas de permisos**.
+
+### 4. `fix-database-ownership.sql` - Corregir Permisos
+Script SQL para corregir problemas de propiedad de la base de datos.
+
+## Problemas Comunes y Soluciones
+
+### Problema 1: "debe ser dueño de la base de datos ceiba"
+
+**Síntomas**: Al ejecutar `dotnet ef database drop` o `reset-database.ps1` obtienes:
+```
+debe ser dueño de la base de datos ceiba
+```
+
+**Causa**: El usuario `ceiba` no es el propietario de la base de datos.
+
+**Solución Rápida**:
+```powershell
+.\scripts\reset-database-with-postgres.ps1
+```
+
+Este script usa el superusuario `postgres` para eliminar y recrear la base de datos correctamente.
+
+**Solución Permanente**:
+```powershell
+# Ejecutar como superusuario postgres
+psql -h localhost -U postgres -d postgres -f scripts/fix-database-ownership.sql
+```
+
+### Problema 2: "se ha denegado el permiso para crear la base de datos"
+
+**Síntomas**:
 ```
 Npgsql.PostgresException (0x80004005): 42501: se ha denegado el permiso para crear la base de datos
 ```
 
-Significa que el usuario de PostgreSQL no tiene permisos para crear la base de datos. Usa estos scripts para resolver el problema.
+**Causa**: El usuario de PostgreSQL no tiene permisos para crear la base de datos.
+
+**Solución**:
+```powershell
+.\scripts\setup-database.ps1
+```
 
 ## Solución Rápida - Windows (Recomendado)
 

@@ -1,6 +1,8 @@
 using Ceiba.Core.Exceptions;
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs;
+using Ceiba.Web.Filters;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -13,7 +15,8 @@ namespace Ceiba.Web.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[AuthorizeBeforeModelBinding] // Custom filter to check auth before model binding (OWASP best practice)
+[IgnoreAntiforgeryToken] // APIs REST don't use antiforgery tokens
 public class ReportsController : ControllerBase
 {
     private readonly IReportService _reportService;
@@ -86,7 +89,7 @@ public class ReportsController : ControllerBase
     /// Only CREADOR can create reports.
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "CREADOR")]
+    [AuthorizeBeforeModelBinding("CREADOR")]
     public async Task<ActionResult<ReportDto>> CreateReport([FromBody] CreateReportDto createDto)
     {
         try
@@ -151,7 +154,7 @@ public class ReportsController : ControllerBase
     /// Only CREADOR can submit their own reports.
     /// </summary>
     [HttpPost("{id}/submit")]
-    [Authorize(Roles = "CREADOR")]
+    [AuthorizeBeforeModelBinding("CREADOR")]
     public async Task<ActionResult<ReportDto>> SubmitReport(int id)
     {
         try

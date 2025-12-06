@@ -94,8 +94,12 @@ public class ReportService : IReportService
             null
         );
 
+        // Reload with relations for DTO mapping
+        var reportWithRelations = await _reportRepository.GetByIdWithRelationsAsync(savedReport.Id)
+            ?? throw new NotFoundException($"Reporte con ID {savedReport.Id} no encontrado.");
+
         // Return DTO
-        return await MapToDto(savedReport);
+        return await MapToDto(reportWithRelations);
     }
 
     public async Task<ReportDto> UpdateReportAsync(
@@ -214,7 +218,11 @@ public class ReportService : IReportService
             null
         );
 
-        return await MapToDto(updatedReport);
+        // Reload with relations for DTO mapping
+        var reportWithRelations = await _reportRepository.GetByIdWithRelationsAsync(reportId)
+            ?? throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
+
+        return await MapToDto(reportWithRelations);
     }
 
     public async Task<ReportDto> SubmitReportAsync(int reportId, Guid usuarioId)
@@ -256,7 +264,11 @@ public class ReportService : IReportService
             null
         );
 
-        return await MapToDto(submittedReport);
+        // Reload with relations for DTO mapping
+        var reportWithRelations = await _reportRepository.GetByIdWithRelationsAsync(reportId)
+            ?? throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
+
+        return await MapToDto(reportWithRelations);
     }
 
     public async Task<ReportDto> GetReportByIdAsync(int reportId, Guid usuarioId, bool isRevisor = false)
@@ -314,59 +326,50 @@ public class ReportService : IReportService
 
     #region Helper Methods
 
-    private async Task<ReportDto> MapToDto(ReporteIncidencia report)
+    private Task<ReportDto> MapToDto(ReporteIncidencia report)
     {
-        // Ensure relations are loaded
-        ReporteIncidencia reportWithRelations;
-        if (report.Zona == null || report.Sector == null || report.Cuadrante == null)
+        // Assumes relations (Zona, Sector, Cuadrante) are already loaded by caller
+        var dto = new ReportDto
         {
-            reportWithRelations = await _reportRepository.GetByIdWithRelationsAsync(report.Id)
-                ?? throw new NotFoundException($"Reporte con ID {report.Id} no encontrado.");
-        }
-        else
-        {
-            reportWithRelations = report;
-        }
-
-        return new ReportDto
-        {
-            Id = reportWithRelations.Id,
-            TipoReporte = reportWithRelations.TipoReporte,
-            Estado = reportWithRelations.Estado,
-            UsuarioId = reportWithRelations.UsuarioId,
-            CreatedAt = reportWithRelations.CreatedAt,
-            UpdatedAt = reportWithRelations.UpdatedAt,
-            DatetimeHechos = reportWithRelations.DatetimeHechos,
-            Sexo = reportWithRelations.Sexo,
-            Edad = reportWithRelations.Edad,
-            LgbtttiqPlus = reportWithRelations.LgbtttiqPlus,
-            SituacionCalle = reportWithRelations.SituacionCalle,
-            Migrante = reportWithRelations.Migrante,
-            Discapacidad = reportWithRelations.Discapacidad,
-            Delito = reportWithRelations.Delito,
+            Id = report.Id,
+            TipoReporte = report.TipoReporte,
+            Estado = report.Estado,
+            UsuarioId = report.UsuarioId,
+            CreatedAt = report.CreatedAt,
+            UpdatedAt = report.UpdatedAt,
+            DatetimeHechos = report.DatetimeHechos,
+            Sexo = report.Sexo,
+            Edad = report.Edad,
+            LgbtttiqPlus = report.LgbtttiqPlus,
+            SituacionCalle = report.SituacionCalle,
+            Migrante = report.Migrante,
+            Discapacidad = report.Discapacidad,
+            Delito = report.Delito,
             Zona = new CatalogItemDto
             {
-                Id = reportWithRelations.Zona.Id,
-                Nombre = reportWithRelations.Zona.Nombre
+                Id = report.Zona.Id,
+                Nombre = report.Zona.Nombre
             },
             Sector = new CatalogItemDto
             {
-                Id = reportWithRelations.Sector.Id,
-                Nombre = reportWithRelations.Sector.Nombre
+                Id = report.Sector.Id,
+                Nombre = report.Sector.Nombre
             },
             Cuadrante = new CatalogItemDto
             {
-                Id = reportWithRelations.Cuadrante.Id,
-                Nombre = reportWithRelations.Cuadrante.Nombre
+                Id = report.Cuadrante.Id,
+                Nombre = report.Cuadrante.Nombre
             },
-            TurnoCeiba = reportWithRelations.TurnoCeiba,
-            TipoDeAtencion = reportWithRelations.TipoDeAtencion,
-            TipoDeAccion = reportWithRelations.TipoDeAccion,
-            HechosReportados = reportWithRelations.HechosReportados,
-            AccionesRealizadas = reportWithRelations.AccionesRealizadas,
-            Traslados = reportWithRelations.Traslados,
-            Observaciones = reportWithRelations.Observaciones
+            TurnoCeiba = report.TurnoCeiba,
+            TipoDeAtencion = report.TipoDeAtencion,
+            TipoDeAccion = report.TipoDeAccion,
+            HechosReportados = report.HechosReportados,
+            AccionesRealizadas = report.AccionesRealizadas,
+            Traslados = report.Traslados,
+            Observaciones = report.Observaciones
         };
+
+        return Task.FromResult(dto);
     }
 
     private List<string> GetUpdatedFields(UpdateReportDto updateDto)

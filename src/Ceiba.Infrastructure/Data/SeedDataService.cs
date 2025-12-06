@@ -167,48 +167,50 @@ public class SeedDataService
         await _context.SaveChangesAsync();
         _logger.LogInformation("Seeded {Count} zonas", zonas.Length);
 
-        // Seed Sectores (2 per zona)
+        // Seed Sectores (3-4 per zona con nombres realistas)
         var sectores = new List<Core.Entities.Sector>();
-        foreach (var zona in zonas)
+        var sectorNames = new[] { "Sector Centro", "Sector Este", "Sector Oeste", "Sector Residencial" };
+
+        for (int i = 0; i < zonas.Length; i++)
         {
-            sectores.Add(new Core.Entities.Sector
+            var zona = zonas[i];
+            var numSectores = i % 2 == 0 ? 3 : 4; // Alternar entre 3 y 4 sectores
+
+            for (int j = 0; j < numSectores; j++)
             {
-                Nombre = $"Sector A",
-                ZonaId = zona.Id,
-                Activo = true,
-                UsuarioId = adminUserId
-            });
-            sectores.Add(new Core.Entities.Sector
-            {
-                Nombre = $"Sector B",
-                ZonaId = zona.Id,
-                Activo = true,
-                UsuarioId = adminUserId
-            });
+                sectores.Add(new Core.Entities.Sector
+                {
+                    Nombre = sectorNames[j % sectorNames.Length],
+                    ZonaId = zona.Id,
+                    Activo = true,
+                    UsuarioId = adminUserId
+                });
+            }
         }
 
         _context.Sectores.AddRange(sectores);
         await _context.SaveChangesAsync();
         _logger.LogInformation("Seeded {Count} sectores", sectores.Count);
 
-        // Seed Cuadrantes (2 per sector)
+        // Seed Cuadrantes (3-5 per sector con nombres realistas)
         var cuadrantes = new List<Core.Entities.Cuadrante>();
-        foreach (var sector in sectores)
+        var cuadranteNames = new[] { "Cuadrante A", "Cuadrante B", "Cuadrante C", "Cuadrante D", "Cuadrante E" };
+
+        for (int i = 0; i < sectores.Count; i++)
         {
-            cuadrantes.Add(new Core.Entities.Cuadrante
+            var sector = sectores[i];
+            var numCuadrantes = (i % 3) + 3; // Alternar entre 3, 4 y 5 cuadrantes
+
+            for (int j = 0; j < numCuadrantes; j++)
             {
-                Nombre = "Cuadrante 1",
-                SectorId = sector.Id,
-                Activo = true,
-                UsuarioId = adminUserId
-            });
-            cuadrantes.Add(new Core.Entities.Cuadrante
-            {
-                Nombre = "Cuadrante 2",
-                SectorId = sector.Id,
-                Activo = true,
-                UsuarioId = adminUserId
-            });
+                cuadrantes.Add(new Core.Entities.Cuadrante
+                {
+                    Nombre = cuadranteNames[j],
+                    SectorId = sector.Id,
+                    Activo = true,
+                    UsuarioId = adminUserId
+                });
+            }
         }
 
         _context.Cuadrantes.AddRange(cuadrantes);
