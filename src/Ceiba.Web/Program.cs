@@ -80,6 +80,12 @@ try
     builder.Services.AddScoped<IUserManagementService, Ceiba.Infrastructure.Services.UserManagementService>();
     builder.Services.AddScoped<ICatalogAdminService, Ceiba.Infrastructure.Services.CatalogAdminService>();
 
+    // Registrar servicios de User Story 4 - Automated Reports (US4)
+    builder.Services.AddHttpClient<IAiNarrativeService, AiNarrativeService>();
+    builder.Services.AddScoped<IEmailService, EmailService>();
+    builder.Services.AddScoped<IAutomatedReportService, AutomatedReportService>();
+    builder.Services.AddHostedService<AutomatedReportBackgroundService>();
+
     // Configurar HttpClient para componentes Blazor
     builder.Services.AddScoped(sp => new HttpClient
     {

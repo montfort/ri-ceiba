@@ -10,5 +10,23 @@
             Tests create/edit functionality per T024
             </summary>
         </member>
+        <member name="T:Ceiba.Application.Tests.Services.Export.ExportServiceTests">
+            <summary>
+            Unit tests for Export orchestration service
+            Tests T-US2-021 to T-US2-030
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.Export.JsonExporterTests">
+            <summary>
+            Unit tests for JSON export service
+            Tests T-US2-011 to T-US2-020
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.Export.PdfGeneratorTests">
+            <summary>
+            Unit tests for PDF generation service
+            Tests T-US2-001 to T-US2-005
+            </summary>
+        </member>
     </members>
 </doc>

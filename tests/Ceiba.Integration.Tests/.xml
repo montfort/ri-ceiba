@@ -4,16 +4,36 @@
         <name>Ceiba.Integration.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Integration.Tests.AuthorizationMatrixTests">
+            <summary>
+            T020c: RS-001 Mitigation - Authorization Matrix Tests
+            Tests Role × Functionality matrix to ensure proper authorization enforcement
+            </summary>
+        </member>
         <member name="T:Ceiba.Integration.Tests.CeibaWebApplicationFactory">
             <summary>
             Custom WebApplicationFactory for integration tests.
             Configures in-memory database and test-specific services.
+            Each instance uses a unique database name to prevent cross-test contamination.
             </summary>
         </member>
         <member name="T:Ceiba.Integration.Tests.DbContextTests">
             <summary>
             Integration tests for CeibaDbContext.
             Tests database configuration, relationships, and constraints.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Integration.Tests.InputValidationTests">
+            <summary>
+            T020i: RS-002 Mitigation - Input Validation Integration Tests
+            Tests that all user inputs are properly validated to prevent injection attacks
+            </summary>
+        </member>
+        <member name="T:Ceiba.Integration.Tests.IntegrationTestCollection">
+            <summary>
+            xUnit collection definition for integration tests.
+            Tests in the same collection run sequentially and share the same fixture instance.
+            This prevents InMemory database conflicts when running tests in parallel.
             </summary>
         </member>
         <member name="T:Ceiba.Integration.Tests.ReportContractTests">

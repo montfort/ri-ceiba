@@ -1,0 +1,390 @@
+@page "/automated"
+@page "/automated/reports"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@inject IAutomatedReportService ReportService
+@inject NavigationManager Navigation
+@inject ILogger<AutomatedReportList> Logger
+@attribute [Authorize(Roles = "REVISOR")]
+
+<PageTitle>Reportes Automatizados</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-robot me-2"></i>Reportes Automatizados</h2>
+                    <p class="text-muted">Resúmenes diarios generados automáticamente con estadísticas e inteligencia artificial</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary me-2" @onclick="NavigateToTemplates">
+                        <i class="bi bi-file-earmark-code me-1"></i>Plantillas
+                    </button>
+                    <button class="btn btn-primary" @onclick="ShowGenerateModal">
+                        <i class="bi bi-plus-circle me-1"></i>Generar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Desde</label>
+                            <input type="date" class="form-control" @bind="FilterFechaDesde" @bind:after="LoadReportsAsync" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Hasta</label>
+                            <input type="date" class="form-control" @bind="FilterFechaHasta" @bind:after="LoadReportsAsync" />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Estado de Envío</label>
+                            <select class="form-select" @bind="FilterEnviado" @bind:after="LoadReportsAsync">
+                                <option value="">Todos</option>
+                                <option value="true">Enviados</option>
+                                <option value="false">No Enviados</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn btn-secondary w-100" @onclick="ClearFilters">
+                                <i class="bi bi-x-circle me-1"></i>Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-3">Cargando reportes automatizados...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger">@ErrorMessage</div>
+                    }
+                    else if (!Reports.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-robot" style="font-size: 3rem;"></i>
+                            <p class="mt-3">No hay reportes automatizados para mostrar.</p>
+                            <button class="btn btn-primary" @onclick="ShowGenerateModal">
+                                <i class="bi bi-plus-circle me-1"></i>Generar Primer Reporte
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Período</th>
+                                        <th>Fecha Generación</th>
+                                        <th>Total Reportes</th>
+                                        <th>Plantilla</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var report in Reports)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @report.FechaInicio.ToLocalTime().ToString("dd/MM/yyyy") -
+                                                @report.FechaFin.ToLocalTime().ToString("dd/MM/yyyy")
+                                            </td>
+                                            <td>@report.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <span class="badge bg-primary">@report.TotalReportes</span>
+                                            </td>
+                                            <td>@(report.NombreModelo ?? "Por defecto")</td>
+                                            <td>
+                                                @if (report.TieneError)
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="bi bi-exclamation-triangle me-1"></i>Error
+                                                    </span>
+                                                }
+                                                else if (report.Enviado)
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle me-1"></i>Enviado
+                                                        @if (report.FechaEnvio.HasValue)
+                                                        {
+                                                            <small>(@report.FechaEnvio.Value.ToLocalTime().ToString("HH:mm"))</small>
+                                                        }
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-clock me-1"></i>Pendiente
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1"
+                                                        @onclick="() => ViewReport(report.Id)"
+                                                        title="Ver detalle">
+                                                    <i class="bi bi-eye"></i>
+                                                </button>
+                                                @if (!report.Enviado)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-success me-1"
+                                                            @onclick="() => SendReport(report.Id)"
+                                                            title="Enviar por email">
+                                                        <i class="bi bi-envelope"></i>
+                                                    </button>
+                                                }
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => DeleteReport(report.Id)"
+                                                        title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Modal -->
+@if (ShowGenerateModalFlag)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Generar Reporte Automatizado</h5>
+                    <button type="button" class="btn-close" @onclick="CloseGenerateModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" class="form-control" @bind="GenerateRequest.FechaInicio" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Fin</label>
+                        <input type="date" class="form-control" @bind="GenerateRequest.FechaFin" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Plantilla (opcional)</label>
+                        <select class="form-select" @bind="GenerateRequest.ModeloReporteId">
+                            <option value="">Usar plantilla por defecto</option>
+                            @foreach (var template in Templates)
+                            {
+                                <option value="@template.Id">@template.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="sendEmail" @bind="GenerateRequest.EnviarEmail" />
+                        <label class="form-check-label" for="sendEmail">
+                            Enviar por email a destinatarios configurados
+                        </label>
+                    </div>
+                    @if (!string.IsNullOrEmpty(GenerateError))
+                    {
+                        <div class="alert alert-danger">@GenerateError</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseGenerateModal" disabled="@IsGenerating">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="GenerateReportAsync" disabled="@IsGenerating">
+                        @if (IsGenerating)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                            <span>Generando...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-magic me-1"></i>
+                            <span>Generar</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<AutomatedReportListDto> Reports { get; set; } = new();
+    private List<ReportTemplateListDto> Templates { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private string? ErrorMessage { get; set; }
+
+    // Filters
+    private DateTime? FilterFechaDesde { get; set; }
+    private DateTime? FilterFechaHasta { get; set; }
+    private string? FilterEnviado { get; set; }
+
+    // Generate modal
+    private bool ShowGenerateModalFlag { get; set; }
+    private bool IsGenerating { get; set; }
+    private string? GenerateError { get; set; }
+    private GenerateReportRequestDto GenerateRequest { get; set; } = new()
+    {
+        FechaInicio = DateTime.Today.AddDays(-1),
+        FechaFin = DateTime.Today,
+        EnviarEmail = true
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReportsAsync();
+        await LoadTemplatesAsync();
+    }
+
+    private async Task LoadReportsAsync()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            bool? enviado = string.IsNullOrEmpty(FilterEnviado) ? null : bool.Parse(FilterEnviado);
+
+            Reports = await ReportService.GetReportsAsync(
+                0, 50,
+                FilterFechaDesde,
+                FilterFechaHasta,
+                enviado);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading automated reports");
+            ErrorMessage = "Error al cargar los reportes automatizados.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadTemplatesAsync()
+    {
+        try
+        {
+            Templates = await ReportService.GetTemplatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading templates");
+        }
+    }
+
+    private async Task ClearFilters()
+    {
+        FilterFechaDesde = null;
+        FilterFechaHasta = null;
+        FilterEnviado = null;
+        await LoadReportsAsync();
+    }
+
+    private void ShowGenerateModal()
+    {
+        GenerateRequest = new GenerateReportRequestDto
+        {
+            FechaInicio = DateTime.Today.AddDays(-1),
+            FechaFin = DateTime.Today,
+            EnviarEmail = true
+        };
+        GenerateError = null;
+        ShowGenerateModalFlag = true;
+    }
+
+    private void CloseGenerateModal()
+    {
+        ShowGenerateModalFlag = false;
+    }
+
+    private async Task GenerateReportAsync()
+    {
+        IsGenerating = true;
+        GenerateError = null;
+
+        try
+        {
+            var report = await ReportService.GenerateReportAsync(GenerateRequest);
+            ShowGenerateModalFlag = false;
+            await LoadReportsAsync();
+
+            // Navigate to the new report detail
+            Navigation.NavigateTo($"/automated/reports/{report.Id}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error generating report");
+            GenerateError = "Error al generar el reporte: " + ex.Message;
+        }
+        finally
+        {
+            IsGenerating = false;
+        }
+    }
+
+    private void ViewReport(int id)
+    {
+        Navigation.NavigateTo($"/automated/reports/{id}");
+    }
+
+    private async Task SendReport(int id)
+    {
+        try
+        {
+            await ReportService.SendReportByEmailAsync(id);
+            await LoadReportsAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error sending report {Id}", id);
+            ErrorMessage = "Error al enviar el reporte: " + ex.Message;
+        }
+    }
+
+    private async Task DeleteReport(int id)
+    {
+        try
+        {
+            await ReportService.DeleteReportAsync(id);
+            await LoadReportsAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting report {Id}", id);
+            ErrorMessage = "Error al eliminar el reporte: " + ex.Message;
+        }
+    }
+
+    private void NavigateToTemplates()
+    {
+        Navigation.NavigateTo("/automated/templates");
+    }
+}

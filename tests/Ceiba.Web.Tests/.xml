@@ -10,5 +10,16 @@
             Tests form rendering and interaction per T026
             </summary>
         </member>
+        <member name="T:Ceiba.Web.Tests.ReportFormComponentTests.TestAuthenticationStateProvider">
+            <summary>
+            Test implementation of AuthenticationStateProvider
+            Returns an authenticated user with CREADOR role
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.ReportFormComponentTests.FakeNavigationManager">
+            <summary>
+            Fake NavigationManager for testing
+            </summary>
+        </member>
     </members>
 </doc>

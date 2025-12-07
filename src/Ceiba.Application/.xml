@@ -4,6 +4,185 @@
         <name>Ceiba.Application</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Application.Services.Export.ExportService">
+            <summary>
+            High-level export service with authorization and data retrieval
+            Implements T-US2-021 to T-US2-030 test requirements
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.ExportReportsAsync(Ceiba.Shared.DTOs.Export.ExportRequestDto,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports reports based on request parameters
+            </summary>
+            <param name="request">Export request with format and options</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+            <exception cref="T:System.UnauthorizedAccessException">If user is not REVISOR</exception>
+            <exception cref="T:System.ArgumentException">If no report IDs provided</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.ExportSingleReportAsync(System.Int32,Ceiba.Shared.DTOs.Export.ExportFormat,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports a single report by ID
+            </summary>
+            <param name="reportId">ID of report to export</param>
+            <param name="format">Export format (PDF or JSON)</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+            <exception cref="T:System.UnauthorizedAccessException">If user is not REVISOR</exception>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">If report not found</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.MapToExportDto(Ceiba.Core.Entities.ReporteIncidencia)">
+            <summary>
+            Maps ReporteIncidencia entity to ReportExportDto
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.MapTipoDeAccion(System.Int16)">
+            <summary>
+            Maps TipoDeAccion numeric code to string
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.MapTurnoCeiba(System.Int32)">
+            <summary>
+            Maps TurnoCeiba numeric code to string
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.MapTraslados(System.Int16)">
+            <summary>
+            Maps Traslados numeric code to string
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.IExportService">
+            <summary>
+            High-level service for exporting incident reports
+            Handles authorization, data retrieval, and format conversion
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IExportService.ExportReportsAsync(Ceiba.Shared.DTOs.Export.ExportRequestDto,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports reports based on request parameters
+            </summary>
+            <param name="request">Export request with format and options</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IExportService.ExportSingleReportAsync(System.Int32,Ceiba.Shared.DTOs.Export.ExportFormat,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports a single report by ID
+            </summary>
+            <param name="reportId">ID of report to export</param>
+            <param name="format">Export format (PDF or JSON)</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.IJsonExporter">
+            <summary>
+            Service for exporting incident reports to JSON format
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IJsonExporter.ExportSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto,Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports a single report to JSON format
+            </summary>
+            <param name="report">Report data to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IJsonExporter.ExportMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto},Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports multiple reports to JSON format
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.IPdfGenerator">
+            <summary>
+            Service for generating PDF documents from incident reports
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IPdfGenerator.GenerateSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Generates a PDF document from a single report
+            </summary>
+            <param name="report">Report data to export</param>
+            <returns>PDF file as byte array</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IPdfGenerator.GenerateMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto})">
+            <summary>
+            Generates a PDF document containing multiple reports
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <returns>PDF file as byte array</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.JsonExporter">
+            <summary>
+            JSON export service implementation
+            Implements T-US2-011 to T-US2-020 test requirements
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.JsonExporter.ExportSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto,Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports a single report to JSON format
+            </summary>
+            <param name="report">Report data to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+            <exception cref="T:System.ArgumentNullException">If report is null</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.JsonExporter.ExportMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto},Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports multiple reports to JSON format
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+            <exception cref="T:System.ArgumentException">If reports collection is empty</exception>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.PdfGenerator">
+            <summary>
+            PDF document generation service using QuestPDF
+            Implements T-US2-001 to T-US2-010 test requirements
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.GenerateSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Generates a PDF document from a single report
+            </summary>
+            <param name="report">Report data to export</param>
+            <returns>PDF file as byte array</returns>
+            <exception cref="T:System.ArgumentNullException">If report is null</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.GenerateMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto})">
+            <summary>
+            Generates a PDF document containing multiple reports
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <returns>PDF file as byte array</returns>
+            <exception cref="T:System.ArgumentException">If reports collection is empty</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeHeader(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the PDF header with CEIBA branding
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeContent(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the PDF content with all report sections
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeFooter(QuestPDF.Infrastructure.IContainer)">
+            <summary>
+            Composes the PDF footer with page numbers and generation timestamp
+            </summary>
+        </member>
         <member name="T:Ceiba.Application.Services.ReportService">
             <summary>
             Service implementation for report management operations.

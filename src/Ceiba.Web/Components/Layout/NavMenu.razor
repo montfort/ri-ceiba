@@ -33,6 +33,69 @@
                     </Authorized>
                 </AuthorizeView>
 
+                <!-- Supervisor (REVISOR role) -->
+                <AuthorizeView Roles="REVISOR" Context="revisorAuth">
+                    <Authorized>
+                        <div class="nav-item px-3 mt-2">
+                            <span class="text-white-50 small text-uppercase">Supervisión</span>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="supervisor/reports">
+                                <span class="bi bi-clipboard-check me-2" aria-hidden="true"></span> Todos los Reportes
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="supervisor/export">
+                                <span class="bi bi-download me-2" aria-hidden="true"></span> Exportar
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="automated">
+                                <span class="bi bi-robot me-2" aria-hidden="true"></span> Reportes Auto
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="automated/templates">
+                                <span class="bi bi-file-earmark-code me-2" aria-hidden="true"></span> Plantillas
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- Administration (ADMIN role) -->
+                <AuthorizeView Roles="ADMIN" Context="adminAuth">
+                    <Authorized>
+                        <div class="nav-item px-3 mt-2">
+                            <span class="text-white-50 small text-uppercase">Administración</span>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin">
+                                <span class="bi bi-gear me-2" aria-hidden="true"></span> Panel Admin
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin/users">
+                                <span class="bi bi-people me-2" aria-hidden="true"></span> Usuarios
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin/catalogs">
+                                <span class="bi bi-geo-alt me-2" aria-hidden="true"></span> Catálogos
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin/suggestions">
+                                <span class="bi bi-list-check me-2" aria-hidden="true"></span> Sugerencias
+                            </NavLink>
+                        </div>
+                        <div class="nav-item px-3">
+                            <NavLink class="nav-link" href="admin/audit">
+                                <span class="bi bi-shield-check me-2" aria-hidden="true"></span> Auditoría
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+
                 <!-- Separator -->
                 <hr class="my-2 mx-3 border-secondary" />
 

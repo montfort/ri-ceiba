@@ -124,6 +124,72 @@ namespace Ceiba.Infrastructure.Migrations
                     b.ToTable("CUADRANTE", (string)null);
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.ModeloReporte", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("activo");
+
+                    b.Property<string>("ContenidoMarkdown")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("contenido_markdown");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Descripcion")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<bool>("EsDefault")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("es_default");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nombre");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Activo")
+                        .HasDatabaseName("idx_modelo_activo");
+
+                    b.HasIndex("EsDefault")
+                        .HasDatabaseName("idx_modelo_default");
+
+                    b.HasIndex("Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("idx_modelo_nombre_unique");
+
+                    b.ToTable("MODELO_REPORTE", (string)null);
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.RegistroAuditoria", b =>
                 {
                     b.Property<long>("Id")
@@ -182,6 +248,81 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasDatabaseName("idx_auditoria_entidad");
 
                     b.ToTable("AUDITORIA", (string)null);
+                });
+
+            modelBuilder.Entity("Ceiba.Core.Entities.ReporteAutomatizado", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ContenidoMarkdown")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("contenido_markdown");
+
+                    b.Property<string>("ContenidoWordPath")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("contenido_word_path");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<bool>("Enviado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enviado");
+
+                    b.Property<string>("ErrorMensaje")
+                        .HasColumnType("text")
+                        .HasColumnName("error_mensaje");
+
+                    b.Property<string>("Estadisticas")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("jsonb")
+                        .HasDefaultValue("{}")
+                        .HasColumnName("estadisticas");
+
+                    b.Property<DateTime?>("FechaEnvio")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("fecha_envio");
+
+                    b.Property<DateTime>("FechaFin")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("fecha_fin");
+
+                    b.Property<DateTime>("FechaInicio")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("fecha_inicio");
+
+                    b.Property<int?>("ModeloReporteId")
+                        .HasColumnType("integer")
+                        .HasColumnName("modelo_reporte_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .IsDescending()
+                        .HasDatabaseName("idx_reporte_auto_created");
+
+                    b.HasIndex("Enviado")
+                        .HasDatabaseName("idx_reporte_auto_enviado");
+
+                    b.HasIndex("FechaInicio")
+                        .HasDatabaseName("idx_reporte_auto_fecha_inicio");
+
+                    b.HasIndex("ModeloReporteId");
+
+                    b.ToTable("REPORTE_AUTOMATIZADO", (string)null);
                 });
 
             modelBuilder.Entity("Ceiba.Core.Entities.ReporteIncidencia", b =>
@@ -660,6 +801,17 @@ namespace Ceiba.Infrastructure.Migrations
                     b.Navigation("Sector");
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.ReporteAutomatizado", b =>
+                {
+                    b.HasOne("Ceiba.Core.Entities.ModeloReporte", "ModeloReporte")
+                        .WithMany("ReportesGenerados")
+                        .HasForeignKey("ModeloReporteId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("modelo_reporte_id_FK");
+
+                    b.Navigation("ModeloReporte");
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.ReporteIncidencia", b =>
                 {
                     b.HasOne("Ceiba.Core.Entities.Cuadrante", "Cuadrante")
@@ -756,6 +908,11 @@ namespace Ceiba.Infrastructure.Migrations
             modelBuilder.Entity("Ceiba.Core.Entities.Cuadrante", b =>
                 {
                     b.Navigation("Reportes");
+                });
+
+            modelBuilder.Entity("Ceiba.Core.Entities.ModeloReporte", b =>
+                {
+                    b.Navigation("ReportesGenerados");
                 });
 
             modelBuilder.Entity("Ceiba.Core.Entities.Sector", b =>

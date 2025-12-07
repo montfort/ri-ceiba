@@ -39,6 +39,10 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
     // Audit
     public DbSet<RegistroAuditoria> RegistrosAuditoria => Set<RegistroAuditoria>();
 
+    // Automated Reports (US4)
+    public DbSet<ReporteAutomatizado> ReportesAutomatizados => Set<ReporteAutomatizado>();
+    public DbSet<ModeloReporte> ModelosReporte => Set<ModeloReporte>();
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

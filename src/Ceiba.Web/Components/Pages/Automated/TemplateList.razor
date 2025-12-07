@@ -1,0 +1,396 @@
+@page "/automated/templates"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@inject IAutomatedReportService ReportService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject ILogger<TemplateList> Logger
+@attribute [Authorize(Roles = "REVISOR")]
+
+<PageTitle>Plantillas de Reportes</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="/automated" class="btn btn-link text-decoration-none ps-0 mb-2">
+                        <i class="bi bi-arrow-left me-1"></i>Volver a Reportes
+                    </a>
+                    <h2><i class="bi bi-file-earmark-code me-2"></i>Plantillas de Reportes</h2>
+                    <p class="text-muted">Configure las plantillas para la generación de reportes automatizados</p>
+                </div>
+                <button class="btn btn-primary" @onclick="ShowCreateModal">
+                    <i class="bi bi-plus-circle me-1"></i>Nueva Plantilla
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (!Templates.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-file-earmark-code" style="font-size: 3rem;"></i>
+                            <p class="mt-3">No hay plantillas configuradas.</p>
+                            <button class="btn btn-primary" @onclick="ShowCreateModal">
+                                <i class="bi bi-plus-circle me-1"></i>Crear Primera Plantilla
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                        <th>Última Modificación</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var template in Templates)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @template.Nombre
+                                                @if (template.EsDefault)
+                                                {
+                                                    <span class="badge bg-primary ms-2">Por defecto</span>
+                                                }
+                                            </td>
+                                            <td>@(template.Descripcion ?? "-")</td>
+                                            <td>
+                                                @if (template.Activo)
+                                                {
+                                                    <span class="badge bg-success">Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Inactivo</span>
+                                                }
+                                            </td>
+                                            <td>@((template.UpdatedAt ?? template.CreatedAt).ToLocalTime().ToString("dd/MM/yyyy HH:mm"))</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary me-1"
+                                                        @onclick="() => ShowEditModal(template)"
+                                                        title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                @if (!template.EsDefault && template.Activo)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-success me-1"
+                                                            @onclick="() => SetAsDefault(template.Id)"
+                                                            title="Establecer como predeterminada">
+                                                        <i class="bi bi-star"></i>
+                                                    </button>
+                                                }
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => DeleteTemplate(template.Id)"
+                                                        title="Eliminar">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Placeholders Reference -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-code me-2"></i>Placeholders Disponibles</h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Utilice estos placeholders en el contenido de las plantillas:</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><code>{{fecha_inicio}}</code> - Fecha de inicio del período</li>
+                                <li><code>{{fecha_fin}}</code> - Fecha de fin del período</li>
+                                <li><code>{{total_reportes}}</code> - Total de reportes en el período</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><code>{{narrativa_ia}}</code> - Resumen generado por IA</li>
+                                <li><code>{{tabla_delitos}}</code> - Tabla de distribución por delito</li>
+                                <li><code>{{tabla_zonas}}</code> - Tabla de distribución por zona</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingTemplate == null ? "Nueva Plantilla" : "Editar Plantilla")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" @bind="FormNombre" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" class="form-control" @bind="FormDescripcion" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contenido (Markdown) *</label>
+                        <textarea class="form-control font-monospace" rows="15" @bind="FormContenido"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="activo" @bind="FormActivo" />
+                                <label class="form-check-label" for="activo">Activo</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="esDefault" @bind="FormEsDefault" />
+                                <label class="form-check-label" for="esDefault">Plantilla por defecto</label>
+                            </div>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">@ErrorMessage</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseModal" disabled="@IsSaving">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="SaveTemplateAsync" disabled="@IsSaving">
+                        @if (IsSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ReportTemplateListDto> Templates { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private bool ShowModal { get; set; }
+    private bool IsSaving { get; set; }
+    private string? ErrorMessage { get; set; }
+
+    // Form fields
+    private ReportTemplateListDto? EditingTemplate { get; set; }
+    private string FormNombre { get; set; } = string.Empty;
+    private string? FormDescripcion { get; set; }
+    private string FormContenido { get; set; } = string.Empty;
+    private bool FormActivo { get; set; } = true;
+    private bool FormEsDefault { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTemplatesAsync();
+    }
+
+    private async Task LoadTemplatesAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            Templates = await ReportService.GetTemplatesAsync(includeInactive: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading templates");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ShowCreateModal()
+    {
+        EditingTemplate = null;
+        FormNombre = string.Empty;
+        FormDescripcion = null;
+        FormContenido = GetDefaultTemplateContent();
+        FormActivo = true;
+        FormEsDefault = false;
+        ErrorMessage = null;
+        ShowModal = true;
+    }
+
+    private async Task ShowEditModal(ReportTemplateListDto template)
+    {
+        EditingTemplate = template;
+        var detail = await ReportService.GetTemplateByIdAsync(template.Id);
+        if (detail != null)
+        {
+            FormNombre = detail.Nombre;
+            FormDescripcion = detail.Descripcion;
+            FormContenido = detail.ContenidoMarkdown;
+            FormActivo = detail.Activo;
+            FormEsDefault = detail.EsDefault;
+        }
+        ErrorMessage = null;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+    }
+
+    private async Task SaveTemplateAsync()
+    {
+        if (string.IsNullOrWhiteSpace(FormNombre))
+        {
+            ErrorMessage = "El nombre es requerido.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(FormContenido))
+        {
+            ErrorMessage = "El contenido es requerido.";
+            return;
+        }
+
+        IsSaving = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var userId = userIdClaim != null ? Guid.Parse(userIdClaim.Value) : Guid.Empty;
+
+            if (EditingTemplate == null)
+            {
+                // Create
+                await ReportService.CreateTemplateAsync(new CreateTemplateDto
+                {
+                    Nombre = FormNombre,
+                    Descripcion = FormDescripcion,
+                    ContenidoMarkdown = FormContenido,
+                    EsDefault = FormEsDefault
+                }, userId);
+            }
+            else
+            {
+                // Update
+                await ReportService.UpdateTemplateAsync(EditingTemplate.Id, new UpdateTemplateDto
+                {
+                    Nombre = FormNombre,
+                    Descripcion = FormDescripcion,
+                    ContenidoMarkdown = FormContenido,
+                    Activo = FormActivo,
+                    EsDefault = FormEsDefault
+                }, userId);
+            }
+
+            ShowModal = false;
+            await LoadTemplatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving template");
+            ErrorMessage = "Error al guardar la plantilla: " + ex.Message;
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task SetAsDefault(int id)
+    {
+        try
+        {
+            await ReportService.SetDefaultTemplateAsync(id);
+            await LoadTemplatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error setting default template");
+        }
+    }
+
+    private async Task DeleteTemplate(int id)
+    {
+        try
+        {
+            await ReportService.DeleteTemplateAsync(id);
+            await LoadTemplatesAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting template");
+        }
+    }
+
+    private string GetDefaultTemplateContent()
+    {
+        return @"# Reporte de Incidencias de Género
+## Período: {{fecha_inicio}} - {{fecha_fin}}
+
+---
+
+## Resumen Ejecutivo
+
+{{narrativa_ia}}
+
+---
+
+## Estadísticas Generales
+
+| Métrica | Valor |
+|---------|-------|
+| Total de Reportes | {{total_reportes}} |
+
+## Distribución por Tipo de Delito
+
+{{tabla_delitos}}
+
+## Distribución por Zona
+
+{{tabla_zonas}}
+
+---
+
+*Reporte generado automáticamente por el Sistema Ceiba*";
+    }
+}

@@ -327,6 +327,11 @@ public static class AuditCodes
     public const string ACCESS_DENIED = "ACCESS_DENIED";
     public const string SESSION_EXPIRED = "SESSION_EXPIRED";
 
+    // Automated Reports (US4)
+    public const string AUTO_REPORT_GEN = "AUTO_REPORT_GEN";
+    public const string AUTO_REPORT_SEND = "AUTO_REPORT_SEND";
+    public const string AUTO_REPORT_FAIL = "AUTO_REPORT_FAIL";
+
     public static string GetDescription(string code) => code switch
     {
         AUTH_LOGIN => "Inicio de sesión",
@@ -351,6 +356,9 @@ public static class AuditCodes
         CATALOG_DELETE => "Catálogo eliminado",
         ACCESS_DENIED => "Acceso denegado",
         SESSION_EXPIRED => "Sesión expirada",
+        AUTO_REPORT_GEN => "Reporte automatizado generado",
+        AUTO_REPORT_SEND => "Reporte automatizado enviado",
+        AUTO_REPORT_FAIL => "Error en reporte automatizado",
         _ => code
     };
 }

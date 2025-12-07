@@ -25,6 +25,20 @@
             NULL for system operations (background jobs, migrations).
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Data.Configurations.ModeloReporteConfiguration">
+            <summary>
+            EF Core configuration for ModeloReporte entity.
+            Defines table name, column mappings, indexes, and relationships.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Data.Configurations.ReporteAutomatizadoConfiguration">
+            <summary>
+            EF Core configuration for ReporteAutomatizado entity.
+            Defines table name, column mappings, indexes, and relationships.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
         <member name="T:Ceiba.Infrastructure.Data.Configurations.ReporteIncidenciaConfiguration">
             <summary>
             EF Core configuration for ReporteIncidencia entity (Type A).
@@ -158,10 +172,29 @@
         <member name="M:Ceiba.Infrastructure.Migrations.US1_AddReportFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.US4_AutomatedReports">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AutomatedReports.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AutomatedReports.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AutomatedReports.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:Ceiba.Infrastructure.Repositories.ReportRepository">
             <summary>
             Repository implementation for ReporteIncidencia entity.
             US1: T035 (supporting implementation)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Services.AiNarrativeService">
+            <summary>
+            Provider-agnostic AI narrative generation service.
+            Supports OpenAI, Azure OpenAI, and can be extended for local LLMs.
+            US4: Reportes Automatizados Diarios con IA.
             </summary>
         </member>
         <member name="T:Ceiba.Infrastructure.Services.AuditService">
@@ -169,6 +202,63 @@
             Implementation of audit logging service.
             Provides manual audit logging and query capabilities.
             </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Services.AutomatedReportBackgroundService">
+            <summary>
+            Background service that generates automated daily reports at a configured time.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Services.AutomatedReportService">
+            <summary>
+            Service for managing automated daily reports.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Services.CatalogAdminService">
+            <summary>
+            Catalog administration service for ADMIN operations.
+            US3: FR-027 to FR-030
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Services.EmailService">
+            <summary>
+            Email service implementation using MailKit for SMTP.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Services.UserManagementService">
+            <summary>
+            User management service for ADMIN operations.
+            US3: FR-021 to FR-026
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.ListUsersAsync(Ceiba.Shared.DTOs.UserFilterDto,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.GetUserByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.CreateUserAsync(Ceiba.Shared.DTOs.CreateUserDto,System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.UpdateUserAsync(System.Guid,Ceiba.Shared.DTOs.UpdateUserDto,System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.SuspendUserAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.ActivateUserAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.DeleteUserAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.GetAvailableRolesAsync(System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Services.UserManagementService.IsEmailInUseAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <inheritdoc />
         </member>
         <member name="T:Ceiba.Application.Services.CatalogService">
             <summary>

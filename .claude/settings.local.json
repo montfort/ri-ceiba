@@ -36,7 +36,13 @@
       "Bash(dotnet test:*)",
       "Bash(git commit:*)",
       "Bash(Select-String -Pattern \"error|Errores|Advertencia\")",
-      "Bash(Select-Object -Last 20)"
+      "Bash(Select-Object -Last 20)",
+      "Bash(tee:*)",
+      "Bash(dotnet list:*)",
+      "Bash(tasklist /FI 'IMAGENAME eq dotnet.exe')",
+      "Bash(findstr:*)",
+      "Bash(tasklist:*)",
+      "Bash(wmic process where name=''dotnet.exe'' get ProcessId,CommandLine)"
     ],
     "deny": [],
     "ask": []

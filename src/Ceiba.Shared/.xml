@@ -4,6 +4,283 @@
         <name>Ceiba.Shared</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Shared.DTOs.UserDto">
+            <summary>
+            DTO for user listing in admin panel
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CreateUserDto">
+            <summary>
+            DTO for creating a new user
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.UpdateUserDto">
+            <summary>
+            DTO for updating an existing user
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.UpdateUserDto.NewPassword">
+            <summary>
+            Optional: Only set if changing password
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.UserListResponse">
+            <summary>
+            DTO for user list response with pagination
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.UserFilterDto">
+            <summary>
+            DTO for user filter/search
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ZonaDto">
+            <summary>
+            DTO for Zona (geographic zone)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CreateZonaDto">
+            <summary>
+            DTO for creating/updating a Zona
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.SectorDto">
+            <summary>
+            DTO for Sector (linked to Zona)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CreateSectorDto">
+            <summary>
+            DTO for creating/updating a Sector
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CuadranteDto">
+            <summary>
+            DTO for Cuadrante (linked to Sector)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CreateCuadranteDto">
+            <summary>
+            DTO for creating/updating a Cuadrante
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.SugerenciaDto">
+            <summary>
+            DTO for suggestion catalog item
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CreateSugerenciaDto">
+            <summary>
+            DTO for creating/updating a suggestion
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.SugerenciaCampos">
+            <summary>
+            Available suggestion field types
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AuditLogEntryDto">
+            <summary>
+            DTO for audit log entry display
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AuditFilterDto">
+            <summary>
+            DTO for audit log filter/search
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AuditListResponse">
+            <summary>
+            DTO for audit log list response with pagination
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AuditCodes">
+            <summary>
+            Standard audit action codes
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AutomatedReportListDto">
+            <summary>
+            DTO for displaying automated report in list view.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AutomatedReportDetailDto">
+            <summary>
+            DTO for automated report detail view.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ReportStatisticsDto">
+            <summary>
+            DTO for report statistics in automated reports.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ReportTemplateListDto">
+            <summary>
+            DTO for template list view.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.ReportTemplateDto">
+            <summary>
+            DTO for template detail/edit.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.CreateTemplateDto">
+            <summary>
+            DTO for creating a new template.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.UpdateTemplateDto">
+            <summary>
+            DTO for updating a template.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AutomatedReportConfigDto">
+            <summary>
+            DTO for automated report configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.GenerationTime">
+            <summary>
+            Time of day for automatic report generation (e.g., "06:00:00").
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.Recipients">
+            <summary>
+            Email recipients for automated reports.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.Enabled">
+            <summary>
+            Whether automated report generation is enabled.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.DefaultTemplateId">
+            <summary>
+            Default template ID to use for generation.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.GenerateReportRequestDto">
+            <summary>
+            DTO for manual report generation request.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.NarrativeRequestDto">
+            <summary>
+            DTO for AI narrative generation request.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.NarrativeResponseDto">
+            <summary>
+            DTO for AI narrative response.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.SendEmailRequestDto">
+            <summary>
+            DTO for email sending request.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.EmailAttachmentDto">
+            <summary>
+            DTO for email attachment.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.SendEmailResultDto">
+            <summary>
+            DTO for email sending result.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.Export.ExportFormat">
+            <summary>
+            Export format options for incident reports
+            </summary>
+        </member>
+        <member name="F:Ceiba.Shared.DTOs.Export.ExportFormat.PDF">
+            <summary>
+            Export as PDF document
+            </summary>
+        </member>
+        <member name="F:Ceiba.Shared.DTOs.Export.ExportFormat.JSON">
+            <summary>
+            Export as JSON data
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.Export.ExportOptions">
+            <summary>
+            Options for customizing export output
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportOptions.IncludeMetadata">
+            <summary>
+            Include export metadata (date, user, version)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportOptions.IncludeAuditInfo">
+            <summary>
+            Include audit trail information in export
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportOptions.FileName">
+            <summary>
+            Custom filename for the export (without extension)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.Export.ExportRequestDto">
+            <summary>
+            Request DTO for exporting incident reports
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportRequestDto.ReportIds">
+            <summary>
+            IDs of reports to export. Null means export all accessible reports.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportRequestDto.Format">
+            <summary>
+            Export format (PDF or JSON)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportRequestDto.Options">
+            <summary>
+            Optional export customization options
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.Export.ExportResultDto">
+            <summary>
+            Result DTO containing exported report data
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportResultDto.Data">
+            <summary>
+            Exported file content as byte array
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportResultDto.FileName">
+            <summary>
+            Suggested filename for download
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportResultDto.ContentType">
+            <summary>
+            MIME content type (e.g., "application/pdf", "application/json")
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportResultDto.ReportCount">
+            <summary>
+            Number of reports included in export
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ExportResultDto.GeneratedAt">
+            <summary>
+            UTC timestamp when export was generated
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.Export.ReportExportDto">
+            <summary>
+            Complete report data for export purposes
+            Contains all fields formatted for PDF and JSON export
+            </summary>
+        </member>
         <member name="T:Ceiba.Shared.DTOs.CreateReportDto">
             <summary>
             DTO for creating a new incident report.
