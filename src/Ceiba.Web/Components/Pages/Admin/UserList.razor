@@ -1,0 +1,562 @@
+@page "/admin/users"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject IUserManagementService UserService
+@inject NavigationManager Navigation
+@inject ILogger<UserList> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>Gestión de Usuarios</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="bi bi-people me-2"></i>Gestión de Usuarios
+                </h2>
+                <button type="button" class="btn btn-primary" @onclick="OpenCreateModal">
+                    <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="filterSearch" class="form-label">Buscar</label>
+                            <input id="filterSearch" type="text" class="form-control" placeholder="Email o nombre"
+                                   @bind="FilterSearch" @bind:event="oninput" @bind:after="ApplyFiltersDebounced" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filterRole" class="form-label">Rol</label>
+                            <select id="filterRole" class="form-select" @bind="FilterRole" @bind:after="ApplyFilters">
+                                <option value="">Todos</option>
+                                @foreach (var role in AvailableRoles)
+                                {
+                                    <option value="@role">@role</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filterActivo" class="form-label">Estado</label>
+                            <select id="filterActivo" class="form-select" @bind="FilterActivo" @bind:after="ApplyFilters">
+                                <option value="">Todos</option>
+                                <option value="true">Activo</option>
+                                <option value="false">Suspendido</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-secondary w-100" @onclick="ClearFilters">
+                                <i class="bi bi-x-circle me-1"></i>Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-3">Cargando usuarios...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @ErrorMessage
+                        </div>
+                    }
+                    else if (!Users.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-people" style="font-size: 4rem; color: #ccc;"></i>
+                            <p class="mt-3 text-muted">No hay usuarios para mostrar.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Roles</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in Users)
+                                    {
+                                        <tr>
+                                            <td>@user.Email</td>
+                                            <td>
+                                                @foreach (var role in user.Roles)
+                                                {
+                                                    <span class="badge @GetRoleBadgeClass(role) me-1">@role</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="badge @(user.Activo ? "bg-success" : "bg-danger")">
+                                                    @(user.Activo ? "Activo" : "Suspendido")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button type="button" class="btn btn-outline-primary"
+                                                            @onclick="() => OpenEditModal(user)" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    @if (user.Id != CurrentUserId)
+                                                    {
+                                                        @if (user.Activo)
+                                                        {
+                                                            <button type="button" class="btn btn-outline-warning"
+                                                                    @onclick="() => SuspendUser(user)" title="Suspender">
+                                                                <i class="bi bi-pause-circle"></i>
+                                                            </button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="button" class="btn btn-outline-success"
+                                                                    @onclick="() => ActivateUser(user)" title="Activar">
+                                                                <i class="bi bi-play-circle"></i>
+                                                            </button>
+                                                        }
+                                                        <button type="button" class="btn btn-outline-danger"
+                                                                @onclick="() => DeleteUser(user)" title="Eliminar">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        @if (TotalPages > 1)
+                        {
+                            <nav aria-label="Paginación de usuarios">
+                                <ul class="pagination justify-content-center mb-0">
+                                    <li class="page-item @(CurrentPage == 1 ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => ChangePage(CurrentPage - 1)">Anterior</button>
+                                    </li>
+                                    @for (int i = Math.Max(1, CurrentPage - 2); i <= Math.Min(TotalPages, CurrentPage + 2); i++)
+                                    {
+                                        var pageNumber = i;
+                                        <li class="page-item @(CurrentPage == pageNumber ? "active" : "")">
+                                            <button class="page-link" @onclick="() => ChangePage(pageNumber)">@pageNumber</button>
+                                        </li>
+                                    }
+                                    <li class="page-item @(CurrentPage == TotalPages ? "disabled" : "")">
+                                        <button class="page-link" @onclick="() => ChangePage(CurrentPage + 1)">Siguiente</button>
+                                    </li>
+                                </ul>
+                            </nav>
+                            <p class="text-center text-muted mt-2">
+                                Mostrando @Users.Count de @TotalCount usuarios
+                            </p>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(IsEditing ? "Editar Usuario" : "Nuevo Usuario")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ModalError))
+                    {
+                        <div class="alert alert-danger">@ModalError</div>
+                    }
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input id="email" type="email" class="form-control" @bind="FormEmail" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            @(IsEditing ? "Nueva Contraseña (dejar vacío para mantener)" : "Contraseña *")
+                        </label>
+                        <input id="password" type="password" class="form-control" @bind="FormPassword" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Roles *</label>
+                        @foreach (var role in AvailableRoles)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="role_@role"
+                                       checked="@FormRoles.Contains(role)"
+                                       @onchange="(e) => ToggleRole(role, (bool?)e.Value ?? false)" />
+                                <label class="form-check-label" for="role_@role">@role</label>
+                            </div>
+                        }
+                    </div>
+                    @if (IsEditing)
+                    {
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="activo" @bind="FormActivo" />
+                                <label class="form-check-label" for="activo">Usuario activo</label>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveUser" disabled="@IsSaving">
+                        @if (IsSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        @(IsEditing ? "Guardar Cambios" : "Crear Usuario")
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Confirm Delete Modal -->
+@if (ShowDeleteConfirm)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="() => ShowDeleteConfirm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro que desea eliminar al usuario <strong>@UserToDelete?.Email</strong>?</p>
+                    <p class="text-muted">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="() => ShowDeleteConfirm = false">Cancelar</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<UserDto> Users { get; set; } = new();
+    private List<string> AvailableRoles { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private string? ErrorMessage { get; set; }
+    private Guid CurrentUserId { get; set; }
+
+    // Pagination
+    private int CurrentPage { get; set; } = 1;
+    private int PageSize { get; set; } = 20;
+    private int TotalCount { get; set; } = 0;
+    private int TotalPages => (int)Math.Ceiling((double)TotalCount / PageSize);
+
+    // Filters
+    private string? FilterSearch { get; set; }
+    private string? FilterRole { get; set; }
+    private string? FilterActivo { get; set; }
+    private System.Threading.Timer? _debounceTimer;
+
+    // Modal state
+    private bool ShowModal { get; set; }
+    private bool IsEditing { get; set; }
+    private bool IsSaving { get; set; }
+    private string? ModalError { get; set; }
+    private Guid? EditingUserId { get; set; }
+    private string FormEmail { get; set; } = string.Empty;
+    private string FormPassword { get; set; } = string.Empty;
+    private List<string> FormRoles { get; set; } = new();
+    private bool FormActivo { get; set; } = true;
+
+    // Delete confirmation
+    private bool ShowDeleteConfirm { get; set; }
+    private UserDto? UserToDelete { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                CurrentUserId = userId;
+            }
+
+            AvailableRoles = await UserService.GetAvailableRolesAsync();
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing user list");
+            ErrorMessage = "Error al cargar la lista de usuarios.";
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var filter = new UserFilterDto
+            {
+                Search = FilterSearch,
+                Role = FilterRole,
+                Activo = string.IsNullOrEmpty(FilterActivo) ? null : bool.Parse(FilterActivo),
+                Page = CurrentPage,
+                PageSize = PageSize
+            };
+
+            var response = await UserService.ListUsersAsync(filter);
+            Users = response.Items;
+            TotalCount = response.TotalCount;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading users");
+            ErrorMessage = "Error al cargar los usuarios.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task ApplyFilters()
+    {
+        CurrentPage = 1;
+        await LoadUsersAsync();
+    }
+
+    private void ApplyFiltersDebounced()
+    {
+        _debounceTimer?.Dispose();
+        _debounceTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await ApplyFilters();
+                StateHasChanged();
+            });
+        }, null, 500, Timeout.Infinite);
+    }
+
+    private async Task ClearFilters()
+    {
+        FilterSearch = null;
+        FilterRole = null;
+        FilterActivo = null;
+        CurrentPage = 1;
+        await LoadUsersAsync();
+    }
+
+    private async Task ChangePage(int page)
+    {
+        if (page < 1 || page > TotalPages) return;
+        CurrentPage = page;
+        await LoadUsersAsync();
+    }
+
+    private void OpenCreateModal()
+    {
+        IsEditing = false;
+        EditingUserId = null;
+        FormEmail = string.Empty;
+        FormPassword = string.Empty;
+        FormRoles = new List<string>();
+        FormActivo = true;
+        ModalError = null;
+        ShowModal = true;
+    }
+
+    private void OpenEditModal(UserDto user)
+    {
+        IsEditing = true;
+        EditingUserId = user.Id;
+        FormEmail = user.Email;
+        FormPassword = string.Empty;
+        FormRoles = new List<string>(user.Roles);
+        FormActivo = user.Activo;
+        ModalError = null;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+        ModalError = null;
+    }
+
+    private void ToggleRole(string role, bool isChecked)
+    {
+        if (isChecked && !FormRoles.Contains(role))
+            FormRoles.Add(role);
+        else if (!isChecked && FormRoles.Contains(role))
+            FormRoles.Remove(role);
+    }
+
+    private async Task SaveUser()
+    {
+        ModalError = null;
+
+        if (string.IsNullOrWhiteSpace(FormEmail))
+        {
+            ModalError = "El email es requerido.";
+            return;
+        }
+
+        if (!IsEditing && string.IsNullOrWhiteSpace(FormPassword))
+        {
+            ModalError = "La contraseña es requerida para nuevos usuarios.";
+            return;
+        }
+
+        if (!FormRoles.Any())
+        {
+            ModalError = "Debe seleccionar al menos un rol.";
+            return;
+        }
+
+        IsSaving = true;
+
+        try
+        {
+            if (IsEditing && EditingUserId.HasValue)
+            {
+                var updateDto = new UpdateUserDto
+                {
+                    Email = FormEmail,
+                    NewPassword = string.IsNullOrWhiteSpace(FormPassword) ? null : FormPassword,
+                    Roles = FormRoles,
+                    Activo = FormActivo
+                };
+                await UserService.UpdateUserAsync(EditingUserId.Value, updateDto, CurrentUserId);
+            }
+            else
+            {
+                var createDto = new CreateUserDto
+                {
+                    Email = FormEmail,
+                    Password = FormPassword,
+                    Roles = FormRoles
+                };
+                await UserService.CreateUserAsync(createDto, CurrentUserId);
+            }
+
+            CloseModal();
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving user");
+            ModalError = ex.Message;
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task SuspendUser(UserDto user)
+    {
+        try
+        {
+            await UserService.SuspendUserAsync(user.Id, CurrentUserId);
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error suspending user");
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task ActivateUser(UserDto user)
+    {
+        try
+        {
+            await UserService.ActivateUserAsync(user.Id, CurrentUserId);
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error activating user");
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private void DeleteUser(UserDto user)
+    {
+        UserToDelete = user;
+        ShowDeleteConfirm = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (UserToDelete == null) return;
+
+        try
+        {
+            await UserService.DeleteUserAsync(UserToDelete.Id, CurrentUserId);
+            ShowDeleteConfirm = false;
+            UserToDelete = null;
+            await LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting user");
+            ErrorMessage = ex.Message;
+            ShowDeleteConfirm = false;
+        }
+    }
+
+    private string GetRoleBadgeClass(string role) => role switch
+    {
+        "ADMIN" => "bg-danger",
+        "REVISOR" => "bg-primary",
+        "CREADOR" => "bg-info",
+        _ => "bg-secondary"
+    };
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+    }
+}

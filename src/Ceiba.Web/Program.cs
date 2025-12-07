@@ -76,6 +76,10 @@ try
     builder.Services.AddScoped<IPdfGenerator, PdfGenerator>();
     builder.Services.AddScoped<IJsonExporter, JsonExporter>();
 
+    // Registrar servicios de User Story 3 - Admin (US3)
+    builder.Services.AddScoped<IUserManagementService, Ceiba.Infrastructure.Services.UserManagementService>();
+    builder.Services.AddScoped<ICatalogAdminService, Ceiba.Infrastructure.Services.CatalogAdminService>();
+
     // Configurar HttpClient para componentes Blazor
     builder.Services.AddScoped(sp => new HttpClient
     {

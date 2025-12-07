@@ -1,0 +1,397 @@
+@page "/admin/suggestions"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject ICatalogAdminService CatalogService
+@inject ILogger<SuggestionManager> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>Gestión de Sugerencias</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-list-check me-2"></i>Gestión de Sugerencias</h2>
+            <p class="text-muted">Configure las listas de sugerencias para los campos de los reportes</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Campo Selector -->
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-header">Campos</div>
+                <div class="list-group list-group-flush">
+                    @foreach (var campo in AvailableCampos)
+                    {
+                        <button class="list-group-item list-group-item-action @(SelectedCampo == campo.Key ? "active" : "")"
+                                @onclick="() => SelectCampo(campo.Key)">
+                            @campo.Value
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions List -->
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Sugerencias para: <strong>@GetCampoDisplayName(SelectedCampo)</strong></span>
+                    <button class="btn btn-sm btn-primary" @onclick="OpenCreateModal">
+                        <i class="bi bi-plus me-1"></i>Nueva Sugerencia
+                    </button>
+                </div>
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger">@ErrorMessage</div>
+                    }
+                    else if (!Sugerencias.Any())
+                    {
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                            <p class="mt-3">No hay sugerencias para este campo.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">Orden</th>
+                                        <th>Valor</th>
+                                        <th style="width: 100px;">Estado</th>
+                                        <th style="width: 150px;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var sugerencia in Sugerencias.OrderBy(s => s.Orden))
+                                    {
+                                        <tr>
+                                            <td>@sugerencia.Orden</td>
+                                            <td>@sugerencia.Valor</td>
+                                            <td>
+                                                <span class="badge @(sugerencia.Activo ? "bg-success" : "bg-secondary")">
+                                                    @(sugerencia.Activo ? "Activo" : "Inactivo")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-secondary"
+                                                            @onclick="() => MoveUp(sugerencia)"
+                                                            disabled="@(sugerencia.Orden <= 1)">
+                                                        <i class="bi bi-arrow-up"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary"
+                                                            @onclick="() => MoveDown(sugerencia)"
+                                                            disabled="@(sugerencia.Orden >= Sugerencias.Count)">
+                                                        <i class="bi bi-arrow-down"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-primary"
+                                                            @onclick="() => OpenEditModal(sugerencia)">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-danger"
+                                                            @onclick="() => ConfirmDelete(sugerencia)">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Modal -->
+@if (ShowModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingId.HasValue ? "Editar Sugerencia" : "Nueva Sugerencia")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ModalError))
+                    {
+                        <div class="alert alert-danger">@ModalError</div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Campo</label>
+                        <input type="text" class="form-control" value="@GetCampoDisplayName(SelectedCampo)" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valor *</label>
+                        <input type="text" class="form-control" @bind="FormValor" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Orden</label>
+                        <input type="number" class="form-control" @bind="FormOrden" min="1" />
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="activo" @bind="FormActivo" />
+                            <label class="form-check-label" for="activo">Activo</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseModal">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="SaveSugerencia">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (ShowDeleteConfirm)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" @onclick="() => ShowDeleteConfirm = false"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro que desea eliminar la sugerencia "<strong>@SugerenciaToDelete?.Valor</strong>"?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="() => ShowDeleteConfirm = false">Cancelar</button>
+                    <button class="btn btn-danger" @onclick="DeleteSugerencia">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private static readonly Dictionary<string, string> AvailableCampos = new()
+    {
+        { "Sexo", "Sexo" },
+        { "Delito", "Tipo de Delito" },
+        { "TipoDeAtencion", "Tipo de Atención" },
+        { "TipoVehiculo", "Tipo de Vehículo" },
+        { "ColorVehiculo", "Color de Vehículo" },
+        { "MarcaVehiculo", "Marca de Vehículo" }
+    };
+
+    private string SelectedCampo { get; set; } = "Sexo";
+    private List<SugerenciaDto> Sugerencias { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private string? ErrorMessage { get; set; }
+    private Guid CurrentUserId { get; set; }
+
+    // Modal state
+    private bool ShowModal { get; set; }
+    private int? EditingId { get; set; }
+    private string FormValor { get; set; } = string.Empty;
+    private int FormOrden { get; set; } = 1;
+    private bool FormActivo { get; set; } = true;
+    private string? ModalError { get; set; }
+
+    // Delete confirmation
+    private bool ShowDeleteConfirm { get; set; }
+    private SugerenciaDto? SugerenciaToDelete { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                CurrentUserId = userId;
+            }
+
+            await LoadSugerenciasAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing suggestion manager");
+            ErrorMessage = "Error al cargar las sugerencias.";
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadSugerenciasAsync()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            Sugerencias = await CatalogService.GetSugerenciasAsync(SelectedCampo);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading suggestions");
+            ErrorMessage = "Error al cargar las sugerencias.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task SelectCampo(string campo)
+    {
+        SelectedCampo = campo;
+        await LoadSugerenciasAsync();
+    }
+
+    private string GetCampoDisplayName(string campo)
+    {
+        return AvailableCampos.TryGetValue(campo, out var displayName) ? displayName : campo;
+    }
+
+    private void OpenCreateModal()
+    {
+        EditingId = null;
+        FormValor = string.Empty;
+        FormOrden = Sugerencias.Count + 1;
+        FormActivo = true;
+        ModalError = null;
+        ShowModal = true;
+    }
+
+    private void OpenEditModal(SugerenciaDto sugerencia)
+    {
+        EditingId = sugerencia.Id;
+        FormValor = sugerencia.Valor;
+        FormOrden = sugerencia.Orden;
+        FormActivo = sugerencia.Activo;
+        ModalError = null;
+        ShowModal = true;
+    }
+
+    private void CloseModal()
+    {
+        ShowModal = false;
+        ModalError = null;
+    }
+
+    private async Task SaveSugerencia()
+    {
+        if (string.IsNullOrWhiteSpace(FormValor))
+        {
+            ModalError = "El valor es requerido.";
+            return;
+        }
+
+        try
+        {
+            var dto = new CreateSugerenciaDto
+            {
+                Campo = SelectedCampo,
+                Valor = FormValor,
+                Orden = FormOrden,
+                Activo = FormActivo
+            };
+
+            if (EditingId.HasValue)
+            {
+                await CatalogService.UpdateSugerenciaAsync(EditingId.Value, dto, CurrentUserId);
+            }
+            else
+            {
+                await CatalogService.CreateSugerenciaAsync(dto, CurrentUserId);
+            }
+
+            CloseModal();
+            await LoadSugerenciasAsync();
+        }
+        catch (Exception ex)
+        {
+            ModalError = ex.Message;
+        }
+    }
+
+    private void ConfirmDelete(SugerenciaDto sugerencia)
+    {
+        SugerenciaToDelete = sugerencia;
+        ShowDeleteConfirm = true;
+    }
+
+    private async Task DeleteSugerencia()
+    {
+        if (SugerenciaToDelete == null) return;
+
+        try
+        {
+            await CatalogService.DeleteSugerenciaAsync(SugerenciaToDelete.Id, CurrentUserId);
+            ShowDeleteConfirm = false;
+            SugerenciaToDelete = null;
+            await LoadSugerenciasAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            ShowDeleteConfirm = false;
+        }
+    }
+
+    private async Task MoveUp(SugerenciaDto sugerencia)
+    {
+        var orderedList = Sugerencias.OrderBy(s => s.Orden).ToList();
+        var index = orderedList.FindIndex(s => s.Id == sugerencia.Id);
+        if (index <= 0) return;
+
+        // Swap with previous
+        var orderedIds = orderedList.Select(s => s.Id).ToArray();
+        (orderedIds[index], orderedIds[index - 1]) = (orderedIds[index - 1], orderedIds[index]);
+
+        try
+        {
+            await CatalogService.ReorderSugerenciasAsync(SelectedCampo, orderedIds, CurrentUserId);
+            await LoadSugerenciasAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task MoveDown(SugerenciaDto sugerencia)
+    {
+        var orderedList = Sugerencias.OrderBy(s => s.Orden).ToList();
+        var index = orderedList.FindIndex(s => s.Id == sugerencia.Id);
+        if (index < 0 || index >= orderedList.Count - 1) return;
+
+        // Swap with next
+        var orderedIds = orderedList.Select(s => s.Id).ToArray();
+        (orderedIds[index], orderedIds[index + 1]) = (orderedIds[index + 1], orderedIds[index]);
+
+        try
+        {
+            await CatalogService.ReorderSugerenciasAsync(SelectedCampo, orderedIds, CurrentUserId);
+            await LoadSugerenciasAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,608 @@
+@page "/admin/catalogs"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject ICatalogAdminService CatalogService
+@inject ILogger<CatalogManager> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>Gestión de Catálogos</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-geo-alt me-2"></i>Gestión de Catálogos Geográficos</h2>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "zonas" ? "active" : "")" @onclick="SetTabZonas">
+                <i class="bi bi-map me-1"></i>Zonas
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "sectores" ? "active" : "")" @onclick="SetTabSectores">
+                <i class="bi bi-grid me-1"></i>Sectores
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "cuadrantes" ? "active" : "")" @onclick="SetTabCuadrantes">
+                <i class="bi bi-pin-map me-1"></i>Cuadrantes
+            </button>
+        </li>
+    </ul>
+
+    @if (IsLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger">@ErrorMessage</div>
+    }
+    else
+    {
+        <!-- Zonas Tab -->
+        @if (ActiveTab == "zonas")
+        {
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Zonas</span>
+                    <button class="btn btn-sm btn-primary" @onclick="OpenZonaModal">
+                        <i class="bi bi-plus me-1"></i>Nueva Zona
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Sectores</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var zona in Zonas)
+                            {
+                                <tr>
+                                    <td>@zona.Id</td>
+                                    <td>@zona.Nombre</td>
+                                    <td>@zona.SectoresCount</td>
+                                    <td>
+                                        <span class="badge @(zona.Activo ? "bg-success" : "bg-secondary")">
+                                            @(zona.Activo ? "Activo" : "Inactivo")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" @onclick="() => EditZona(zona)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn @(zona.Activo ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ToggleZona(zona)">
+                                                <i class="bi @(zona.Activo ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Sectores Tab -->
+        @if (ActiveTab == "sectores")
+        {
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="me-3">Sectores</span>
+                        <select class="form-select form-select-sm d-inline-block w-auto"
+                                @bind="FilterZonaId" @bind:after="LoadSectores">
+                            <option value="">Todas las zonas</option>
+                            @foreach (var zona in Zonas.Where(z => z.Activo))
+                            {
+                                <option value="@zona.Id">@zona.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="btn btn-sm btn-primary" @onclick="OpenSectorModal">
+                        <i class="bi bi-plus me-1"></i>Nuevo Sector
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Zona</th>
+                                <th>Cuadrantes</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sector in Sectores)
+                            {
+                                <tr>
+                                    <td>@sector.Id</td>
+                                    <td>@sector.Nombre</td>
+                                    <td>@sector.ZonaNombre</td>
+                                    <td>@sector.CuadrantesCount</td>
+                                    <td>
+                                        <span class="badge @(sector.Activo ? "bg-success" : "bg-secondary")">
+                                            @(sector.Activo ? "Activo" : "Inactivo")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" @onclick="() => EditSector(sector)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn @(sector.Activo ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ToggleSector(sector)">
+                                                <i class="bi @(sector.Activo ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <!-- Cuadrantes Tab -->
+        @if (ActiveTab == "cuadrantes")
+        {
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="me-3">Cuadrantes</span>
+                        <select class="form-select form-select-sm d-inline-block w-auto"
+                                @bind="FilterSectorId" @bind:after="LoadCuadrantes">
+                            <option value="">Todos los sectores</option>
+                            @foreach (var sector in Sectores.Where(s => s.Activo))
+                            {
+                                <option value="@sector.Id">@sector.Nombre (@sector.ZonaNombre)</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="btn btn-sm btn-primary" @onclick="OpenCuadranteModal">
+                        <i class="bi bi-plus me-1"></i>Nuevo Cuadrante
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Sector</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cuadrante in Cuadrantes)
+                            {
+                                <tr>
+                                    <td>@cuadrante.Id</td>
+                                    <td>@cuadrante.Nombre</td>
+                                    <td>@cuadrante.SectorNombre</td>
+                                    <td>
+                                        <span class="badge @(cuadrante.Activo ? "bg-success" : "bg-secondary")">
+                                            @(cuadrante.Activo ? "Activo" : "Inactivo")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" @onclick="() => EditCuadrante(cuadrante)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn @(cuadrante.Activo ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ToggleCuadrante(cuadrante)">
+                                                <i class="bi @(cuadrante.Activo ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+<!-- Zona Modal -->
+@if (ShowZonaModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingZonaId.HasValue ? "Editar Zona" : "Nueva Zona")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseZonaModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ModalError))
+                    {
+                        <div class="alert alert-danger">@ModalError</div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" @bind="ZonaNombre" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseZonaModal">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="SaveZona">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Sector Modal -->
+@if (ShowSectorModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingSectorId.HasValue ? "Editar Sector" : "Nuevo Sector")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseSectorModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ModalError))
+                    {
+                        <div class="alert alert-danger">@ModalError</div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Zona *</label>
+                        <select class="form-select" @bind="SectorZonaId">
+                            <option value="0">-- Seleccione --</option>
+                            @foreach (var zona in Zonas.Where(z => z.Activo))
+                            {
+                                <option value="@zona.Id">@zona.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" @bind="SectorNombre" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseSectorModal">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="SaveSector">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Cuadrante Modal -->
+@if (ShowCuadranteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingCuadranteId.HasValue ? "Editar Cuadrante" : "Nuevo Cuadrante")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseCuadranteModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ModalError))
+                    {
+                        <div class="alert alert-danger">@ModalError</div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Sector *</label>
+                        <select class="form-select" @bind="CuadranteSectorId">
+                            <option value="0">-- Seleccione --</option>
+                            @foreach (var sector in Sectores.Where(s => s.Activo))
+                            {
+                                <option value="@sector.Id">@sector.Nombre (@sector.ZonaNombre)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" @bind="CuadranteNombre" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseCuadranteModal">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="SaveCuadrante">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string ActiveTab { get; set; } = "zonas";
+    private bool IsLoading { get; set; } = true;
+    private string? ErrorMessage { get; set; }
+    private string? ModalError { get; set; }
+    private Guid CurrentUserId { get; set; }
+
+    // Tab navigation
+    private void SetTabZonas() => ActiveTab = "zonas";
+    private void SetTabSectores() => ActiveTab = "sectores";
+    private void SetTabCuadrantes() => ActiveTab = "cuadrantes";
+
+    // Modal close methods
+    private void CloseZonaModal() => ShowZonaModal = false;
+    private void CloseSectorModal() => ShowSectorModal = false;
+    private void CloseCuadranteModal() => ShowCuadranteModal = false;
+
+    private List<ZonaDto> Zonas { get; set; } = new();
+    private List<SectorDto> Sectores { get; set; } = new();
+    private List<CuadranteDto> Cuadrantes { get; set; } = new();
+
+    // Filters
+    private string? FilterZonaId { get; set; }
+    private string? FilterSectorId { get; set; }
+
+    // Zona modal
+    private bool ShowZonaModal { get; set; }
+    private int? EditingZonaId { get; set; }
+    private string ZonaNombre { get; set; } = string.Empty;
+
+    // Sector modal
+    private bool ShowSectorModal { get; set; }
+    private int? EditingSectorId { get; set; }
+    private int SectorZonaId { get; set; }
+    private string SectorNombre { get; set; } = string.Empty;
+
+    // Cuadrante modal
+    private bool ShowCuadranteModal { get; set; }
+    private int? EditingCuadranteId { get; set; }
+    private int CuadranteSectorId { get; set; }
+    private string CuadranteNombre { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                CurrentUserId = userId;
+            }
+
+            await LoadAllDataAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing catalog manager");
+            ErrorMessage = "Error al cargar los catálogos.";
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadAllDataAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            Zonas = await CatalogService.GetZonasAsync();
+            await LoadSectores();
+            await LoadCuadrantes();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadSectores()
+    {
+        var zonaId = string.IsNullOrEmpty(FilterZonaId) ? (int?)null : int.Parse(FilterZonaId);
+        Sectores = await CatalogService.GetSectoresAsync(zonaId);
+    }
+
+    private async Task LoadCuadrantes()
+    {
+        var sectorId = string.IsNullOrEmpty(FilterSectorId) ? (int?)null : int.Parse(FilterSectorId);
+        Cuadrantes = await CatalogService.GetCuadrantesAsync(sectorId);
+    }
+
+    // Zona methods
+    private void OpenZonaModal()
+    {
+        EditingZonaId = null;
+        ZonaNombre = string.Empty;
+        ModalError = null;
+        ShowZonaModal = true;
+    }
+
+    private void EditZona(ZonaDto zona)
+    {
+        EditingZonaId = zona.Id;
+        ZonaNombre = zona.Nombre;
+        ModalError = null;
+        ShowZonaModal = true;
+    }
+
+    private async Task SaveZona()
+    {
+        if (string.IsNullOrWhiteSpace(ZonaNombre))
+        {
+            ModalError = "El nombre es requerido.";
+            return;
+        }
+
+        try
+        {
+            var dto = new CreateZonaDto { Nombre = ZonaNombre };
+            if (EditingZonaId.HasValue)
+                await CatalogService.UpdateZonaAsync(EditingZonaId.Value, dto, CurrentUserId);
+            else
+                await CatalogService.CreateZonaAsync(dto, CurrentUserId);
+
+            ShowZonaModal = false;
+            Zonas = await CatalogService.GetZonasAsync();
+        }
+        catch (Exception ex)
+        {
+            ModalError = ex.Message;
+        }
+    }
+
+    private async Task ToggleZona(ZonaDto zona)
+    {
+        try
+        {
+            await CatalogService.ToggleZonaActivoAsync(zona.Id, CurrentUserId);
+            Zonas = await CatalogService.GetZonasAsync();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    // Sector methods
+    private void OpenSectorModal()
+    {
+        EditingSectorId = null;
+        SectorZonaId = 0;
+        SectorNombre = string.Empty;
+        ModalError = null;
+        ShowSectorModal = true;
+    }
+
+    private void EditSector(SectorDto sector)
+    {
+        EditingSectorId = sector.Id;
+        SectorZonaId = sector.ZonaId;
+        SectorNombre = sector.Nombre;
+        ModalError = null;
+        ShowSectorModal = true;
+    }
+
+    private async Task SaveSector()
+    {
+        if (SectorZonaId == 0)
+        {
+            ModalError = "Debe seleccionar una zona.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(SectorNombre))
+        {
+            ModalError = "El nombre es requerido.";
+            return;
+        }
+
+        try
+        {
+            var dto = new CreateSectorDto { ZonaId = SectorZonaId, Nombre = SectorNombre };
+            if (EditingSectorId.HasValue)
+                await CatalogService.UpdateSectorAsync(EditingSectorId.Value, dto, CurrentUserId);
+            else
+                await CatalogService.CreateSectorAsync(dto, CurrentUserId);
+
+            ShowSectorModal = false;
+            await LoadSectores();
+        }
+        catch (Exception ex)
+        {
+            ModalError = ex.Message;
+        }
+    }
+
+    private async Task ToggleSector(SectorDto sector)
+    {
+        try
+        {
+            await CatalogService.ToggleSectorActivoAsync(sector.Id, CurrentUserId);
+            await LoadSectores();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    // Cuadrante methods
+    private void OpenCuadranteModal()
+    {
+        EditingCuadranteId = null;
+        CuadranteSectorId = 0;
+        CuadranteNombre = string.Empty;
+        ModalError = null;
+        ShowCuadranteModal = true;
+    }
+
+    private void EditCuadrante(CuadranteDto cuadrante)
+    {
+        EditingCuadranteId = cuadrante.Id;
+        CuadranteSectorId = cuadrante.SectorId;
+        CuadranteNombre = cuadrante.Nombre;
+        ModalError = null;
+        ShowCuadranteModal = true;
+    }
+
+    private async Task SaveCuadrante()
+    {
+        if (CuadranteSectorId == 0)
+        {
+            ModalError = "Debe seleccionar un sector.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(CuadranteNombre))
+        {
+            ModalError = "El nombre es requerido.";
+            return;
+        }
+
+        try
+        {
+            var dto = new CreateCuadranteDto { SectorId = CuadranteSectorId, Nombre = CuadranteNombre };
+            if (EditingCuadranteId.HasValue)
+                await CatalogService.UpdateCuadranteAsync(EditingCuadranteId.Value, dto, CurrentUserId);
+            else
+                await CatalogService.CreateCuadranteAsync(dto, CurrentUserId);
+
+            ShowCuadranteModal = false;
+            await LoadCuadrantes();
+        }
+        catch (Exception ex)
+        {
+            ModalError = ex.Message;
+        }
+    }
+
+    private async Task ToggleCuadrante(CuadranteDto cuadrante)
+    {
+        try
+        {
+            await CatalogService.ToggleCuadranteActivoAsync(cuadrante.Id, CurrentUserId);
+            await LoadCuadrantes();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+}

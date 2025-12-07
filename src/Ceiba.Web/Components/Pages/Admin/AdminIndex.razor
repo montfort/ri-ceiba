@@ -1,0 +1,104 @@
+@page "/admin"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>Administración</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-gear me-2"></i>Panel de Administración</h2>
+            <p class="text-muted">Gestione usuarios, catálogos y revise el registro de auditoría</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Users Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-people text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Gestión de Usuarios</h5>
+                    </div>
+                    <p class="card-text flex-grow-1">
+                        Cree, edite, suspenda o elimine usuarios del sistema. Asigne roles y gestione permisos.
+                    </p>
+                    <button class="btn btn-primary" @onclick="NavigateToUsers">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Usuarios
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Catalogs Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-geo-alt text-success" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Catálogos Geográficos</h5>
+                    </div>
+                    <p class="card-text flex-grow-1">
+                        Configure zonas, sectores y cuadrantes. Gestione la jerarquía geográfica del sistema.
+                    </p>
+                    <button class="btn btn-success" @onclick="NavigateToCatalogs">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Catálogos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Suggestions Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-list-check text-warning" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Listas de Sugerencias</h5>
+                    </div>
+                    <p class="card-text flex-grow-1">
+                        Configure las opciones predefinidas para campos como tipo de delito, tipo de atención, etc.
+                    </p>
+                    <button class="btn btn-warning" @onclick="NavigateToSuggestions">
+                        <i class="bi bi-arrow-right me-1"></i>Ir a Sugerencias
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-shield-check text-danger" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Registro de Auditoría</h5>
+                    </div>
+                    <p class="card-text flex-grow-1">
+                        Visualice todas las acciones realizadas en el sistema. Filtre por usuario, fecha o tipo de acción.
+                    </p>
+                    <button class="btn btn-danger" @onclick="NavigateToAudit">
+                        <i class="bi bi-arrow-right me-1"></i>Ver Auditoría
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void NavigateToUsers() => Navigation.NavigateTo("/admin/users");
+    private void NavigateToCatalogs() => Navigation.NavigateTo("/admin/catalogs");
+    private void NavigateToSuggestions() => Navigation.NavigateTo("/admin/suggestions");
+    private void NavigateToAudit() => Navigation.NavigateTo("/admin/audit");
+}
