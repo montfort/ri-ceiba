@@ -39,6 +39,15 @@
             }
             else if (Report != null)
             {
+                @if (!string.IsNullOrEmpty(SuccessMessage))
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        @SuccessMessage
+                        <button type="button" class="btn-close" @onclick="() => SuccessMessage = null"></button>
+                    </div>
+                }
+
                 <!-- Header Card -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -216,11 +225,26 @@
                     <button type="button" class="btn btn-secondary" @onclick="NavigateBack">
                         <i class="bi bi-arrow-left me-2"></i>Volver
                     </button>
-                    <div>
+                    <div class="d-flex gap-2">
                         @if (CanEdit)
                         {
-                            <button type="button" class="btn btn-primary" @onclick="EditReport">
-                                <i class="bi bi-pencil me-2"></i>Editar Reporte
+                            <button type="button" class="btn btn-outline-primary" @onclick="EditReport">
+                                <i class="bi bi-pencil me-2"></i>Editar
+                            </button>
+                        }
+                        @if (CanSubmit)
+                        {
+                            <button type="button" class="btn btn-success" @onclick="SubmitReport" disabled="@IsSubmitting">
+                                @if (IsSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                    <span>Entregando...</span>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-send me-2"></i>
+                                    <span>Entregar Reporte</span>
+                                }
                             </button>
                         }
                     </div>
@@ -235,10 +259,13 @@
 
     private ReportDto? Report { get; set; }
     private bool IsLoading { get; set; } = true;
+    private bool IsSubmitting { get; set; } = false;
     private string? ErrorMessage { get; set; }
+    private string? SuccessMessage { get; set; }
     private Guid CurrentUserId { get; set; }
     private bool IsRevisor { get; set; }
     private bool CanEdit => IsRevisor || (Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId);
+    private bool CanSubmit => Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -307,6 +334,37 @@
     private void EditReport()
     {
         Navigation.NavigateTo($"/reports/edit/{ReportId}");
+    }
+
+    private async Task SubmitReport()
+    {
+        if (!CanSubmit || Report == null)
+            return;
+
+        IsSubmitting = true;
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        try
+        {
+            await ReportService.SubmitReportAsync(ReportId, CurrentUserId);
+            SuccessMessage = "Reporte entregado exitosamente.";
+            // Reload report to reflect new state
+            await LoadReportAsync();
+        }
+        catch (ForbiddenException)
+        {
+            ErrorMessage = "No tiene permisos para entregar este reporte.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error submitting report {ReportId}", ReportId);
+            ErrorMessage = "Error al entregar el reporte: " + ex.Message;
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
     }
 
     private static string GetEstadoBadgeClass(int estado) => estado switch
