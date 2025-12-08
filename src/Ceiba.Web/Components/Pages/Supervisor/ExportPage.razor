@@ -1,0 +1,545 @@
+@page "/supervisor/export"
+@using Ceiba.Application.Services.Export
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using Ceiba.Shared.DTOs.Export
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IReportService ReportService
+@inject IExportService ExportService
+@inject IJSRuntime JS
+@inject ILogger<ExportPage> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "REVISOR")]
+
+<PageTitle>Exportar Reportes</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>
+                <i class="bi bi-download me-2"></i>Exportar Reportes
+            </h2>
+            <p class="text-muted">Exporte reportes de incidencias en formato PDF o JSON</p>
+        </div>
+    </div>
+
+    <!-- Export Status -->
+    @if (!string.IsNullOrEmpty(ExportMessage))
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert @(ExportSuccess ? "alert-success" : "alert-danger") alert-dismissible fade show" role="alert">
+                    <i class="bi @(ExportSuccess ? "bi-check-circle" : "bi-exclamation-triangle") me-2"></i>
+                    @ExportMessage
+                    <button type="button" class="btn-close" @onclick="() => ExportMessage = null" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Export Options Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Opciones de Exportacion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Formato de Exportacion</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="exportFormat" id="formatPdf" value="PDF" @onchange="() => SelectedFormat = ExportFormat.PDF" checked="@(SelectedFormat == ExportFormat.PDF)" />
+                            <label class="btn btn-outline-danger" for="formatPdf">
+                                <i class="bi bi-file-pdf me-1"></i>PDF
+                            </label>
+
+                            <input type="radio" class="btn-check" name="exportFormat" id="formatJson" value="JSON" @onchange="() => SelectedFormat = ExportFormat.JSON" />
+                            <label class="btn btn-outline-primary" for="formatJson">
+                                <i class="bi bi-file-code me-1"></i>JSON
+                            </label>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <h6>Filtros de Busqueda</h6>
+
+                    <div class="mb-3">
+                        <label for="filterEstado" class="form-label">Estado</label>
+                        <select id="filterEstado" class="form-select" @bind="FilterEstado">
+                            <option value="">Todos</option>
+                            <option value="0">Borrador</option>
+                            <option value="1">Entregado</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="filterDelito" class="form-label">Delito</label>
+                        <input id="filterDelito" type="text" class="form-control" placeholder="Buscar por delito" @bind="FilterDelito" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="filterFechaDesde" class="form-label">Fecha Desde</label>
+                        <input id="filterFechaDesde" type="date" class="form-control" @bind="FilterFechaDesde" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="filterFechaHasta" class="form-label">Fecha Hasta</label>
+                        <input id="filterFechaHasta" type="date" class="form-control" @bind="FilterFechaHasta" />
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" @onclick="SearchReportsAsync" disabled="@IsLoading">
+                            @if (IsLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            <i class="bi bi-search me-1"></i>Buscar Reportes
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" @onclick="ClearFilters">
+                            <i class="bi bi-x-circle me-1"></i>Limpiar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Selection Card -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Seleccionar Reportes</h5>
+                    @if (SelectedReportIds.Any())
+                    {
+                        <span class="badge bg-primary">@SelectedReportIds.Count seleccionados</span>
+                    }
+                </div>
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-3">Buscando reportes...</p>
+                        </div>
+                    }
+                    else if (!Reports.Any())
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                            <p class="mt-3 text-muted">
+                                @if (HasSearched)
+                                {
+                                    <span>No se encontraron reportes con los filtros especificados.</span>
+                                }
+                                else
+                                {
+                                    <span>Use los filtros para buscar reportes a exportar.</span>
+                                }
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="selectAll"
+                                       @bind="SelectAll"
+                                       @bind:after="ToggleSelectAll" />
+                                <label class="form-check-label" for="selectAll">
+                                    Seleccionar todos (@Reports.Count reportes)
+                                </label>
+                            </div>
+                            @if (SelectedReportIds.Any())
+                            {
+                                <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="ClearSelection">
+                                    <i class="bi bi-x-circle me-1"></i>Limpiar seleccion
+                                </button>
+                            }
+                        </div>
+
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover table-sm">
+                                <thead class="sticky-top bg-white">
+                                    <tr>
+                                        <th style="width: 40px;"></th>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Delito</th>
+                                        <th>Zona</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var report in Reports)
+                                    {
+                                        <tr class="@(SelectedReportIds.Contains(report.Id) ? "table-active" : "")"
+                                            @onclick="() => ToggleReportSelection(report.Id)"
+                                            style="cursor: pointer;">
+                                            <td>
+                                                <input type="checkbox" class="form-check-input"
+                                                       checked="@SelectedReportIds.Contains(report.Id)"
+                                                       @onclick:stopPropagation="true"
+                                                       @onchange="() => ToggleReportSelection(report.Id)" />
+                                            </td>
+                                            <td>@report.Id</td>
+                                            <td>@report.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <span class="badge @GetEstadoBadgeClass(report.Estado)">
+                                                    @GetEstadoText(report.Estado)
+                                                </span>
+                                            </td>
+                                            <td>@TruncateText(report.Delito, 30)</td>
+                                            <td>@report.Zona.Nombre</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (TotalCount > Reports.Count)
+                        {
+                            <p class="text-muted text-center mt-2">
+                                <small>Mostrando @Reports.Count de @TotalCount reportes. Refine los filtros para ver mas resultados.</small>
+                            </p>
+                        }
+                    }
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">
+                            @if (SelectedReportIds.Any())
+                            {
+                                <span>@SelectedReportIds.Count reportes listos para exportar</span>
+                            }
+                            else
+                            {
+                                <span>Seleccione reportes para exportar</span>
+                            }
+                        </span>
+                        <button type="button" class="btn btn-success btn-lg" @onclick="ExportSelectedAsync"
+                                disabled="@(!SelectedReportIds.Any() || IsExporting)">
+                            @if (IsExporting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            <i class="bi bi-download me-1"></i>
+                            Exportar @(SelectedFormat == ExportFormat.PDF ? "PDF" : "JSON")
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Export Cards -->
+    <div class="row">
+        <div class="col-12">
+            <h5 class="mb-3"><i class="bi bi-lightning me-2"></i>Exportacion Rapida</h5>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-day text-primary" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Reportes de Hoy</h6>
+                    <p class="text-muted small">Exportar todos los reportes creados hoy</p>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => QuickExportAsync(QuickExportType.Today, ExportFormat.PDF)" disabled="@IsExporting">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => QuickExportAsync(QuickExportType.Today, ExportFormat.JSON)" disabled="@IsExporting">
+                            <i class="bi bi-file-code"></i> JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-week text-success" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Ultimos 7 Dias</h6>
+                    <p class="text-muted small">Exportar reportes de la ultima semana</p>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => QuickExportAsync(QuickExportType.LastWeek, ExportFormat.PDF)" disabled="@IsExporting">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => QuickExportAsync(QuickExportType.LastWeek, ExportFormat.JSON)" disabled="@IsExporting">
+                            <i class="bi bi-file-code"></i> JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-month text-warning" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Este Mes</h6>
+                    <p class="text-muted small">Exportar reportes del mes actual</p>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-danger btn-sm" @onclick="() => QuickExportAsync(QuickExportType.ThisMonth, ExportFormat.PDF)" disabled="@IsExporting">
+                            <i class="bi bi-file-pdf"></i> PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => QuickExportAsync(QuickExportType.ThisMonth, ExportFormat.JSON)" disabled="@IsExporting">
+                            <i class="bi bi-file-code"></i> JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ReportDto> Reports { get; set; } = new();
+    private HashSet<int> SelectedReportIds { get; set; } = new();
+    private bool SelectAll { get; set; }
+    private bool IsLoading { get; set; }
+    private bool IsExporting { get; set; }
+    private bool HasSearched { get; set; }
+    private string? ExportMessage { get; set; }
+    private bool ExportSuccess { get; set; }
+    private Guid CurrentUserId { get; set; }
+    private int TotalCount { get; set; }
+
+    // Export Options
+    private ExportFormat SelectedFormat { get; set; } = ExportFormat.PDF;
+
+    // Filters
+    private string? FilterEstado { get; set; }
+    private string? FilterDelito { get; set; }
+    private DateTime? FilterFechaDesde { get; set; }
+    private DateTime? FilterFechaHasta { get; set; }
+
+    private enum QuickExportType { Today, LastWeek, ThisMonth }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+        {
+            CurrentUserId = userId;
+        }
+    }
+
+    private async Task SearchReportsAsync()
+    {
+        IsLoading = true;
+        HasSearched = true;
+        ExportMessage = null;
+
+        try
+        {
+            var filter = new ReportFilterDto
+            {
+                Estado = string.IsNullOrWhiteSpace(FilterEstado) ? null : int.Parse(FilterEstado),
+                Delito = string.IsNullOrWhiteSpace(FilterDelito) ? null : FilterDelito,
+                FechaDesde = FilterFechaDesde,
+                FechaHasta = FilterFechaHasta,
+                Page = 1,
+                PageSize = 100, // Load more for export selection
+                SortBy = "createdAt",
+                SortDesc = true
+            };
+
+            var response = await ReportService.ListReportsAsync(filter, CurrentUserId, isRevisor: true);
+            Reports = response.Items;
+            TotalCount = response.TotalCount;
+            SelectedReportIds.Clear();
+            SelectAll = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error searching reports for export");
+            ExportSuccess = false;
+            ExportMessage = "Error al buscar reportes: " + ex.Message;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ToggleReportSelection(int reportId)
+    {
+        if (SelectedReportIds.Contains(reportId))
+        {
+            SelectedReportIds.Remove(reportId);
+        }
+        else
+        {
+            SelectedReportIds.Add(reportId);
+        }
+        SelectAll = Reports.Any() && Reports.All(r => SelectedReportIds.Contains(r.Id));
+    }
+
+    private void ToggleSelectAll()
+    {
+        if (SelectAll)
+        {
+            foreach (var report in Reports)
+            {
+                SelectedReportIds.Add(report.Id);
+            }
+        }
+        else
+        {
+            SelectedReportIds.Clear();
+        }
+    }
+
+    private void ClearSelection()
+    {
+        SelectedReportIds.Clear();
+        SelectAll = false;
+    }
+
+    private void ClearFilters()
+    {
+        FilterEstado = null;
+        FilterDelito = null;
+        FilterFechaDesde = null;
+        FilterFechaHasta = null;
+        Reports.Clear();
+        SelectedReportIds.Clear();
+        SelectAll = false;
+        HasSearched = false;
+    }
+
+    private async Task ExportSelectedAsync()
+    {
+        if (!SelectedReportIds.Any())
+        {
+            ExportSuccess = false;
+            ExportMessage = "Seleccione al menos un reporte para exportar.";
+            return;
+        }
+
+        IsExporting = true;
+        ExportMessage = null;
+
+        try
+        {
+            var request = new ExportRequestDto
+            {
+                ReportIds = SelectedReportIds.ToArray(),
+                Format = SelectedFormat
+            };
+
+            var result = await ExportService.ExportReportsAsync(request, CurrentUserId, isRevisor: true);
+            await DownloadFileAsync(result.Data, result.FileName, result.ContentType);
+
+            ExportSuccess = true;
+            ExportMessage = $"{result.ReportCount} reportes exportados exitosamente: {result.FileName}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error exporting {Count} reports", SelectedReportIds.Count);
+            ExportSuccess = false;
+            ExportMessage = $"Error al exportar los reportes: {ex.Message}";
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    private async Task QuickExportAsync(QuickExportType type, ExportFormat format)
+    {
+        IsExporting = true;
+        ExportMessage = null;
+
+        try
+        {
+            var today = DateTime.UtcNow.Date;
+            DateTime fechaDesde;
+            DateTime fechaHasta = today.AddDays(1).AddSeconds(-1);
+
+            switch (type)
+            {
+                case QuickExportType.Today:
+                    fechaDesde = today;
+                    break;
+                case QuickExportType.LastWeek:
+                    fechaDesde = today.AddDays(-7);
+                    break;
+                case QuickExportType.ThisMonth:
+                    fechaDesde = new DateTime(today.Year, today.Month, 1);
+                    break;
+                default:
+                    throw new ArgumentException("Tipo de exportacion no valido");
+            }
+
+            // First, find the reports
+            var filter = new ReportFilterDto
+            {
+                FechaDesde = fechaDesde,
+                FechaHasta = fechaHasta,
+                Page = 1,
+                PageSize = 500
+            };
+
+            var response = await ReportService.ListReportsAsync(filter, CurrentUserId, isRevisor: true);
+
+            if (!response.Items.Any())
+            {
+                ExportSuccess = false;
+                ExportMessage = $"No hay reportes para el periodo seleccionado.";
+                return;
+            }
+
+            var request = new ExportRequestDto
+            {
+                ReportIds = response.Items.Select(r => r.Id).ToArray(),
+                Format = format
+            };
+
+            var result = await ExportService.ExportReportsAsync(request, CurrentUserId, isRevisor: true);
+            await DownloadFileAsync(result.Data, result.FileName, result.ContentType);
+
+            ExportSuccess = true;
+            ExportMessage = $"{result.ReportCount} reportes exportados exitosamente: {result.FileName}";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error in quick export");
+            ExportSuccess = false;
+            ExportMessage = $"Error al exportar: {ex.Message}";
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    private async Task DownloadFileAsync(byte[] data, string fileName, string contentType)
+    {
+        var base64 = Convert.ToBase64String(data);
+        await JS.InvokeVoidAsync("downloadFileFromBase64", base64, fileName, contentType);
+    }
+
+    private static string GetEstadoBadgeClass(int estado) => estado switch
+    {
+        0 => "bg-warning text-dark",
+        1 => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    private static string GetEstadoText(int estado) => estado switch
+    {
+        0 => "Borrador",
+        1 => "Entregado",
+        _ => "Desconocido"
+    };
+
+    private static string TruncateText(string? text, int maxLength)
+    {
+        if (string.IsNullOrEmpty(text)) return "-";
+        return text.Length <= maxLength ? text : text[..maxLength] + "...";
+    }
+}
