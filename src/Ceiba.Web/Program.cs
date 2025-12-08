@@ -156,12 +156,13 @@ try
         context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
 
         // CSP (T020f RS-002)
+        // Allow cdn.jsdelivr.net for Bootstrap Icons
         context.Response.Headers.Append("Content-Security-Policy",
             "default-src 'self'; " +
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-            "style-src 'self' 'unsafe-inline'; " +
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
             "img-src 'self' data:; " +
-            "font-src 'self'; " +
+            "font-src 'self' https://cdn.jsdelivr.net; " +
             "connect-src 'self'; " +
             "frame-ancestors 'none'");
 
