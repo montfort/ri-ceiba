@@ -1,9 +1,6 @@
 @page "/logout"
-@using System.Net.Http.Json
-@rendermode InteractiveServer
-@inject HttpClient HttpClient
-@inject NavigationManager Navigation
-@inject ILogger<Logout> Logger
+@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
 
 <PageTitle>Cerrar Sesión - Ceiba</PageTitle>
 
@@ -16,28 +13,25 @@
                         <span class="visually-hidden">Cerrando sesión...</span>
                     </div>
                     <p class="text-muted">Cerrando sesión...</p>
+                    @* Auto-submit form to perform real HTTP logout *@
+                    <form id="logoutForm" method="post" action="/Account/logout-form">
+                        @if (HttpContextAccessor?.HttpContext != null)
+                        {
+                            var tokens = Antiforgery.GetAndStoreTokens(HttpContextAccessor.HttpContext);
+                            <input type="hidden" name="__RequestVerificationToken" value="@tokens.RequestToken" />
+                        }
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    // Auto-submit form when page loads
+    document.getElementById('logoutForm')?.submit();
+</script>
+
 @code {
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            await HttpClient.PostAsync("/api/account/logout", null);
-            Logger.LogInformation("User logged out successfully");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error during logout");
-        }
-        finally
-        {
-            // Use NavigationManager instead of JS interop that can be cancelled when the client navigates
-            Navigation.NavigateTo("/login", forceLoad: true);
-        }
-    }
+    [Inject] private IHttpContextAccessor? HttpContextAccessor { get; set; }
 }

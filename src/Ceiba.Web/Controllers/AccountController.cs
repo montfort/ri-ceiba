@@ -139,6 +139,24 @@ public class AccountController : Controller
         }
     }
 
+    [HttpPost("logout-form")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> LogoutForm()
+    {
+        try
+        {
+            var userName = User.Identity?.Name ?? "Unknown";
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User {UserName} logged out successfully via form", userName);
+            return Redirect("/login?logout=success");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during logout");
+            return Redirect("/login?error=logout");
+        }
+    }
+
     public class LoginRequest
     {
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]
