@@ -60,10 +60,16 @@ public class AutomatedReportService : IAutomatedReportService
             .AsQueryable();
 
         if (fechaDesde.HasValue)
-            query = query.Where(r => r.FechaInicio >= fechaDesde.Value);
+        {
+            var fechaDesdeUtc = DateTime.SpecifyKind(fechaDesde.Value, DateTimeKind.Utc);
+            query = query.Where(r => r.FechaInicio >= fechaDesdeUtc);
+        }
 
         if (fechaHasta.HasValue)
-            query = query.Where(r => r.FechaFin <= fechaHasta.Value);
+        {
+            var fechaHastaUtc = DateTime.SpecifyKind(fechaHasta.Value, DateTimeKind.Utc);
+            query = query.Where(r => r.FechaFin <= fechaHastaUtc);
+        }
 
         if (enviado.HasValue)
             query = query.Where(r => r.Enviado == enviado.Value);
@@ -118,17 +124,21 @@ public class AutomatedReportService : IAutomatedReportService
         Guid? userId = null,
         CancellationToken cancellationToken = default)
     {
+        // Ensure dates are UTC for PostgreSQL compatibility
+        var fechaInicio = DateTime.SpecifyKind(request.FechaInicio, DateTimeKind.Utc);
+        var fechaFin = DateTime.SpecifyKind(request.FechaFin, DateTimeKind.Utc);
+
         _logger.LogInformation(
             "Generating automated report for period {Start} - {End}",
-            request.FechaInicio,
-            request.FechaFin);
+            fechaInicio,
+            fechaFin);
 
         try
         {
             // 1. Calculate statistics
             var statistics = await CalculateStatisticsAsync(
-                request.FechaInicio,
-                request.FechaFin,
+                fechaInicio,
+                fechaFin,
                 cancellationToken);
 
             // 2. Get template
@@ -143,7 +153,7 @@ public class AutomatedReportService : IAutomatedReportService
 
             // 3. Get sample incidents for narrative
             var incidents = await _context.ReportesIncidencia
-                .Where(r => r.CreatedAt >= request.FechaInicio && r.CreatedAt < request.FechaFin)
+                .Where(r => r.CreatedAt >= fechaInicio && r.CreatedAt < fechaFin)
                 .OrderByDescending(r => r.CreatedAt)
                 .Take(10)
                 .Select(r => new { r.HechosReportados, r.AccionesRealizadas })
@@ -155,8 +165,8 @@ public class AutomatedReportService : IAutomatedReportService
                 Statistics = statistics,
                 HechosReportados = incidents.Select(i => i.HechosReportados).ToList(),
                 AccionesRealizadas = incidents.Select(i => i.AccionesRealizadas).ToList(),
-                FechaInicio = request.FechaInicio,
-                FechaFin = request.FechaFin
+                FechaInicio = fechaInicio,
+                FechaFin = fechaFin
             };
 
             var narrativeResponse = await _aiService.GenerateNarrativeAsync(narrativeRequest, cancellationToken);
@@ -166,14 +176,14 @@ public class AutomatedReportService : IAutomatedReportService
                 template?.ContenidoMarkdown,
                 statistics,
                 narrativeResponse.Narrativa,
-                request.FechaInicio,
-                request.FechaFin);
+                fechaInicio,
+                fechaFin);
 
             // 6. Create report entity
             var report = new ReporteAutomatizado
             {
-                FechaInicio = request.FechaInicio,
-                FechaFin = request.FechaFin,
+                FechaInicio = fechaInicio,
+                FechaFin = fechaFin,
                 ContenidoMarkdown = markdown,
                 Estadisticas = JsonSerializer.Serialize(statistics, JsonOptions),
                 ModeloReporteId = template?.Id,
@@ -212,7 +222,7 @@ public class AutomatedReportService : IAutomatedReportService
                 AuditCodes.AUTO_REPORT_GEN,
                 report.Id,
                 "ReporteAutomatizado",
-                JsonSerializer.Serialize(new { request.FechaInicio, request.FechaFin, statistics.TotalReportes, UserId = userId }),
+                JsonSerializer.Serialize(new { fechaInicio, fechaFin, statistics.TotalReportes, UserId = userId }),
                 null,
                 cancellationToken);
 
@@ -229,7 +239,7 @@ public class AutomatedReportService : IAutomatedReportService
                 AuditCodes.AUTO_REPORT_FAIL,
                 null,
                 "ReporteAutomatizado",
-                JsonSerializer.Serialize(new { Error = ex.Message, request.FechaInicio, request.FechaFin, UserId = userId }),
+                JsonSerializer.Serialize(new { Error = ex.Message, fechaInicio, fechaFin, UserId = userId }),
                 null,
                 cancellationToken);
 
@@ -524,9 +534,13 @@ public class AutomatedReportService : IAutomatedReportService
         DateTime fechaFin,
         CancellationToken cancellationToken = default)
     {
+        // Ensure dates are UTC for PostgreSQL compatibility
+        var fechaInicioUtc = DateTime.SpecifyKind(fechaInicio, DateTimeKind.Utc);
+        var fechaFinUtc = DateTime.SpecifyKind(fechaFin, DateTimeKind.Utc);
+
         var reports = await _context.ReportesIncidencia
             .Include(r => r.Zona)
-            .Where(r => r.CreatedAt >= fechaInicio && r.CreatedAt < fechaFin)
+            .Where(r => r.CreatedAt >= fechaInicioUtc && r.CreatedAt < fechaFinUtc)
             .ToListAsync(cancellationToken);
 
         var stats = new ReportStatisticsDto

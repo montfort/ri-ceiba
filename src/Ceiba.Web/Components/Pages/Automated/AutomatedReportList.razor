@@ -251,8 +251,8 @@
     private string? GenerateError { get; set; }
     private GenerateReportRequestDto GenerateRequest { get; set; } = new()
     {
-        FechaInicio = DateTime.Today.AddDays(-1),
-        FechaFin = DateTime.Today,
+        FechaInicio = DateTime.UtcNow.Date.AddDays(-1),
+        FechaFin = DateTime.UtcNow.Date,
         EnviarEmail = true
     };
 
@@ -310,10 +310,11 @@
 
     private void ShowGenerateModal()
     {
+        var today = DateTime.UtcNow.Date;
         GenerateRequest = new GenerateReportRequestDto
         {
-            FechaInicio = DateTime.Today.AddDays(-1),
-            FechaFin = DateTime.Today,
+            FechaInicio = today.AddDays(-1),
+            FechaFin = today,
             EnviarEmail = true
         };
         GenerateError = null;
