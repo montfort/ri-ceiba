@@ -606,6 +606,14 @@ public class CatalogAdminService : ICatalogAdminService
             throw new ArgumentException($"Campo inválido: {createDto.Campo}. Valores válidos: {string.Join(", ", SugerenciaCampos.All)}");
         }
 
+        // Check for duplicate (campo + valor must be unique)
+        var exists = await _context.CatalogosSugerencia
+            .AnyAsync(s => s.Campo == createDto.Campo && s.Valor == createDto.Valor, cancellationToken);
+        if (exists)
+        {
+            throw new InvalidOperationException($"Ya existe una sugerencia con el valor '{createDto.Valor}' para el campo '{SugerenciaCampos.GetDisplayName(createDto.Campo)}'.");
+        }
+
         var sugerencia = new CatalogoSugerencia
         {
             Campo = createDto.Campo,
@@ -617,7 +625,16 @@ public class CatalogAdminService : ICatalogAdminService
         };
 
         _context.CatalogosSugerencia.Add(sugerencia);
-        await _context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Error saving suggestion: {Campo}={Valor}", createDto.Campo, createDto.Valor);
+            throw new InvalidOperationException($"Error al guardar la sugerencia: {ex.InnerException?.Message ?? ex.Message}");
+        }
 
         await _auditService.LogAsync(
             AuditCodes.CATALOG_CREATE,

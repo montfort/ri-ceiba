@@ -314,6 +314,13 @@
             return;
         }
 
+        if (CurrentUserId == Guid.Empty)
+        {
+            ModalError = "Error de autenticación. Por favor, cierre sesión y vuelva a iniciarla.";
+            Logger.LogWarning("Attempted to save suggestion with empty UserId");
+            return;
+        }
+
         try
         {
             var dto = new CreateSugerenciaDto
@@ -323,6 +330,9 @@
                 Orden = FormOrden,
                 Activo = FormActivo
             };
+
+            Logger.LogInformation("Saving suggestion: Campo={Campo}, Valor={Valor}, UserId={UserId}",
+                dto.Campo, dto.Valor, CurrentUserId);
 
             if (EditingId.HasValue)
             {
@@ -338,6 +348,7 @@
         }
         catch (Exception ex)
         {
+            Logger.LogError(ex, "Error saving suggestion");
             ModalError = ex.Message;
         }
     }
