@@ -9,7 +9,8 @@
 
     <select id="@Id"
             class="form-select @(IsInvalid ? "is-invalid" : "")"
-            @bind="CurrentValue"
+            value="@CurrentStringValue"
+            @onchange="OnSelectionChanged"
             disabled="@(Disabled || IsLoading)"
             @attributes="AdditionalAttributes">
         @if (IsLoading)
@@ -25,7 +26,7 @@
             <option value="">@PlaceholderText</option>
             @foreach (var item in Items)
             {
-                <option value="@item.Id">@item.Nombre</option>
+                <option value="@item.Id" selected="@(item.Id == GetIntValue())">@item.Nombre</option>
             }
         }
     </select>
@@ -53,16 +54,39 @@
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private TValue CurrentValue
+    private string CurrentStringValue => Value?.ToString() ?? "";
+
+    private int GetIntValue()
     {
-        get => Value;
-        set
+        if (Value is int intVal) return intVal;
+        if (Value != null && int.TryParse(Value.ToString(), out var parsed)) return parsed;
+        return 0;
+    }
+
+    private async Task OnSelectionChanged(ChangeEventArgs e)
+    {
+        var stringValue = e.Value?.ToString() ?? "";
+
+        TValue newValue;
+        if (typeof(TValue) == typeof(int))
         {
-            if (!EqualityComparer<TValue>.Default.Equals(value, Value))
-            {
-                Value = value;
-                ValueChanged.InvokeAsync(value);
-            }
+            newValue = (TValue)(object)(int.TryParse(stringValue, out var intVal) ? intVal : 0);
+        }
+        else if (typeof(TValue) == typeof(int?))
+        {
+            newValue = string.IsNullOrEmpty(stringValue)
+                ? default!
+                : (TValue)(object)int.Parse(stringValue);
+        }
+        else
+        {
+            newValue = (TValue)(object)stringValue;
+        }
+
+        if (!EqualityComparer<TValue>.Default.Equals(newValue, Value))
+        {
+            Value = newValue;
+            await ValueChanged.InvokeAsync(newValue);
         }
     }
 }
