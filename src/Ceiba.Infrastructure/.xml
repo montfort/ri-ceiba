@@ -231,6 +231,8 @@
             <summary>
             User management service for ADMIN operations.
             US3: FR-021 to FR-026
+            Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
+            when Identity saves changes through CeibaDbContext.
             </summary>
         </member>
         <member name="M:Ceiba.Infrastructure.Services.UserManagementService.ListUsersAsync(Ceiba.Shared.DTOs.UserFilterDto,System.Threading.CancellationToken)">

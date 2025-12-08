@@ -9,23 +9,22 @@ namespace Ceiba.Infrastructure.Services;
 /// <summary>
 /// User management service for ADMIN operations.
 /// US3: FR-021 to FR-026
+/// Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
+/// when Identity saves changes through CeibaDbContext.
 /// </summary>
 public class UserManagementService : IUserManagementService
 {
     private readonly UserManager<IdentityUser<Guid>> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-    private readonly IAuditService _auditService;
     private readonly ILogger<UserManagementService> _logger;
 
     public UserManagementService(
         UserManager<IdentityUser<Guid>> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
-        IAuditService auditService,
         ILogger<UserManagementService> logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
-        _auditService = auditService;
         _logger = logger;
     }
 
@@ -138,16 +137,9 @@ public class UserManagementService : IUserManagementService
             }
         }
 
-        // Audit log
-        await _auditService.LogAsync(
-            AuditCodes.USER_CREATE,
-            null,
-            "Usuario",
-            $"Usuario creado: {user.Email}, Roles: {string.Join(", ", createDto.Roles)}",
-            null,
-            cancellationToken);
-
-        _logger.LogInformation("User {Email} created by admin {AdminId}", user.Email, adminUserId);
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
+        _logger.LogInformation("User {Email} created by admin {AdminId} with roles [{Roles}]",
+            user.Email, adminUserId, string.Join(", ", createDto.Roles));
 
         var roles = await _userManager.GetRolesAsync(user);
         return MapToDto(user, roles.ToList());
@@ -216,15 +208,7 @@ public class UserManagementService : IUserManagementService
             }
         }
 
-        // Audit log
-        await _auditService.LogAsync(
-            AuditCodes.USER_UPDATE,
-            null,
-            "Usuario",
-            $"Usuario actualizado: {user.Email}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("User {Email} updated by admin {AdminId}", user.Email, adminUserId);
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -250,15 +234,7 @@ public class UserManagementService : IUserManagementService
         user.LockoutEnabled = true;
         await _userManager.UpdateAsync(user);
 
-        // Audit log
-        await _auditService.LogAsync(
-            AuditCodes.USER_SUSPEND,
-            null,
-            "Usuario",
-            $"Usuario suspendido: {user.Email}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("User {Email} suspended by admin {AdminId}", user.Email, adminUserId);
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -277,15 +253,7 @@ public class UserManagementService : IUserManagementService
         user.LockoutEnd = null;
         await _userManager.UpdateAsync(user);
 
-        // Audit log
-        await _auditService.LogAsync(
-            AuditCodes.USER_ACTIVATE,
-            null,
-            "Usuario",
-            $"Usuario activado: {user.Email}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("User {Email} activated by admin {AdminId}", user.Email, adminUserId);
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -316,15 +284,7 @@ public class UserManagementService : IUserManagementService
         user.NormalizedUserName = user.Email.ToUpperInvariant();
         await _userManager.UpdateAsync(user);
 
-        // Audit log
-        await _auditService.LogAsync(
-            AuditCodes.USER_DELETE,
-            null,
-            "Usuario",
-            $"Usuario eliminado (soft delete): {user.Email}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("User {UserId} soft-deleted by admin {AdminId}", userId, adminUserId);
     }
 
