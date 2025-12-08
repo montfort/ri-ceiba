@@ -81,6 +81,8 @@ try
     builder.Services.AddScoped<ICatalogAdminService, Ceiba.Infrastructure.Services.CatalogAdminService>();
 
     // Registrar servicios de User Story 4 - Automated Reports (US4)
+    builder.Services.AddHttpClient(); // IHttpClientFactory para pruebas de conexión
+    builder.Services.AddScoped<IAiConfigurationService, AiConfigurationService>();
     builder.Services.AddHttpClient<IAiNarrativeService, AiNarrativeService>();
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IAutomatedReportService, AutomatedReportService>();

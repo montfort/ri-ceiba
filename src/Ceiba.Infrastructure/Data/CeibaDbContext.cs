@@ -43,6 +43,9 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
     public DbSet<ReporteAutomatizado> ReportesAutomatizados => Set<ReporteAutomatizado>();
     public DbSet<ModeloReporte> ModelosReporte => Set<ModeloReporte>();
 
+    // AI Configuration (US4)
+    public DbSet<ConfiguracionIA> ConfiguracionesIA => Set<ConfiguracionIA>();
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

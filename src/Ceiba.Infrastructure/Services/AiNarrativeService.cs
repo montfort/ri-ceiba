@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs;
 using Microsoft.Extensions.Configuration;
@@ -10,42 +11,43 @@ namespace Ceiba.Infrastructure.Services;
 
 /// <summary>
 /// Provider-agnostic AI narrative generation service.
-/// Supports OpenAI, Azure OpenAI, and can be extended for local LLMs.
+/// Supports OpenAI, Azure OpenAI, Ollama, and local LLMs.
+/// Configuration is loaded from database (via IAiConfigurationService) with fallback to appsettings.
 /// US4: Reportes Automatizados Diarios con IA.
 /// </summary>
 public class AiNarrativeService : IAiNarrativeService
 {
     private readonly HttpClient _httpClient;
+    private readonly IAiConfigurationService _configService;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AiNarrativeService> _logger;
-    private readonly string _provider;
-    private readonly string _apiKey;
-    private readonly string _model;
-    private readonly string _endpoint;
+
+    // Cached configuration for performance
+    private ConfiguracionIA? _cachedConfig;
+    private DateTime _configCacheExpiry = DateTime.MinValue;
+    private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(5);
 
     public AiNarrativeService(
         HttpClient httpClient,
+        IAiConfigurationService configService,
         IConfiguration configuration,
         ILogger<AiNarrativeService> logger)
     {
         _httpClient = httpClient;
+        _configService = configService;
         _configuration = configuration;
         _logger = logger;
-
-        // Load configuration
-        _provider = configuration["AI:Provider"] ?? "OpenAI";
-        _apiKey = configuration["AI:ApiKey"] ?? "";
-        _model = configuration["AI:Model"] ?? "gpt-4";
-        _endpoint = configuration["AI:Endpoint"] ?? "https://api.openai.com/v1/chat/completions";
     }
 
-    public string ProviderName => _provider;
+    public string ProviderName => GetCachedConfigSync()?.Proveedor ?? _configuration["AI:Provider"] ?? "OpenAI";
 
     public async Task<NarrativeResponseDto> GenerateNarrativeAsync(
         NarrativeRequestDto request,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_apiKey))
+        var config = await GetConfigurationAsync(cancellationToken);
+
+        if (config == null || string.IsNullOrEmpty(config.ApiKey) && RequiresApiKey(config.Proveedor))
         {
             _logger.LogWarning("AI API key not configured. Returning fallback narrative.");
             return CreateFallbackNarrative(request);
@@ -55,12 +57,12 @@ public class AiNarrativeService : IAiNarrativeService
         {
             var prompt = BuildPrompt(request);
 
-            var response = _provider.ToLower() switch
+            var response = config.Proveedor.ToLower() switch
             {
-                "openai" => await CallOpenAiAsync(prompt, cancellationToken),
-                "azureopenai" => await CallAzureOpenAiAsync(prompt, cancellationToken),
-                "local" => await CallLocalLlmAsync(prompt, cancellationToken),
-                _ => await CallOpenAiAsync(prompt, cancellationToken)
+                "openai" => await CallOpenAiAsync(config, prompt, cancellationToken),
+                "azureopenai" => await CallAzureOpenAiAsync(config, prompt, cancellationToken),
+                "local" or "ollama" => await CallLocalLlmAsync(config, prompt, cancellationToken),
+                _ => await CallOpenAiAsync(config, prompt, cancellationToken)
             };
 
             return response;
@@ -74,14 +76,26 @@ public class AiNarrativeService : IAiNarrativeService
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_apiKey))
+        var config = await GetConfigurationAsync(cancellationToken);
+
+        if (config == null)
+            return false;
+
+        if (RequiresApiKey(config.Proveedor) && string.IsNullOrEmpty(config.ApiKey))
             return false;
 
         try
         {
-            // Simple health check - just verify we can reach the endpoint
-            using var request = new HttpRequestMessage(HttpMethod.Head, _endpoint);
-            request.Headers.Add("Authorization", $"Bearer {_apiKey}");
+            var endpoint = GetEndpoint(config);
+            using var request = new HttpRequestMessage(HttpMethod.Head, endpoint);
+
+            if (!string.IsNullOrEmpty(config.ApiKey))
+            {
+                if (config.Proveedor.ToLower() == "azureopenai")
+                    request.Headers.Add("api-key", config.ApiKey);
+                else
+                    request.Headers.Add("Authorization", $"Bearer {config.ApiKey}");
+            }
 
             var response = await _httpClient.SendAsync(request, cancellationToken);
             return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.MethodNotAllowed;
@@ -90,6 +104,72 @@ public class AiNarrativeService : IAiNarrativeService
         {
             return false;
         }
+    }
+
+    private async Task<ConfiguracionIA?> GetConfigurationAsync(CancellationToken cancellationToken)
+    {
+        // Check cache
+        if (_cachedConfig != null && DateTime.UtcNow < _configCacheExpiry)
+        {
+            return _cachedConfig;
+        }
+
+        // Load from database
+        var dbConfig = await _configService.GetActiveConfigurationAsync(cancellationToken);
+
+        if (dbConfig != null)
+        {
+            _cachedConfig = dbConfig;
+            _configCacheExpiry = DateTime.UtcNow.Add(CacheDuration);
+            return dbConfig;
+        }
+
+        // Fallback to appsettings configuration
+        var fallbackConfig = new ConfiguracionIA
+        {
+            Proveedor = _configuration["AI:Provider"] ?? "OpenAI",
+            ApiKey = _configuration["AI:ApiKey"] ?? "",
+            Modelo = _configuration["AI:Model"] ?? "gpt-4",
+            Endpoint = _configuration["AI:Endpoint"] ?? "https://api.openai.com/v1/chat/completions",
+            AzureEndpoint = _configuration["AI:AzureEndpoint"],
+            AzureApiVersion = _configuration["AI:AzureApiVersion"] ?? "2024-02-15-preview",
+            LocalEndpoint = _configuration["AI:LocalEndpoint"] ?? "http://localhost:11434/api/generate",
+            MaxTokens = int.TryParse(_configuration["AI:MaxTokens"], out var tokens) ? tokens : 1000,
+            Temperature = double.TryParse(_configuration["AI:Temperature"], out var temp) ? temp : 0.7
+        };
+
+        _cachedConfig = fallbackConfig;
+        _configCacheExpiry = DateTime.UtcNow.Add(CacheDuration);
+        return fallbackConfig;
+    }
+
+    private ConfiguracionIA? GetCachedConfigSync()
+    {
+        if (_cachedConfig != null && DateTime.UtcNow < _configCacheExpiry)
+        {
+            return _cachedConfig;
+        }
+        return null;
+    }
+
+    private static bool RequiresApiKey(string provider)
+    {
+        return provider.ToLower() switch
+        {
+            "openai" or "azureopenai" => true,
+            _ => false
+        };
+    }
+
+    private static string GetEndpoint(ConfiguracionIA config)
+    {
+        return config.Proveedor.ToLower() switch
+        {
+            "openai" => config.Endpoint ?? "https://api.openai.com/v1/chat/completions",
+            "azureopenai" => config.AzureEndpoint ?? config.Endpoint ?? "",
+            "local" or "ollama" => config.LocalEndpoint ?? "http://localhost:11434/api/generate",
+            _ => config.Endpoint ?? "https://api.openai.com/v1/chat/completions"
+        };
     }
 
     private string BuildPrompt(NarrativeRequestDto request)
@@ -143,22 +223,27 @@ public class AiNarrativeService : IAiNarrativeService
         return sb.ToString();
     }
 
-    private async Task<NarrativeResponseDto> CallOpenAiAsync(string prompt, CancellationToken cancellationToken)
+    private async Task<NarrativeResponseDto> CallOpenAiAsync(
+        ConfiguracionIA config,
+        string prompt,
+        CancellationToken cancellationToken)
     {
+        var endpoint = config.Endpoint ?? "https://api.openai.com/v1/chat/completions";
+
         var requestBody = new
         {
-            model = _model,
+            model = config.Modelo,
             messages = new[]
             {
                 new { role = "system", content = "Eres un analista de seguridad pública especializado en género que genera reportes ejecutivos." },
                 new { role = "user", content = prompt }
             },
-            max_tokens = 1000,
-            temperature = 0.7
+            max_tokens = config.MaxTokens,
+            temperature = config.Temperature
         };
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, _endpoint);
-        request.Headers.Add("Authorization", $"Bearer {_apiKey}");
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        request.Headers.Add("Authorization", $"Bearer {config.ApiKey}");
         request.Content = new StringContent(
             JsonSerializer.Serialize(requestBody),
             Encoding.UTF8,
@@ -193,11 +278,13 @@ public class AiNarrativeService : IAiNarrativeService
         };
     }
 
-    private async Task<NarrativeResponseDto> CallAzureOpenAiAsync(string prompt, CancellationToken cancellationToken)
+    private async Task<NarrativeResponseDto> CallAzureOpenAiAsync(
+        ConfiguracionIA config,
+        string prompt,
+        CancellationToken cancellationToken)
     {
-        // Azure OpenAI uses a slightly different endpoint format
-        var azureEndpoint = _configuration["AI:AzureEndpoint"] ?? _endpoint;
-        var apiVersion = _configuration["AI:AzureApiVersion"] ?? "2024-02-15-preview";
+        var azureEndpoint = config.AzureEndpoint ?? config.Endpoint ?? "";
+        var apiVersion = config.AzureApiVersion ?? "2024-02-15-preview";
 
         var requestBody = new
         {
@@ -206,12 +293,12 @@ public class AiNarrativeService : IAiNarrativeService
                 new { role = "system", content = "Eres un analista de seguridad pública especializado en género que genera reportes ejecutivos." },
                 new { role = "user", content = prompt }
             },
-            max_tokens = 1000,
-            temperature = 0.7
+            max_tokens = config.MaxTokens,
+            temperature = config.Temperature
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{azureEndpoint}?api-version={apiVersion}");
-        request.Headers.Add("api-key", _apiKey);
+        request.Headers.Add("api-key", config.ApiKey);
         request.Content = new StringContent(
             JsonSerializer.Serialize(requestBody),
             Encoding.UTF8,
@@ -246,42 +333,95 @@ public class AiNarrativeService : IAiNarrativeService
         };
     }
 
-    private async Task<NarrativeResponseDto> CallLocalLlmAsync(string prompt, CancellationToken cancellationToken)
+    private async Task<NarrativeResponseDto> CallLocalLlmAsync(
+        ConfiguracionIA config,
+        string prompt,
+        CancellationToken cancellationToken)
     {
-        // Local LLM endpoint (e.g., Ollama, LM Studio)
-        var localEndpoint = _configuration["AI:LocalEndpoint"] ?? "http://localhost:11434/api/generate";
+        var localEndpoint = config.LocalEndpoint ?? "http://localhost:11434/api/generate";
 
-        var requestBody = new
+        // Detect if it's Ollama based on endpoint
+        bool isOllama = localEndpoint.Contains("11434") || localEndpoint.Contains("ollama") ||
+                        config.Proveedor.ToLower() == "ollama";
+
+        if (isOllama)
         {
-            model = _model,
-            prompt = prompt,
-            stream = false
-        };
+            var requestBody = new
+            {
+                model = config.Modelo,
+                prompt = prompt,
+                stream = false
+            };
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, localEndpoint);
-        request.Content = new StringContent(
-            JsonSerializer.Serialize(requestBody),
-            Encoding.UTF8,
-            "application/json");
+            using var request = new HttpRequestMessage(HttpMethod.Post, localEndpoint);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(requestBody),
+                Encoding.UTF8,
+                "application/json");
 
-        var response = await _httpClient.SendAsync(request, cancellationToken);
-        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogError("Local LLM error: {StatusCode} - {Content}", response.StatusCode, responseContent);
-            throw new Exception($"Local LLM error: {response.StatusCode}");
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Ollama error: {StatusCode} - {Content}", response.StatusCode, responseContent);
+                throw new Exception($"Ollama error: {response.StatusCode}");
+            }
+
+            using var doc = JsonDocument.Parse(responseContent);
+            var narrative = doc.RootElement.GetProperty("response").GetString() ?? "";
+
+            return new NarrativeResponseDto
+            {
+                Narrativa = narrative,
+                Success = true,
+                TokensUsed = 0
+            };
         }
-
-        using var doc = JsonDocument.Parse(responseContent);
-        var narrative = doc.RootElement.GetProperty("response").GetString() ?? "";
-
-        return new NarrativeResponseDto
+        else
         {
-            Narrativa = narrative,
-            Success = true,
-            TokensUsed = 0 // Local LLMs typically don't report tokens
-        };
+            // Generic OpenAI-compatible local LLM
+            var requestBody = new
+            {
+                model = config.Modelo,
+                messages = new[]
+                {
+                    new { role = "system", content = "Eres un analista de seguridad pública especializado en género que genera reportes ejecutivos." },
+                    new { role = "user", content = prompt }
+                },
+                max_tokens = config.MaxTokens,
+                temperature = config.Temperature
+            };
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, localEndpoint);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(requestBody),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("Local LLM error: {StatusCode} - {Content}", response.StatusCode, responseContent);
+                throw new Exception($"Local LLM error: {response.StatusCode}");
+            }
+
+            using var doc = JsonDocument.Parse(responseContent);
+            var narrative = doc.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString() ?? "";
+
+            return new NarrativeResponseDto
+            {
+                Narrativa = narrative,
+                Success = true,
+                TokensUsed = 0
+            };
+        }
     }
 
     private NarrativeResponseDto CreateFallbackNarrative(NarrativeRequestDto request)

@@ -1,0 +1,530 @@
+@page "/admin/ai-config"
+@using Ceiba.Core.Entities
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@using System.Security.Claims
+@inject IAiConfigurationService ConfigService
+@inject NavigationManager Navigation
+@inject ILogger<AiConfigManager> Logger
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>Configuracion de IA</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="bi bi-robot me-2"></i>Configuracion de Inteligencia Artificial</h2>
+                    <p class="text-muted">Configure las credenciales y parametros del servicio de IA para reportes automatizados</p>
+                </div>
+                <button class="btn btn-outline-secondary" @onclick="NavigateToAdmin">
+                    <i class="bi bi-arrow-left me-1"></i>Volver
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@ErrorMessage
+            <button type="button" class="btn-close" @onclick="() => ErrorMessage = null"></button>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@SuccessMessage
+            <button type="button" class="btn-close" @onclick="() => SuccessMessage = null"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- Configuration Form -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Configuracion del Proveedor</h5>
+                </div>
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-2">Cargando configuracion...</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <EditForm Model="@Config" OnValidSubmit="SaveConfigurationAsync">
+                            <DataAnnotationsValidator />
+
+                            <!-- Provider Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Proveedor de IA</label>
+                                <div class="row g-3">
+                                    @foreach (var provider in AiProviders.All)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="card @(Config.Proveedor == provider.Id ? "border-primary" : "border-secondary") cursor-pointer"
+                                                 @onclick="() => SelectProvider(provider.Id)"
+                                                 style="cursor: pointer;">
+                                                <div class="card-body py-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio"
+                                                               name="provider"
+                                                               id="@provider.Id"
+                                                               checked="@(Config.Proveedor == provider.Id)"
+                                                               @onchange="() => SelectProvider(provider.Id)" />
+                                                        <label class="form-check-label fw-bold" for="@provider.Id">
+                                                            @provider.Name
+                                                        </label>
+                                                    </div>
+                                                    <small class="text-muted">@provider.Description</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Provider-specific fields -->
+                            @{
+                                var selectedProvider = AiProviders.All.FirstOrDefault(p => p.Id == Config.Proveedor);
+                            }
+
+                            @if (selectedProvider?.RequiresApiKey == true)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">API Key <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="@(ShowApiKey ? "text" : "password")"
+                                               class="form-control"
+                                               @bind="Config.ApiKey"
+                                               placeholder="Ingrese la API Key del proveedor" />
+                                        <button class="btn btn-outline-secondary" type="button" @onclick="ToggleApiKeyVisibility">
+                                            <i class="bi @(ShowApiKey ? "bi-eye-slash" : "bi-eye")"></i>
+                                        </button>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(MaskedApiKey))
+                                    {
+                                        <small class="text-muted">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            API Key actual: @MaskedApiKey
+                                        </small>
+                                    }
+                                </div>
+                            }
+
+                            @if (selectedProvider?.RequiresAzureConfig == true)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">Azure Endpoint <span class="text-danger">*</span></label>
+                                    <input type="url" class="form-control" @bind="Config.AzureEndpoint"
+                                           placeholder="https://your-resource.openai.azure.com/openai/deployments/your-deployment/chat/completions" />
+                                    <small class="text-muted">URL completa del deployment de Azure OpenAI</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">API Version</label>
+                                    <input type="text" class="form-control" @bind="Config.AzureApiVersion"
+                                           placeholder="2024-02-15-preview" />
+                                </div>
+                            }
+
+                            @if (selectedProvider?.RequiresLocalEndpoint == true)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">Endpoint Local <span class="text-danger">*</span></label>
+                                    <input type="url" class="form-control" @bind="Config.LocalEndpoint"
+                                           placeholder="@selectedProvider.DefaultEndpoint" />
+                                    <small class="text-muted">URL del servidor LLM local</small>
+                                </div>
+                            }
+
+                            @if (Config.Proveedor == AiProviders.OpenAI)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">Endpoint (opcional)</label>
+                                    <input type="url" class="form-control" @bind="Config.Endpoint"
+                                           placeholder="https://api.openai.com/v1/chat/completions" />
+                                    <small class="text-muted">Solo cambiar si usa un proxy o endpoint alternativo</small>
+                                </div>
+                            }
+
+                            <!-- Model Selection -->
+                            <div class="mb-3">
+                                <label class="form-label">Modelo <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <select class="form-select" @bind="Config.Modelo">
+                                        @if (selectedProvider != null)
+                                        {
+                                            @foreach (var model in selectedProvider.DefaultModels)
+                                            {
+                                                <option value="@model">@model</option>
+                                            }
+                                        }
+                                    </select>
+                                    <input type="text" class="form-control" @bind="CustomModel"
+                                           placeholder="O escriba un modelo personalizado" />
+                                </div>
+                                <small class="text-muted">Seleccione un modelo predefinido o escriba uno personalizado</small>
+                            </div>
+
+                            <!-- Advanced Settings -->
+                            <div class="accordion mb-4" id="advancedSettings">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
+                                            <i class="bi bi-sliders me-2"></i>Configuracion Avanzada
+                                        </button>
+                                    </h2>
+                                    <div id="advancedCollapse" class="accordion-collapse collapse">
+                                        <div class="accordion-body">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Max Tokens</label>
+                                                    <input type="number" class="form-control" @bind="Config.MaxTokens"
+                                                           min="100" max="32000" />
+                                                    <small class="text-muted">Maximo de tokens en la respuesta (100-32000)</small>
+                                                </div>
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label">Temperature</label>
+                                                    <input type="number" class="form-control" @bind="Config.Temperature"
+                                                           min="0" max="2" step="0.1" />
+                                                    <small class="text-muted">Creatividad de respuestas (0-2)</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        <span>Guardando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        <span>Guardar Configuracion</span>
+                                    }
+                                </button>
+                                <button type="button" class="btn btn-outline-info" @onclick="TestConnectionAsync" disabled="@IsTesting">
+                                    @if (IsTesting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        <span>Probando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-lightning me-1"></i>
+                                        <span>Probar Conexion</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Panel -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Estado Actual</h5>
+                </div>
+                <div class="card-body">
+                    @if (CurrentConfig != null)
+                    {
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <strong>Proveedor:</strong>
+                                <span class="badge bg-primary ms-2">@CurrentConfig.Proveedor</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>Modelo:</strong>
+                                <span class="text-muted">@CurrentConfig.Modelo</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong>API Key:</strong>
+                                @if (!string.IsNullOrEmpty(CurrentConfig.ApiKey))
+                                {
+                                    <span class="badge bg-success ms-2">Configurada</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning ms-2">No configurada</span>
+                                }
+                            </li>
+                            <li class="mb-2">
+                                <strong>Ultima actualizacion:</strong>
+                                <br />
+                                <small class="text-muted">
+                                    @((CurrentConfig.UpdatedAt ?? CurrentConfig.CreatedAt).ToLocalTime().ToString("dd/MM/yyyy HH:mm"))
+                                </small>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-exclamation-circle me-1"></i>
+                            No hay configuracion de IA activa. Los reportes automatizados usaran el resumen basico.
+                        </p>
+                    }
+                </div>
+            </div>
+
+            <!-- Test Result Panel -->
+            @if (TestResult != null)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header @(TestResult.Success ? "bg-success" : "bg-danger") text-white">
+                        <h5 class="mb-0">
+                            <i class="bi @(TestResult.Success ? "bi-check-circle" : "bi-x-circle") me-2"></i>
+                            Resultado de Prueba
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">@TestResult.Message</p>
+                    </div>
+                </div>
+            }
+
+            <!-- Help Panel -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>Ayuda</h5>
+                </div>
+                <div class="card-body">
+                    <h6>OpenAI</h6>
+                    <p class="small">Obtenga su API Key en <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
+
+                    <h6>Azure OpenAI</h6>
+                    <p class="small">Requiere una suscripcion de Azure con el servicio de OpenAI habilitado.</p>
+
+                    <h6>Ollama</h6>
+                    <p class="small">Instale Ollama localmente desde <a href="https://ollama.ai" target="_blank">ollama.ai</a> y ejecute un modelo como <code>ollama run llama2</code></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private ConfiguracionIA Config { get; set; } = new()
+    {
+        Proveedor = AiProviders.OpenAI,
+        Modelo = "gpt-4",
+        MaxTokens = 1000,
+        Temperature = 0.7
+    };
+
+    private ConfiguracionIA? CurrentConfig { get; set; }
+    private string? CustomModel { get; set; }
+    private string? MaskedApiKey { get; set; }
+    private bool ShowApiKey { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+    private bool IsSaving { get; set; }
+    private bool IsTesting { get; set; }
+
+    private string? ErrorMessage { get; set; }
+    private string? SuccessMessage { get; set; }
+    private AiConnectionTestResultDto? TestResult { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConfigurationAsync();
+    }
+
+    private async Task LoadConfigurationAsync()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            CurrentConfig = await ConfigService.GetActiveConfigurationAsync();
+
+            if (CurrentConfig != null)
+            {
+                Config = new ConfiguracionIA
+                {
+                    Id = CurrentConfig.Id,
+                    Proveedor = CurrentConfig.Proveedor,
+                    Modelo = CurrentConfig.Modelo,
+                    Endpoint = CurrentConfig.Endpoint,
+                    AzureEndpoint = CurrentConfig.AzureEndpoint,
+                    AzureApiVersion = CurrentConfig.AzureApiVersion ?? "2024-02-15-preview",
+                    LocalEndpoint = CurrentConfig.LocalEndpoint,
+                    MaxTokens = CurrentConfig.MaxTokens,
+                    Temperature = CurrentConfig.Temperature
+                };
+
+                // Don't copy the API key, but show masked version
+                if (!string.IsNullOrEmpty(CurrentConfig.ApiKey))
+                {
+                    MaskedApiKey = MaskApiKey(CurrentConfig.ApiKey);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading AI configuration");
+            ErrorMessage = "Error al cargar la configuracion de IA.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void SelectProvider(string providerId)
+    {
+        Config.Proveedor = providerId;
+
+        // Set default model for the provider
+        var provider = AiProviders.All.FirstOrDefault(p => p.Id == providerId);
+        if (provider != null && provider.DefaultModels.Length > 0)
+        {
+            Config.Modelo = provider.DefaultModels[0];
+        }
+
+        // Set default endpoint for local providers
+        if (!string.IsNullOrEmpty(provider?.DefaultEndpoint))
+        {
+            if (provider.RequiresLocalEndpoint)
+            {
+                Config.LocalEndpoint = provider.DefaultEndpoint;
+            }
+            else if (providerId == AiProviders.OpenAI)
+            {
+                Config.Endpoint = provider.DefaultEndpoint;
+            }
+        }
+
+        TestResult = null;
+        StateHasChanged();
+    }
+
+    private async Task SaveConfigurationAsync()
+    {
+        IsSaving = true;
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        try
+        {
+            // Use custom model if provided
+            if (!string.IsNullOrWhiteSpace(CustomModel))
+            {
+                Config.Modelo = CustomModel;
+            }
+
+            // If API key is empty and we have a current config, keep the existing key
+            if (string.IsNullOrEmpty(Config.ApiKey) && CurrentConfig != null && !string.IsNullOrEmpty(CurrentConfig.ApiKey))
+            {
+                Config.ApiKey = CurrentConfig.ApiKey;
+            }
+
+            var userId = await GetCurrentUserIdAsync();
+            await ConfigService.SaveConfigurationAsync(Config, userId);
+
+            SuccessMessage = "Configuracion guardada exitosamente.";
+            await LoadConfigurationAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving AI configuration");
+            ErrorMessage = $"Error al guardar la configuracion: {ex.Message}";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private async Task TestConnectionAsync()
+    {
+        IsTesting = true;
+        TestResult = null;
+        ErrorMessage = null;
+
+        try
+        {
+            // Use custom model if provided
+            var testConfig = new ConfiguracionIA
+            {
+                Proveedor = Config.Proveedor,
+                ApiKey = string.IsNullOrEmpty(Config.ApiKey) ? CurrentConfig?.ApiKey : Config.ApiKey,
+                Modelo = !string.IsNullOrWhiteSpace(CustomModel) ? CustomModel : Config.Modelo,
+                Endpoint = Config.Endpoint,
+                AzureEndpoint = Config.AzureEndpoint,
+                AzureApiVersion = Config.AzureApiVersion,
+                LocalEndpoint = Config.LocalEndpoint,
+                MaxTokens = Config.MaxTokens,
+                Temperature = Config.Temperature
+            };
+
+            var (success, message) = await ConfigService.TestConnectionAsync(testConfig);
+
+            TestResult = new AiConnectionTestResultDto
+            {
+                Success = success,
+                Message = message
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error testing AI connection");
+            TestResult = new AiConnectionTestResultDto
+            {
+                Success = false,
+                Message = $"Error al probar la conexion: {ex.Message}"
+            };
+        }
+        finally
+        {
+            IsTesting = false;
+        }
+    }
+
+    private void ToggleApiKeyVisibility()
+    {
+        ShowApiKey = !ShowApiKey;
+    }
+
+    private async Task<Guid> GetCurrentUserIdAsync()
+    {
+        if (AuthState == null) return Guid.Empty;
+
+        var state = await AuthState;
+        var userIdClaim = state.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
+    }
+
+    private static string MaskApiKey(string apiKey)
+    {
+        if (string.IsNullOrEmpty(apiKey) || apiKey.Length < 8)
+            return "****";
+
+        return $"{apiKey.Substring(0, 4)}...{apiKey.Substring(apiKey.Length - 4)}";
+    }
+
+    private void NavigateToAdmin() => Navigation.NavigateTo("/admin");
+}
