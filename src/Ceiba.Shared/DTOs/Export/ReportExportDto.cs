@@ -12,7 +12,14 @@ public record ReportExportDto
     public string Estado { get; init; } = string.Empty;
     public DateTime FechaCreacion { get; init; }
     public DateTime? FechaEntrega { get; init; }
+    /// <summary>
+    /// Email del usuario creador (para mostrar en encabezado del PDF)
+    /// </summary>
     public string UsuarioCreador { get; init; } = string.Empty;
+    /// <summary>
+    /// ID (GUID) del usuario creador (para información de auditoría)
+    /// </summary>
+    public string UsuarioCreadorId { get; init; } = string.Empty;
 
     // Demographic Data
     public string Sexo { get; init; } = string.Empty;

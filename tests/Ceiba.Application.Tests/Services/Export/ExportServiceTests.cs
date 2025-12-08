@@ -19,6 +19,7 @@ public class ExportServiceTests
     private readonly Mock<IReportRepository> _mockReportRepo;
     private readonly Mock<IPdfGenerator> _mockPdfGenerator;
     private readonly Mock<IJsonExporter> _mockJsonExporter;
+    private readonly Mock<IUserManagementService> _mockUserService;
     private readonly ExportService _exportService;
 
     public ExportServiceTests()
@@ -26,11 +27,13 @@ public class ExportServiceTests
         _mockReportRepo = new Mock<IReportRepository>();
         _mockPdfGenerator = new Mock<IPdfGenerator>();
         _mockJsonExporter = new Mock<IJsonExporter>();
+        _mockUserService = new Mock<IUserManagementService>();
 
         _exportService = new ExportService(
             _mockReportRepo.Object,
             _mockPdfGenerator.Object,
-            _mockJsonExporter.Object
+            _mockJsonExporter.Object,
+            _mockUserService.Object
         );
     }
 

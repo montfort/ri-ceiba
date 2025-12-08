@@ -13,15 +13,18 @@ public class ExportService : IExportService
     private readonly IReportRepository _reportRepository;
     private readonly IPdfGenerator _pdfGenerator;
     private readonly IJsonExporter _jsonExporter;
+    private readonly IUserManagementService _userService;
 
     public ExportService(
         IReportRepository reportRepository,
         IPdfGenerator pdfGenerator,
-        IJsonExporter jsonExporter)
+        IJsonExporter jsonExporter,
+        IUserManagementService userService)
     {
         _reportRepository = reportRepository;
         _pdfGenerator = pdfGenerator;
         _jsonExporter = jsonExporter;
+        _userService = userService;
     }
 
     /// <summary>
@@ -68,8 +71,12 @@ public class ExportService : IExportService
             throw new KeyNotFoundException("No reports found with the provided IDs");
         }
 
-        // Map entities to DTOs
-        var exportDtos = reports.Select(MapToExportDto).ToList();
+        // Map entities to DTOs (need to resolve user emails)
+        var exportDtos = new List<ReportExportDto>();
+        foreach (var report in reports)
+        {
+            exportDtos.Add(await MapToExportDtoAsync(report));
+        }
 
         // Generate export based on format
         byte[] fileData;
@@ -140,8 +147,8 @@ public class ExportService : IExportService
             throw new KeyNotFoundException($"Report with ID {reportId} not found");
         }
 
-        // Map entity to DTO
-        var exportDto = MapToExportDto(report);
+        // Map entity to DTO (need to resolve user email)
+        var exportDto = await MapToExportDtoAsync(report);
 
         // Generate export based on format
         byte[] fileData;
@@ -177,11 +184,27 @@ public class ExportService : IExportService
 
     /// <summary>
     /// Maps ReporteIncidencia entity to ReportExportDto
+    /// Resolves user email for display in PDF header
     /// </summary>
-    private static ReportExportDto MapToExportDto(ReporteIncidencia report)
+    private async Task<ReportExportDto> MapToExportDtoAsync(ReporteIncidencia report)
     {
         // Generate folio if not present (format: CEIBA-YYYY-NNNNNN)
         var folio = $"CEIBA-{report.CreatedAt.Year}-{report.Id:D6}";
+
+        // Get user email for display (GUID remains for audit)
+        string usuarioEmail = report.UsuarioId.ToString(); // Fallback to GUID
+        try
+        {
+            var user = await _userService.GetUserByIdAsync(report.UsuarioId);
+            if (user?.Email != null)
+            {
+                usuarioEmail = user.Email;
+            }
+        }
+        catch
+        {
+            // If user lookup fails, keep GUID as fallback
+        }
 
         return new ReportExportDto
         {
@@ -190,7 +213,8 @@ public class ExportService : IExportService
             Estado = report.Estado == 0 ? "Borrador" : "Entregado",
             FechaCreacion = report.CreatedAt,
             FechaEntrega = report.Estado == 1 ? report.UpdatedAt : null,
-            UsuarioCreador = report.UsuarioId.ToString(),
+            UsuarioCreador = usuarioEmail, // Email for header display
+            UsuarioCreadorId = report.UsuarioId.ToString(), // GUID for audit
 
             // Demographic Data
             Sexo = report.Sexo,
@@ -217,7 +241,7 @@ public class ExportService : IExportService
             Traslados = MapTraslados(report.Traslados),
             Observaciones = report.Observaciones,
 
-            // Audit Information (optional)
+            // Audit Information (uses GUID for technical identification)
             FechaUltimaModificacion = report.UpdatedAt,
             UsuarioUltimaModificacion = report.UsuarioId.ToString()
         };

@@ -167,7 +167,7 @@
                                             <td>@report.Delito</td>
                                             <td>@report.Zona.Nombre</td>
                                             <td>
-                                                <small class="text-muted">@report.UsuarioId.ToString()[..8]...</small>
+                                                <small class="text-muted" title="@report.UsuarioId">@(report.UsuarioEmail ?? report.UsuarioId.ToString()[..8] + "...")</small>
                                             </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm" role="group">
@@ -332,8 +332,8 @@
             {
                 Estado = string.IsNullOrWhiteSpace(FilterEstado) ? null : int.Parse(FilterEstado),
                 Delito = string.IsNullOrWhiteSpace(FilterDelito) ? null : FilterDelito,
-                FechaDesde = FilterFechaDesde,
-                FechaHasta = FilterFechaHasta,
+                FechaDesde = FilterFechaDesde.HasValue ? DateTime.SpecifyKind(FilterFechaDesde.Value, DateTimeKind.Utc) : null,
+                FechaHasta = FilterFechaHasta.HasValue ? DateTime.SpecifyKind(FilterFechaHasta.Value.AddDays(1).AddSeconds(-1), DateTimeKind.Utc) : null,
                 Page = CurrentPage,
                 PageSize = PageSize,
                 SortBy = "createdAt",

@@ -11,7 +11,7 @@
 @inject NavigationManager Navigation
 @inject ILogger<ReportForm> Logger
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@attribute [Authorize(Roles = "CREADOR")]
+@attribute [Authorize(Roles = "CREADOR,REVISOR")]
 
 <PageTitle>@(IsEditMode ? "Editar Reporte" : "Nuevo Reporte")</PageTitle>
 
@@ -323,6 +323,7 @@
     private string? ErrorMessage { get; set; }
     private string? SuccessMessage { get; set; }
     private Guid CurrentUserId { get; set; }
+    private bool IsRevisor { get; set; } = false;
 
     // Catalog data
     private List<CatalogItemDto> Zonas { get; set; } = new();
@@ -339,7 +340,7 @@
     {
         try
         {
-            // Get current user ID
+            // Get current user ID and check for REVISOR role
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
@@ -349,6 +350,7 @@
                 return;
             }
             CurrentUserId = userId;
+            IsRevisor = authState.User.IsInRole("REVISOR");
 
             // Load catalogs SEQUENTIALLY to avoid DbContext concurrency issues
             // DbContext is not thread-safe, so we cannot use Task.WhenAll
@@ -384,10 +386,12 @@
     {
         try
         {
-            ExistingReport = await ReportService.GetReportByIdAsync(ReportId!.Value, CurrentUserId, false);
+            ExistingReport = await ReportService.GetReportByIdAsync(ReportId!.Value, CurrentUserId, IsRevisor);
 
-            // Check if user can edit
-            if (ExistingReport.Estado != 0)
+            // Check if user can edit:
+            // - CREADOR can only edit their own reports in Borrador state
+            // - REVISOR can edit any report regardless of state
+            if (!IsRevisor && ExistingReport.Estado != 0)
             {
                 CannotEdit = true;
                 return;
@@ -529,8 +533,8 @@
             {
                 // Update existing report
                 var updateDto = MapToUpdateDto();
-                await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, false);
-                SuccessMessage = "Reporte actualizado exitosamente como borrador.";
+                await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, IsRevisor);
+                SuccessMessage = IsRevisor ? "Reporte actualizado exitosamente." : "Reporte actualizado exitosamente como borrador.";
             }
             else
             {
@@ -569,7 +573,7 @@
         {
             // First update the report
             var updateDto = MapToUpdateDto();
-            await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, false);
+            await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, IsRevisor);
 
             // Then submit it
             await ReportService.SubmitReportAsync(ReportId!.Value, CurrentUserId);

@@ -201,20 +201,21 @@ public class PdfGenerator : IPdfGenerator
                 }
             });
 
-            // Audit Information Section (optional)
-            if (report.FechaUltimaModificacion.HasValue)
+            // Audit Information Section (uses technical IDs for traceability)
+            column.Item().PaddingTop(10).Column(section =>
             {
-                column.Item().PaddingTop(10).Column(section =>
+                section.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
+                section.Item().PaddingTop(5).Text("INFORMACIÓN DE AUDITORÍA").FontSize(10).Bold().FontColor(Colors.Grey.Darken2);
+                // Show user ID (GUID) for audit purposes
+                if (!string.IsNullOrWhiteSpace(report.UsuarioCreadorId))
                 {
-                    section.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
-                    section.Item().PaddingTop(5).Text("INFORMACIÓN DE AUDITORÍA").FontSize(10).Bold().FontColor(Colors.Grey.Darken2);
-                    section.Item().PaddingTop(3).Text($"Última modificación: {report.FechaUltimaModificacion.Value:dd/MM/yyyy HH:mm}").FontSize(8);
-                    if (!string.IsNullOrWhiteSpace(report.UsuarioUltimaModificacion))
-                    {
-                        section.Item().PaddingTop(2).Text($"Usuario: {report.UsuarioUltimaModificacion}").FontSize(8);
-                    }
-                });
-            }
+                    section.Item().PaddingTop(3).Text($"ID Usuario Creador: {report.UsuarioCreadorId}").FontSize(8);
+                }
+                if (report.FechaUltimaModificacion.HasValue)
+                {
+                    section.Item().PaddingTop(2).Text($"Última modificación: {report.FechaUltimaModificacion.Value:dd/MM/yyyy HH:mm}").FontSize(8);
+                }
+            });
         });
     }
 

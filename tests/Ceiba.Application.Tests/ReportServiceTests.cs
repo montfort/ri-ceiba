@@ -19,6 +19,7 @@ public class ReportServiceTests
     private readonly Mock<IReportRepository> _mockRepository;
     private readonly Mock<IAuditService> _mockAuditService;
     private readonly Mock<ICatalogService> _mockCatalogService;
+    private readonly Mock<IUserManagementService> _mockUserService;
     private readonly ReportService _sut;
 
     public ReportServiceTests()
@@ -26,10 +27,12 @@ public class ReportServiceTests
         _mockRepository = new Mock<IReportRepository>();
         _mockAuditService = new Mock<IAuditService>();
         _mockCatalogService = new Mock<ICatalogService>();
+        _mockUserService = new Mock<IUserManagementService>();
         _sut = new ReportService(
             _mockRepository.Object,
             _mockAuditService.Object,
-            _mockCatalogService.Object
+            _mockCatalogService.Object,
+            _mockUserService.Object
         );
     }
 

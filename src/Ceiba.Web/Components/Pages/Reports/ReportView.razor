@@ -1,0 +1,349 @@
+@page "/reports/view/{ReportId:int}"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using Ceiba.Core.Exceptions
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IReportService ReportService
+@inject NavigationManager Navigation
+@inject ILogger<ReportView> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "CREADOR,REVISOR")]
+
+<PageTitle>Ver Reporte #@ReportId</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            @if (IsLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <p class="mt-3">Cargando reporte...</p>
+                </div>
+            }
+            else if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    @ErrorMessage
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-secondary" @onclick="NavigateBack">
+                        <i class="bi bi-arrow-left me-2"></i>Volver
+                    </button>
+                </div>
+            }
+            else if (Report != null)
+            {
+                <!-- Header Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                            Reporte de Incidencia #@Report.Id
+                        </h4>
+                        <span class="badge @GetEstadoBadgeClass(Report.Estado) fs-6">
+                            @GetEstadoText(Report.Estado)
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Tipo de Reporte:</strong> @Report.TipoReporte</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Fecha de Creacion:</strong> @Report.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Usuario:</strong> @(Report.UsuarioEmail ?? Report.UsuarioId.ToString())</p>
+                            </div>
+                        </div>
+                        @if (Report.UpdatedAt.HasValue)
+                        {
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <p class="mb-0 text-muted"><small>Ultima modificacion: @Report.UpdatedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</small></p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Datos de los Hechos -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Datos de los Hechos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Fecha y Hora:</strong> @Report.DatetimeHechos.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Datos de la Victima -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-person me-2"></i>Datos de la Victima/Persona Atendida</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p><strong>Sexo:</strong> @Report.Sexo</p>
+                            </div>
+                            <div class="col-md-3">
+                                <p><strong>Edad:</strong> @Report.Edad anos</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p>
+                                    <i class="bi @(Report.LgbtttiqPlus ? "bi-check-circle-fill text-success" : "bi-x-circle text-muted") me-1"></i>
+                                    LGBTTTIQ+
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p>
+                                    <i class="bi @(Report.SituacionCalle ? "bi-check-circle-fill text-success" : "bi-x-circle text-muted") me-1"></i>
+                                    Situacion de Calle
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p>
+                                    <i class="bi @(Report.Migrante ? "bi-check-circle-fill text-success" : "bi-x-circle text-muted") me-1"></i>
+                                    Migrante
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p>
+                                    <i class="bi @(Report.Discapacidad ? "bi-check-circle-fill text-success" : "bi-x-circle text-muted") me-1"></i>
+                                    Discapacidad
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ubicacion Geografica -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Ubicacion Geografica</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Zona:</strong> @Report.Zona.Nombre</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Sector:</strong> @Report.Sector.Nombre</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Cuadrante:</strong> @Report.Cuadrante.Nombre</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tipo de Incidencia -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-exclamation-circle me-2"></i>Tipo de Incidencia</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Delito:</strong> @Report.Delito</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Tipo de Atencion:</strong> @Report.TipoDeAtencion</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalles Operativos -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-list-check me-2"></i>Detalles Operativos</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p><strong>Turno CEIBA:</strong> @GetTurnoText(Report.TurnoCeiba)</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Tipo de Accion:</strong> @GetTipoAccionText(Report.TipoDeAccion)</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p><strong>Traslados:</strong> @GetTrasladosText(Report.Traslados)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Narrativa -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Narrativa del Incidente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="text-primary">Hechos Reportados</h6>
+                            <p class="border rounded p-3 bg-light" style="white-space: pre-wrap;">@Report.HechosReportados</p>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="text-primary">Acciones Realizadas</h6>
+                            <p class="border rounded p-3 bg-light" style="white-space: pre-wrap;">@Report.AccionesRealizadas</p>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(Report.Observaciones))
+                        {
+                            <div>
+                                <h6 class="text-primary">Observaciones</h6>
+                                <p class="border rounded p-3 bg-light" style="white-space: pre-wrap;">@Report.Observaciones</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <button type="button" class="btn btn-secondary" @onclick="NavigateBack">
+                        <i class="bi bi-arrow-left me-2"></i>Volver
+                    </button>
+                    <div>
+                        @if (CanEdit)
+                        {
+                            <button type="button" class="btn btn-primary" @onclick="EditReport">
+                                <i class="bi bi-pencil me-2"></i>Editar Reporte
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int ReportId { get; set; }
+
+    private ReportDto? Report { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string? ErrorMessage { get; set; }
+    private Guid CurrentUserId { get; set; }
+    private bool IsRevisor { get; set; }
+    private bool CanEdit => IsRevisor || (Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                ErrorMessage = "No se pudo obtener el ID del usuario autenticado.";
+                IsLoading = false;
+                return;
+            }
+
+            CurrentUserId = userId;
+            IsRevisor = authState.User.IsInRole("REVISOR");
+
+            await LoadReportAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing report view for report {ReportId}", ReportId);
+            ErrorMessage = "Error al cargar el reporte.";
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadReportAsync()
+    {
+        try
+        {
+            Report = await ReportService.GetReportByIdAsync(ReportId, CurrentUserId, IsRevisor);
+        }
+        catch (NotFoundException)
+        {
+            ErrorMessage = "El reporte solicitado no existe.";
+        }
+        catch (ForbiddenException)
+        {
+            ErrorMessage = "No tiene permisos para ver este reporte.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading report {ReportId}", ReportId);
+            ErrorMessage = "Error al cargar el reporte.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        if (IsRevisor)
+        {
+            Navigation.NavigateTo("/supervisor/reports");
+        }
+        else
+        {
+            Navigation.NavigateTo("/reports");
+        }
+    }
+
+    private void EditReport()
+    {
+        Navigation.NavigateTo($"/reports/edit/{ReportId}");
+    }
+
+    private static string GetEstadoBadgeClass(int estado) => estado switch
+    {
+        0 => "bg-warning text-dark",
+        1 => "bg-success",
+        _ => "bg-secondary"
+    };
+
+    private static string GetEstadoText(int estado) => estado switch
+    {
+        0 => "Borrador",
+        1 => "Entregado",
+        _ => "Desconocido"
+    };
+
+    private static string GetTurnoText(int turno) => turno switch
+    {
+        1 => "Turno 1 (Matutino)",
+        2 => "Turno 2 (Vespertino)",
+        3 => "Turno 3 (Nocturno)",
+        _ => "No especificado"
+    };
+
+    private static string GetTipoAccionText(int tipoAccion) => tipoAccion switch
+    {
+        1 => "Preventiva",
+        2 => "Reactiva",
+        3 => "Seguimiento",
+        _ => "No especificado"
+    };
+
+    private static string GetTrasladosText(int traslados) => traslados switch
+    {
+        0 => "Sin traslado",
+        1 => "Hospital",
+        2 => "Ministerio Publico",
+        _ => "No especificado"
+    };
+}

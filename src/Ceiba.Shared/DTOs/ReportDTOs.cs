@@ -130,6 +130,7 @@ public class ReportDto
     public string TipoReporte { get; set; } = string.Empty;
     public int Estado { get; set; }
     public Guid UsuarioId { get; set; }
+    public string? UsuarioEmail { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public DateTime DatetimeHechos { get; set; }

@@ -281,6 +281,16 @@
             Contains all fields formatted for PDF and JSON export
             </summary>
         </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ReportExportDto.UsuarioCreador">
+            <summary>
+            Email del usuario creador (para mostrar en encabezado del PDF)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Shared.DTOs.Export.ReportExportDto.UsuarioCreadorId">
+            <summary>
+            ID (GUID) del usuario creador (para información de auditoría)
+            </summary>
+        </member>
         <member name="T:Ceiba.Shared.DTOs.CreateReportDto">
             <summary>
             DTO for creating a new incident report.

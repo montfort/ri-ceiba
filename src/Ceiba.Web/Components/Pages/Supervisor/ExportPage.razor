@@ -339,8 +339,8 @@
             {
                 Estado = string.IsNullOrWhiteSpace(FilterEstado) ? null : int.Parse(FilterEstado),
                 Delito = string.IsNullOrWhiteSpace(FilterDelito) ? null : FilterDelito,
-                FechaDesde = FilterFechaDesde,
-                FechaHasta = FilterFechaHasta,
+                FechaDesde = FilterFechaDesde.HasValue ? DateTime.SpecifyKind(FilterFechaDesde.Value, DateTimeKind.Utc) : null,
+                FechaHasta = FilterFechaHasta.HasValue ? DateTime.SpecifyKind(FilterFechaHasta.Value.AddDays(1).AddSeconds(-1), DateTimeKind.Utc) : null,
                 Page = 1,
                 PageSize = 100, // Load more for export selection
                 SortBy = "createdAt",
@@ -469,7 +469,7 @@
                     fechaDesde = today.AddDays(-7);
                     break;
                 case QuickExportType.ThisMonth:
-                    fechaDesde = new DateTime(today.Year, today.Month, 1);
+                    fechaDesde = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
                     break;
                 default:
                     throw new ArgumentException("Tipo de exportacion no valido");

@@ -14,15 +14,18 @@ public class ReportService : IReportService
     private readonly IReportRepository _reportRepository;
     private readonly IAuditService _auditService;
     private readonly ICatalogService _catalogService;
+    private readonly IUserManagementService _userService;
 
     public ReportService(
         IReportRepository reportRepository,
         IAuditService auditService,
-        ICatalogService catalogService)
+        ICatalogService catalogService,
+        IUserManagementService userService)
     {
         _reportRepository = reportRepository;
         _auditService = auditService;
         _catalogService = catalogService;
+        _userService = userService;
     }
 
     public async Task<ReportDto> CreateReportAsync(CreateReportDto createDto, Guid usuarioId)
@@ -326,15 +329,29 @@ public class ReportService : IReportService
 
     #region Helper Methods
 
-    private Task<ReportDto> MapToDto(ReporteIncidencia report)
+    private async Task<ReportDto> MapToDto(ReporteIncidencia report)
     {
         // Assumes relations (Zona, Sector, Cuadrante) are already loaded by caller
+
+        // Get user email for display
+        string? usuarioEmail = null;
+        try
+        {
+            var user = await _userService.GetUserByIdAsync(report.UsuarioId);
+            usuarioEmail = user?.Email;
+        }
+        catch
+        {
+            // If user lookup fails, leave email as null
+        }
+
         var dto = new ReportDto
         {
             Id = report.Id,
             TipoReporte = report.TipoReporte,
             Estado = report.Estado,
             UsuarioId = report.UsuarioId,
+            UsuarioEmail = usuarioEmail,
             CreatedAt = report.CreatedAt,
             UpdatedAt = report.UpdatedAt,
             DatetimeHechos = report.DatetimeHechos,
@@ -369,7 +386,7 @@ public class ReportService : IReportService
             Observaciones = report.Observaciones
         };
 
-        return Task.FromResult(dto);
+        return dto;
     }
 
     private List<string> GetUpdatedFields(UpdateReportDto updateDto)
