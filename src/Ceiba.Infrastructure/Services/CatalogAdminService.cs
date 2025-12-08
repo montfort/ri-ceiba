@@ -14,16 +14,16 @@ namespace Ceiba.Infrastructure.Services;
 public class CatalogAdminService : ICatalogAdminService
 {
     private readonly CeibaDbContext _context;
-    private readonly IAuditService _auditService;
     private readonly ILogger<CatalogAdminService> _logger;
+
+    // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
+    // No need to inject IAuditService for manual logging
 
     public CatalogAdminService(
         CeibaDbContext context,
-        IAuditService auditService,
         ILogger<CatalogAdminService> logger)
     {
         _context = context;
-        _auditService = auditService;
         _logger = logger;
     }
 
@@ -82,14 +82,7 @@ public class CatalogAdminService : ICatalogAdminService
         _context.Zonas.Add(zona);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_CREATE,
-            zona.Id,
-            "Zona",
-            $"Zona creada: {zona.Nombre}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Zona {Nombre} created by admin {AdminId}", zona.Nombre, adminUserId);
 
         return new ZonaDto
@@ -117,14 +110,7 @@ public class CatalogAdminService : ICatalogAdminService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            zona.Id,
-            "Zona",
-            $"Zona actualizada: {zona.Nombre}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Zona {Id} updated by admin {AdminId}", id, adminUserId);
 
         return new ZonaDto
@@ -149,14 +135,7 @@ public class CatalogAdminService : ICatalogAdminService
         zona.Activo = !zona.Activo;
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            zona.Id,
-            "Zona",
-            $"Zona {(zona.Activo ? "activada" : "desactivada")}: {zona.Nombre}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Zona {Id} toggled to {Activo} by admin {AdminId}", id, zona.Activo, adminUserId);
 
         return new ZonaDto
@@ -244,14 +223,7 @@ public class CatalogAdminService : ICatalogAdminService
         _context.Sectores.Add(sector);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_CREATE,
-            sector.Id,
-            "Sector",
-            $"Sector creado: {sector.Nombre} en Zona {zona.Nombre}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Sector {Nombre} created in Zona {ZonaId} by admin {AdminId}",
             sector.Nombre, sector.ZonaId, adminUserId);
 
@@ -294,13 +266,7 @@ public class CatalogAdminService : ICatalogAdminService
         // Reload zona name
         await _context.Entry(sector).Reference(s => s.Zona).LoadAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            sector.Id,
-            "Sector",
-            $"Sector actualizado: {sector.Nombre}",
-            null,
-            cancellationToken);
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Sector {Id} updated by admin {AdminId}", id, adminUserId);
 
@@ -329,13 +295,7 @@ public class CatalogAdminService : ICatalogAdminService
         sector.Activo = !sector.Activo;
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            sector.Id,
-            "Sector",
-            $"Sector {(sector.Activo ? "activado" : "desactivado")}: {sector.Nombre}",
-            null,
-            cancellationToken);
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Sector {Id} toggled to {Activo} by admin {AdminId}", id, sector.Activo, adminUserId);
 
@@ -432,13 +392,7 @@ public class CatalogAdminService : ICatalogAdminService
         _context.Cuadrantes.Add(cuadrante);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_CREATE,
-            cuadrante.Id,
-            "Cuadrante",
-            $"Cuadrante creado: {cuadrante.Nombre} en Sector {sector.Nombre}",
-            null,
-            cancellationToken);
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Cuadrante {Nombre} created in Sector {SectorId} by admin {AdminId}",
             cuadrante.Nombre, cuadrante.SectorId, adminUserId);
@@ -484,13 +438,7 @@ public class CatalogAdminService : ICatalogAdminService
         await _context.Entry(cuadrante).Reference(c => c.Sector).LoadAsync(cancellationToken);
         await _context.Entry(cuadrante.Sector).Reference(s => s.Zona).LoadAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            cuadrante.Id,
-            "Cuadrante",
-            $"Cuadrante actualizado: {cuadrante.Nombre}",
-            null,
-            cancellationToken);
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Cuadrante {Id} updated by admin {AdminId}", id, adminUserId);
 
@@ -520,13 +468,7 @@ public class CatalogAdminService : ICatalogAdminService
         cuadrante.Activo = !cuadrante.Activo;
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            cuadrante.Id,
-            "Cuadrante",
-            $"Cuadrante {(cuadrante.Activo ? "activado" : "desactivado")}: {cuadrante.Nombre}",
-            null,
-            cancellationToken);
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Cuadrante {Id} toggled to {Activo} by admin {AdminId}", id, cuadrante.Activo, adminUserId);
 
@@ -636,14 +578,7 @@ public class CatalogAdminService : ICatalogAdminService
             throw new InvalidOperationException($"Error al guardar la sugerencia: {ex.InnerException?.Message ?? ex.Message}");
         }
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_CREATE,
-            sugerencia.Id,
-            "CatalogoSugerencia",
-            $"Sugerencia creada: {sugerencia.Campo} = {sugerencia.Valor}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Sugerencia {Campo}={Valor} created by admin {AdminId}",
             sugerencia.Campo, sugerencia.Valor, adminUserId);
 
@@ -678,14 +613,7 @@ public class CatalogAdminService : ICatalogAdminService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            sugerencia.Id,
-            "CatalogoSugerencia",
-            $"Sugerencia actualizada: {sugerencia.Campo} = {sugerencia.Valor}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Sugerencia {Id} updated by admin {AdminId}", id, adminUserId);
 
         return new SugerenciaDto
@@ -709,14 +637,7 @@ public class CatalogAdminService : ICatalogAdminService
         _context.CatalogosSugerencia.Remove(sugerencia);
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_DELETE,
-            id,
-            "CatalogoSugerencia",
-            $"Sugerencia eliminada: {sugerencia.Campo} = {sugerencia.Valor}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Sugerencia {Id} deleted by admin {AdminId}", id, adminUserId);
     }
 
@@ -741,14 +662,7 @@ public class CatalogAdminService : ICatalogAdminService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        await _auditService.LogAsync(
-            AuditCodes.CATALOG_UPDATE,
-            null,
-            "CatalogoSugerencia",
-            $"Sugerencias reordenadas para campo: {campo}",
-            null,
-            cancellationToken);
-
+        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
         _logger.LogInformation("Sugerencias for {Campo} reordered by admin {AdminId}", campo, adminUserId);
     }
 
