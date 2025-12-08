@@ -611,7 +611,9 @@ public class CatalogAdminService : ICatalogAdminService
             Campo = createDto.Campo,
             Valor = createDto.Valor,
             Orden = createDto.Orden,
-            Activo = createDto.Activo
+            Activo = createDto.Activo,
+            UsuarioId = adminUserId,
+            CreatedAt = DateTime.UtcNow
         };
 
         _context.CatalogosSugerencia.Add(sugerencia);
