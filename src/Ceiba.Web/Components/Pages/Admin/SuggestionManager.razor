@@ -21,10 +21,26 @@
     <div class="row">
         <!-- Campo Selector -->
         <div class="col-md-3">
-            <div class="card shadow-sm">
-                <div class="card-header">Campos</div>
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-person me-1"></i> Datos de la Persona
+                </div>
                 <div class="list-group list-group-flush">
-                    @foreach (var campo in AvailableCampos)
+                    @foreach (var campo in CamposPersona)
+                    {
+                        <button class="list-group-item list-group-item-action @(SelectedCampo == campo.Key ? "active" : "")"
+                                @onclick="() => SelectCampo(campo.Key)">
+                            @campo.Value
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-clipboard-data me-1"></i> Detalles Operativos
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach (var campo in CamposOperativos)
                     {
                         <button class="list-group-item list-group-item-action @(SelectedCampo == campo.Key ? "active" : "")"
                                 @onclick="() => SelectCampo(campo.Key)">
@@ -187,15 +203,26 @@
 }
 
 @code {
-    private static readonly Dictionary<string, string> AvailableCampos = new()
+    // Campos de Datos de la Persona
+    private static readonly Dictionary<string, string> CamposPersona = new()
     {
         { "Sexo", "Sexo" },
         { "Delito", "Tipo de Delito" },
-        { "TipoDeAtencion", "Tipo de Atención" },
-        { "TipoVehiculo", "Tipo de Vehículo" },
-        { "ColorVehiculo", "Color de Vehículo" },
-        { "MarcaVehiculo", "Marca de Vehículo" }
+        { "TipoDeAtencion", "Tipo de Atención" }
     };
+
+    // Campos de Detalles Operativos
+    private static readonly Dictionary<string, string> CamposOperativos = new()
+    {
+        { "TurnoCeiba", "Turno CEIBA" },
+        { "TipoDeAccion", "Tipo de Acción" },
+        { "Traslados", "Traslados" }
+    };
+
+    // Todos los campos combinados para búsqueda
+    private static readonly Dictionary<string, string> AllCampos = CamposPersona
+        .Concat(CamposOperativos)
+        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
     private string SelectedCampo { get; set; } = "Sexo";
     private List<SugerenciaDto> Sugerencias { get; set; } = new();
@@ -264,7 +291,7 @@
 
     private string GetCampoDisplayName(string campo)
     {
-        return AvailableCampos.TryGetValue(campo, out var displayName) ? displayName : campo;
+        return AllCampos.TryGetValue(campo, out var displayName) ? displayName : campo;
     }
 
     private void OpenCreateModal()
