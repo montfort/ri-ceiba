@@ -35,6 +35,7 @@ public class AiConfigurationService : IAiConfigurationService
     public async Task<ConfiguracionIA?> GetActiveConfigurationAsync(CancellationToken cancellationToken = default)
     {
         return await _context.ConfiguracionesIA
+            .AsNoTracking()
             .Where(c => c.Activo)
             .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
@@ -52,9 +53,9 @@ public class AiConfigurationService : IAiConfigurationService
             throw new InvalidOperationException($"Configuración inválida: {string.Join(", ", errors)}");
         }
 
-        // Deactivate all existing configurations
+        // Deactivate all existing configurations (exclude the one being updated)
         var existingConfigs = await _context.ConfiguracionesIA
-            .Where(c => c.Activo)
+            .Where(c => c.Activo && c.Id != configuration.Id)
             .ToListAsync(cancellationToken);
 
         foreach (var existing in existingConfigs)
@@ -75,9 +76,23 @@ public class AiConfigurationService : IAiConfigurationService
         }
         else
         {
-            // Update existing
-            configuration.UpdatedAt = DateTime.UtcNow;
-            _context.ConfiguracionesIA.Update(configuration);
+            // Update existing - check if already tracked
+            var trackedEntity = _context.ChangeTracker.Entries<ConfiguracionIA>()
+                .FirstOrDefault(e => e.Entity.Id == configuration.Id);
+
+            if (trackedEntity != null)
+            {
+                // Update the tracked entity's values
+                trackedEntity.CurrentValues.SetValues(configuration);
+                trackedEntity.Entity.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                // Attach and mark as modified
+                configuration.UpdatedAt = DateTime.UtcNow;
+                _context.ConfiguracionesIA.Attach(configuration);
+                _context.Entry(configuration).State = EntityState.Modified;
+            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -170,6 +185,7 @@ public class AiConfigurationService : IAiConfigurationService
         CancellationToken cancellationToken = default)
     {
         return await _context.ConfiguracionesIA
+            .AsNoTracking()
             .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt)
             .Take(take)
             .ToListAsync(cancellationToken);
