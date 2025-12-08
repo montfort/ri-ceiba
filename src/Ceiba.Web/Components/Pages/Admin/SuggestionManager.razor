@@ -203,28 +203,14 @@
 }
 
 @code {
-    // Campos de Datos de la Persona
-    private static readonly Dictionary<string, string> CamposPersona = new()
-    {
-        { "Sexo", "Sexo" },
-        { "Delito", "Tipo de Delito" },
-        { "TipoDeAtencion", "Tipo de Atención" }
-    };
+    // Usar los valores definidos en SugerenciaCampos para consistencia
+    private static readonly Dictionary<string, string> CamposPersona = SugerenciaCampos.DatosPersona
+        .ToDictionary(c => c, c => SugerenciaCampos.GetDisplayName(c));
 
-    // Campos de Detalles Operativos
-    private static readonly Dictionary<string, string> CamposOperativos = new()
-    {
-        { "TurnoCeiba", "Turno CEIBA" },
-        { "TipoDeAccion", "Tipo de Acción" },
-        { "Traslados", "Traslados" }
-    };
+    private static readonly Dictionary<string, string> CamposOperativos = SugerenciaCampos.DetallesOperativos
+        .ToDictionary(c => c, c => SugerenciaCampos.GetDisplayName(c));
 
-    // Todos los campos combinados para búsqueda
-    private static readonly Dictionary<string, string> AllCampos = CamposPersona
-        .Concat(CamposOperativos)
-        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-    private string SelectedCampo { get; set; } = "Sexo";
+    private string SelectedCampo { get; set; } = SugerenciaCampos.Sexo;
     private List<SugerenciaDto> Sugerencias { get; set; } = new();
     private bool IsLoading { get; set; } = true;
     private string? ErrorMessage { get; set; }
@@ -291,7 +277,7 @@
 
     private string GetCampoDisplayName(string campo)
     {
-        return AllCampos.TryGetValue(campo, out var displayName) ? displayName : campo;
+        return SugerenciaCampos.GetDisplayName(campo);
     }
 
     private void OpenCreateModal()

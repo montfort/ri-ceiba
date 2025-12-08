@@ -229,17 +229,30 @@ public record CreateSugerenciaDto
 /// </summary>
 public static class SugerenciaCampos
 {
+    // Datos de la Persona
     public const string Sexo = "sexo";
     public const string Delito = "delito";
     public const string TipoDeAtencion = "tipo_de_atencion";
 
-    public static readonly string[] All = { Sexo, Delito, TipoDeAtencion };
+    // Detalles Operativos
+    public const string TurnoCeiba = "turno_ceiba";
+    public const string TipoDeAccion = "tipo_de_accion";
+    public const string Traslados = "traslados";
+
+    public static readonly string[] All = { Sexo, Delito, TipoDeAtencion, TurnoCeiba, TipoDeAccion, Traslados };
+
+    // Grupos para la UI
+    public static readonly string[] DatosPersona = { Sexo, Delito, TipoDeAtencion };
+    public static readonly string[] DetallesOperativos = { TurnoCeiba, TipoDeAccion, Traslados };
 
     public static string GetDisplayName(string campo) => campo switch
     {
         Sexo => "Sexo",
-        Delito => "Delito",
+        Delito => "Tipo de Delito",
         TipoDeAtencion => "Tipo de Atención",
+        TurnoCeiba => "Turno CEIBA",
+        TipoDeAccion => "Tipo de Acción",
+        Traslados => "Traslados",
         _ => campo
     };
 }
