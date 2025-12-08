@@ -182,6 +182,39 @@ public class ReportsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Deletes a report in Borrador state.
+    /// Only the creator can delete their own reports.
+    /// </summary>
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "CREADOR")]
+    public async Task<IActionResult> DeleteReport(int id)
+    {
+        try
+        {
+            var usuarioId = GetUsuarioId();
+            await _reportService.DeleteReportAsync(id, usuarioId);
+            return Ok(new { message = "Reporte eliminado exitosamente" });
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (ForbiddenException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (BadRequestException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting report {ReportId}", id);
+            return StatusCode(500, new { message = "Error al eliminar el reporte" });
+        }
+    }
+
     #region Helper Methods
 
     private Guid GetUsuarioId()

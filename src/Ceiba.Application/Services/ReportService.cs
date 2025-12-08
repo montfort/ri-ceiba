@@ -327,6 +327,40 @@ public class ReportService : IReportService
         };
     }
 
+    public async Task DeleteReportAsync(int reportId, Guid usuarioId)
+    {
+        // Get report
+        var report = await _reportRepository.GetByIdAsync(reportId);
+        if (report == null)
+        {
+            throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
+        }
+
+        // Authorization check: only creator can delete their own reports
+        if (report.UsuarioId != usuarioId)
+        {
+            throw new ForbiddenException("No tiene permisos para eliminar este reporte.");
+        }
+
+        // State check: only Borrador reports can be deleted
+        if (report.Estado != 0)
+        {
+            throw new BadRequestException("Solo se pueden eliminar reportes en estado Borrador.");
+        }
+
+        // Delete report
+        await _reportRepository.DeleteAsync(reportId);
+
+        // Audit log
+        await _auditService.LogAsync(
+            "REPORT_DELETE",
+            reportId,
+            "REPORTE_INCIDENCIA",
+            System.Text.Json.JsonSerializer.Serialize(new { reportId, usuarioId, estado = "Borrador" }),
+            null
+        );
+    }
+
     #region Helper Methods
 
     private async Task<ReportDto> MapToDto(ReporteIncidencia report)

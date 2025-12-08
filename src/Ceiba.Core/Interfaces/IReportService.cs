@@ -59,4 +59,12 @@ public interface IReportService
     /// <param name="isRevisor">Whether the user has REVISOR role</param>
     /// <returns>Paginated list of reports</returns>
     Task<ReportListResponse> ListReportsAsync(ReportFilterDto filter, Guid usuarioId, bool isRevisor = false);
+
+    /// <summary>
+    /// Deletes a report in Borrador state.
+    /// Only the creator can delete their own reports while in Borrador state.
+    /// </summary>
+    /// <param name="reportId">Report ID</param>
+    /// <param name="usuarioId">ID of the CREADOR user deleting the report</param>
+    Task DeleteReportAsync(int reportId, Guid usuarioId);
 }

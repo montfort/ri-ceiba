@@ -1021,6 +1021,14 @@
             <param name="isRevisor">Whether the user has REVISOR role</param>
             <returns>Paginated list of reports</returns>
         </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.DeleteReportAsync(System.Int32,System.Guid)">
+            <summary>
+            Deletes a report in Borrador state.
+            Only the creator can delete their own reports while in Borrador state.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="usuarioId">ID of the CREADOR user deleting the report</param>
+        </member>
         <member name="T:Ceiba.Core.Interfaces.IUserManagementService">
             <summary>
             Service interface for user management operations.

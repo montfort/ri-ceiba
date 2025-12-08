@@ -259,6 +259,12 @@
             Only CREADOR can submit their own reports.
             </summary>
         </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.DeleteReport(System.Int32)">
+            <summary>
+            Deletes a report in Borrador state.
+            Only the creator can delete their own reports.
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Filters.AuthorizeBeforeModelBindingAttribute">
             <summary>
             Authorization filter that executes BEFORE model binding and validation.

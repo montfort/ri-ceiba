@@ -222,9 +222,17 @@
 
                 <!-- Actions -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
-                    <button type="button" class="btn btn-secondary" @onclick="NavigateBack">
-                        <i class="bi bi-arrow-left me-2"></i>Volver
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary" @onclick="NavigateBack">
+                            <i class="bi bi-arrow-left me-2"></i>Volver
+                        </button>
+                        @if (CanDelete)
+                        {
+                            <button type="button" class="btn btn-outline-danger" @onclick="ShowDeleteConfirmation" disabled="@IsDeleting">
+                                <i class="bi bi-trash me-2"></i>Eliminar
+                            </button>
+                        }
+                    </div>
                     <div class="d-flex gap-2">
                         @if (CanEdit)
                         {
@@ -249,6 +257,44 @@
                         }
                     </div>
                 </div>
+
+                <!-- Delete Confirmation Modal -->
+                @if (ShowDeleteModal)
+                {
+                    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminacion
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" @onclick="HideDeleteConfirmation"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>Esta seguro de que desea eliminar este reporte?</p>
+                                    <p class="text-muted mb-0"><small>Esta accion no se puede deshacer.</small></p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" @onclick="HideDeleteConfirmation" disabled="@IsDeleting">
+                                        Cancelar
+                                    </button>
+                                    <button type="button" class="btn btn-danger" @onclick="DeleteReport" disabled="@IsDeleting">
+                                        @if (IsDeleting)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            <span>Eliminando...</span>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-trash me-2"></i>
+                                            <span>Eliminar</span>
+                                        }
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
             }
         </div>
     </div>
@@ -260,12 +306,15 @@
     private ReportDto? Report { get; set; }
     private bool IsLoading { get; set; } = true;
     private bool IsSubmitting { get; set; } = false;
+    private bool IsDeleting { get; set; } = false;
+    private bool ShowDeleteModal { get; set; } = false;
     private string? ErrorMessage { get; set; }
     private string? SuccessMessage { get; set; }
     private Guid CurrentUserId { get; set; }
     private bool IsRevisor { get; set; }
     private bool CanEdit => IsRevisor || (Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId);
     private bool CanSubmit => Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId;
+    private bool CanDelete => Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -364,6 +413,52 @@
         finally
         {
             IsSubmitting = false;
+        }
+    }
+
+    private void ShowDeleteConfirmation()
+    {
+        ShowDeleteModal = true;
+    }
+
+    private void HideDeleteConfirmation()
+    {
+        ShowDeleteModal = false;
+    }
+
+    private async Task DeleteReport()
+    {
+        if (!CanDelete || Report == null)
+            return;
+
+        IsDeleting = true;
+        ErrorMessage = null;
+
+        try
+        {
+            await ReportService.DeleteReportAsync(ReportId, CurrentUserId);
+            // Navigate back to list after successful deletion
+            Navigation.NavigateTo("/reports");
+        }
+        catch (ForbiddenException)
+        {
+            ErrorMessage = "No tiene permisos para eliminar este reporte.";
+            ShowDeleteModal = false;
+        }
+        catch (BadRequestException ex)
+        {
+            ErrorMessage = ex.Message;
+            ShowDeleteModal = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error deleting report {ReportId}", ReportId);
+            ErrorMessage = "Error al eliminar el reporte: " + ex.Message;
+            ShowDeleteModal = false;
+        }
+        finally
+        {
+            IsDeleting = false;
         }
     }
 
