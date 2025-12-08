@@ -350,11 +350,10 @@
             }
             CurrentUserId = userId;
 
-            // Load catalogs in parallel
-            await Task.WhenAll(
-                LoadZonasAsync(),
-                LoadSuggestionsAsync()
-            );
+            // Load catalogs SEQUENTIALLY to avoid DbContext concurrency issues
+            // DbContext is not thread-safe, so we cannot use Task.WhenAll
+            await LoadZonasAsync();
+            await LoadSuggestionsAsync();
 
             // Load existing report if in edit mode
             if (IsEditMode)
@@ -379,28 +378,7 @@
         }
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        // Watch for zona changes to load sectores
-        if (Model.ZonaId != _previousZonaId && Model.ZonaId > 0)
-        {
-            _previousZonaId = Model.ZonaId;
-            Model.SectorId = 0;
-            Model.CuadranteId = 0;
-            Sectores.Clear();
-            Cuadrantes.Clear();
-            await LoadSectoresAsync(Model.ZonaId);
-        }
-
-        // Watch for sector changes to load cuadrantes
-        if (Model.SectorId != _previousSectorId && Model.SectorId > 0)
-        {
-            _previousSectorId = Model.SectorId;
-            Model.CuadranteId = 0;
-            Cuadrantes.Clear();
-            await LoadCuadrantesAsync(Model.SectorId);
-        }
-    }
+    // Note: OnParametersSetAsync removed - cascading loads are handled by event callbacks
 
     private async Task LoadExistingReportAsync()
     {
@@ -415,7 +393,17 @@
                 return;
             }
 
-            // Map to form model
+            // Store the geographic IDs before loading catalogs
+            var savedZonaId = ExistingReport.Zona.Id;
+            var savedSectorId = ExistingReport.Sector.Id;
+            var savedCuadranteId = ExistingReport.Cuadrante.Id;
+
+            // Load dependent catalogs FIRST (before setting Model values)
+            // This ensures the dropdown options are available
+            await LoadSectoresAsync(savedZonaId);
+            await LoadCuadrantesAsync(savedSectorId);
+
+            // Now map to form model with all values
             Model = new CreateReportDto
             {
                 TipoReporte = ExistingReport.TipoReporte,
@@ -427,9 +415,9 @@
                 Migrante = ExistingReport.Migrante,
                 Discapacidad = ExistingReport.Discapacidad,
                 Delito = ExistingReport.Delito,
-                ZonaId = ExistingReport.Zona.Id,
-                SectorId = ExistingReport.Sector.Id,
-                CuadranteId = ExistingReport.Cuadrante.Id,
+                ZonaId = savedZonaId,
+                SectorId = savedSectorId,
+                CuadranteId = savedCuadranteId,
                 TurnoCeiba = ExistingReport.TurnoCeiba,
                 TipoDeAtencion = ExistingReport.TipoDeAtencion,
                 TipoDeAccion = ExistingReport.TipoDeAccion,
@@ -439,9 +427,12 @@
                 Observaciones = ExistingReport.Observaciones
             };
 
-            // Load dependent catalogs
-            await LoadSectoresAsync(Model.ZonaId);
-            await LoadCuadrantesAsync(Model.SectorId);
+            // Update tracking variables to prevent OnZonaChanged/OnSectorChanged from resetting values
+            _previousZonaId = savedZonaId;
+            _previousSectorId = savedSectorId;
+
+            Logger.LogInformation("Loaded report {ReportId}: Zona={ZonaId}, Sector={SectorId}, Cuadrante={CuadranteId}",
+                ReportId, savedZonaId, savedSectorId, savedCuadranteId);
         }
         catch (ForbiddenException)
         {
