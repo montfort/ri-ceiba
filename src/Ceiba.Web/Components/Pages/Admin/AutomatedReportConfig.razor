@@ -230,6 +230,7 @@
 
         try
         {
+            Logger.LogInformation("Loading automated report configuration");
             var response = await Http.GetAsync("/api/automated-report-config");
 
             if (response.IsSuccessStatusCode)
@@ -245,17 +246,21 @@
                         Destinatarios = Config.Destinatarios,
                         RutaSalida = Config.RutaSalida
                     };
+                    Logger.LogInformation("Configuration loaded successfully");
                 }
             }
             else
             {
-                ErrorMessage = "Error al cargar la configuración";
+                var responseText = await response.Content.ReadAsStringAsync();
+                Logger.LogError("Failed to load configuration. Status: {Status}, Response: {Response}",
+                    response.StatusCode, responseText);
+                ErrorMessage = $"Error al cargar la configuración (HTTP {response.StatusCode})";
             }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error loading automated report configuration");
-            ErrorMessage = "Error al cargar la configuración";
+            ErrorMessage = $"Error al cargar la configuración: {ex.Message}";
         }
         finally
         {
@@ -271,23 +276,36 @@
 
         try
         {
+            Logger.LogInformation("Submitting configuration update");
             var response = await Http.PutAsJsonAsync("/api/automated-report-config", Model);
 
             if (response.IsSuccessStatusCode)
             {
                 Config = await response.Content.ReadFromJsonAsync<AutomatedReportConfigDto>();
                 SuccessMessage = "Configuración guardada exitosamente";
+                Logger.LogInformation("Configuration saved successfully");
             }
             else
             {
-                var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                ErrorMessage = error?["error"] ?? "Error al guardar la configuración";
+                var responseText = await response.Content.ReadAsStringAsync();
+                Logger.LogError("Failed to save configuration. Status: {Status}, Response: {Response}",
+                    response.StatusCode, responseText);
+
+                try
+                {
+                    var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                    ErrorMessage = error?["error"] ?? $"Error al guardar la configuración (HTTP {response.StatusCode})";
+                }
+                catch
+                {
+                    ErrorMessage = $"Error al guardar la configuración (HTTP {response.StatusCode}): {responseText}";
+                }
             }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error saving automated report configuration");
-            ErrorMessage = "Error al guardar la configuración";
+            ErrorMessage = $"Error al guardar la configuración: {ex.Message}";
         }
         finally
         {

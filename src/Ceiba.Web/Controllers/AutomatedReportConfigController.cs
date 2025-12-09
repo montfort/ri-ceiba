@@ -56,25 +56,36 @@ public class AutomatedReportConfigController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("Updating automated report configuration. Enabled: {Enabled}, Time: {Time}, Recipients: {Count}",
+                dto.Habilitado, dto.HoraGeneracion, dto.Destinatarios.Length);
+
             // Validate input
             if (dto.HoraGeneracion < TimeSpan.Zero || dto.HoraGeneracion >= TimeSpan.FromDays(1))
             {
+                _logger.LogWarning("Invalid time range: {Time}", dto.HoraGeneracion);
                 return BadRequest(new { error = "La hora de generación debe estar entre 00:00:00 y 23:59:59" });
             }
 
             if (dto.Habilitado && dto.Destinatarios.Length == 0)
             {
+                _logger.LogWarning("No recipients specified when enabled");
                 return BadRequest(new { error = "Debe especificar al menos un destinatario cuando la generación automática está habilitada" });
             }
 
             var config = await _configService.UpdateConfigurationAsync(dto, cancellationToken);
 
+            _logger.LogInformation("Configuration updated successfully");
             return Ok(config);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogError(ex, "Unauthorized access when updating configuration");
+            return StatusCode(401, new { error = "No autorizado. Debe estar autenticado como ADMIN." });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating automated report configuration");
-            return StatusCode(500, new { error = "Error al actualizar la configuración" });
+            return StatusCode(500, new { error = $"Error al actualizar la configuración: {ex.Message}" });
         }
     }
 }
