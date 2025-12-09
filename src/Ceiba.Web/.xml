@@ -171,6 +171,36 @@
             Update automated report configuration
             </summary>
         </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.DownloadReport(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Download Word document for an automated report
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.GetReports(System.Int32,System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.Boolean})">
+            <summary>
+            Get paginated list of automated reports
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.GetReport(System.Int32)">
+            <summary>
+            Get detailed information for a specific report
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.SendReport(System.Int32,System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Send report by email
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.RegenerateWord(System.Int32)">
+            <summary>
+            Regenerate Word document for a report
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.GenerateReport(Ceiba.Shared.DTOs.GenerateReportRequestDto,System.Threading.CancellationToken)">
+            <summary>
+            Generate a new automated report manually
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Controllers.CatalogsController">
             <summary>
             API controller for catalog operations (Zona, Sector, Cuadrante, Suggestions).
