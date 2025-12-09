@@ -167,10 +167,22 @@ public class GenerateReportRequestDto
 public class NarrativeRequestDto
 {
     public ReportStatisticsDto Statistics { get; set; } = new();
-    public List<string> HechosReportados { get; set; } = new();
-    public List<string> AccionesRealizadas { get; set; } = new();
+    public List<IncidentSummaryDto> Incidents { get; set; } = new();
     public DateTime FechaInicio { get; set; }
     public DateTime FechaFin { get; set; }
+}
+
+/// <summary>
+/// DTO for incident summary in narrative generation.
+/// </summary>
+public class IncidentSummaryDto
+{
+    public int Id { get; set; }
+    public string Folio { get; set; } = string.Empty;
+    public string Delito { get; set; } = string.Empty;
+    public string HechosReportados { get; set; } = string.Empty;
+    public string AccionesRealizadas { get; set; } = string.Empty;
+    public DateTime FechaReporte { get; set; }
 }
 
 /// <summary>

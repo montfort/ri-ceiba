@@ -142,6 +142,14 @@ public class AiConfigurationService : IAiConfigurationService
                     (success, message) = await TestOpenAiAsync(httpClient, configuration, cancellationToken);
                     break;
 
+                case "gemini":
+                    (success, message) = await TestGeminiAsync(httpClient, configuration, cancellationToken);
+                    break;
+
+                case "deepseek":
+                    (success, message) = await TestDeepSeekAsync(httpClient, configuration, cancellationToken);
+                    break;
+
                 case "azureopenai":
                     (success, message) = await TestAzureOpenAiAsync(httpClient, configuration, cancellationToken);
                     break;
@@ -340,6 +348,132 @@ public class AiConfigurationService : IAiConfigurationService
 
             var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
             return (false, $"Error de LLM local ({response.StatusCode}): {errorContent}");
+        }
+    }
+
+    private async Task<(bool Success, string Message)> TestGeminiAsync(
+        HttpClient httpClient,
+        ConfiguracionIA config,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(config.ApiKey))
+        {
+            return (false, "API Key no configurada.");
+        }
+
+        // Gemini API endpoint - always use the correct base URL
+        // Format: https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
+        const string geminiBaseUrl = "https://generativelanguage.googleapis.com/v1beta/models";
+        var endpoint = $"{geminiBaseUrl}/{config.Modelo}:generateContent";
+
+        _logger.LogInformation("Testing Gemini connection to: {Endpoint} with model: {Model}, ApiKey starts with: {ApiKeyPrefix}",
+            endpoint, config.Modelo, config.ApiKey?.Substring(0, Math.Min(8, config.ApiKey?.Length ?? 0)));
+
+        var requestBody = new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = "Responde solo con 'OK'" }
+                    }
+                }
+            },
+            generationConfig = new
+            {
+                maxOutputTokens = 10,
+                temperature = 0.1
+            }
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        request.Headers.Add("x-goog-api-key", config.ApiKey);
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json");
+
+        _logger.LogInformation("Sending Gemini request with headers: {Headers}",
+            string.Join(", ", request.Headers.Select(h => $"{h.Key}={h.Value.FirstOrDefault()?.Substring(0, Math.Min(10, h.Value.FirstOrDefault()?.Length ?? 0))}...")));
+
+        var response = await httpClient.SendAsync(request, cancellationToken);
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        _logger.LogInformation("Gemini response status: {StatusCode}, Content: {Content}",
+            response.StatusCode, responseContent.Substring(0, Math.Min(500, responseContent.Length)));
+
+        if (response.IsSuccessStatusCode)
+        {
+            return (true, $"Conexión exitosa con Google Gemini. Modelo: {config.Modelo}");
+        }
+
+        return (false, $"Error de Gemini ({response.StatusCode}): {GetGeminiErrorMessage(responseContent)}");
+    }
+
+    private async Task<(bool Success, string Message)> TestDeepSeekAsync(
+        HttpClient httpClient,
+        ConfiguracionIA config,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(config.ApiKey))
+        {
+            return (false, "API Key no configurada.");
+        }
+
+        // DeepSeek API - always use the correct endpoint
+        const string deepSeekEndpoint = "https://api.deepseek.com/chat/completions";
+
+        var requestBody = new
+        {
+            model = config.Modelo,
+            messages = new[]
+            {
+                new { role = "user", content = "Responde solo con 'OK'" }
+            },
+            max_tokens = 10
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, deepSeekEndpoint);
+        request.Headers.Add("Authorization", $"Bearer {config.ApiKey}");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json");
+
+        var response = await httpClient.SendAsync(request, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return (true, $"Conexión exitosa con DeepSeek. Modelo: {config.Modelo}");
+        }
+
+        var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        return (false, $"Error de DeepSeek ({response.StatusCode}): {GetErrorMessage(errorContent)}");
+    }
+
+    private static string GetGeminiErrorMessage(string jsonResponse)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(jsonResponse);
+            if (doc.RootElement.TryGetProperty("error", out var error))
+            {
+                if (error.TryGetProperty("message", out var message))
+                {
+                    return message.GetString() ?? jsonResponse;
+                }
+                if (error.TryGetProperty("status", out var status))
+                {
+                    return status.GetString() ?? jsonResponse;
+                }
+            }
+            return jsonResponse;
+        }
+        catch
+        {
+            return jsonResponse;
         }
     }
 

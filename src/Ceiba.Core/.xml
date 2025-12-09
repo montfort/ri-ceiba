@@ -73,6 +73,91 @@
             Default: 0
             </summary>
         </member>
+        <member name="T:Ceiba.Core.Entities.ConfiguracionIA">
+            <summary>
+            Entity for storing AI service configuration.
+            Only one active configuration should exist at a time.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Id">
+            <summary>
+            Primary key.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.UpdatedAt">
+            <summary>
+            UTC timestamp when the entity was last updated.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Proveedor">
+            <summary>
+            AI provider type: OpenAI, AzureOpenAI, Local, Ollama
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.ApiKey">
+            <summary>
+            API key for the AI service (encrypted in database).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Modelo">
+            <summary>
+            Model name to use (e.g., gpt-4o-mini, gpt-4o, llama3.2).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Endpoint">
+            <summary>
+            API endpoint URL.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.AzureEndpoint">
+            <summary>
+            Azure-specific: Resource endpoint.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.AzureApiVersion">
+            <summary>
+            Azure-specific: API version.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.LocalEndpoint">
+            <summary>
+            Local LLM endpoint (e.g., Ollama, LM Studio).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.MaxTokens">
+            <summary>
+            Maximum tokens for response generation.
+            Recommended: 2000-8000 for daily reports with all incidents.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Temperature">
+            <summary>
+            Temperature for response generation (0.0 - 2.0).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.MaxReportesParaNarrativa">
+            <summary>
+            Maximum number of incidents to include in AI narrative.
+            0 = unlimited (include all incidents).
+            Recommended: 50-100 for daily reports.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Activo">
+            <summary>
+            Whether this configuration is active.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.ModificadoPorId">
+            <summary>
+            Last user who modified this configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionIA.Validate">
+            <summary>
+            Validates the configuration based on the selected provider.
+            </summary>
+        </member>
         <member name="T:Ceiba.Core.Entities.Cuadrante">
             <summary>
             Geographic quadrant entity (lowest level in geographic hierarchy).
@@ -620,6 +705,32 @@
         <member name="T:Ceiba.Core.Exceptions.NotFoundException">
             <summary>
             Exception thrown when a resource is not found (404 Not Found).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAiConfigurationService">
+            <summary>
+            Service interface for managing AI configuration.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.GetActiveConfigurationAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current active AI configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.SaveConfigurationAsync(Ceiba.Core.Entities.ConfiguracionIA,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Saves or updates the AI configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.TestConnectionAsync(Ceiba.Core.Entities.ConfiguracionIA,System.Threading.CancellationToken)">
+            <summary>
+            Tests the AI connection with the current configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.GetConfigurationHistoryAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets the configuration history.
             </summary>
         </member>
         <member name="T:Ceiba.Core.Interfaces.IAiNarrativeService">

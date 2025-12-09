@@ -99,6 +99,31 @@
             Standard audit action codes
             </summary>
         </member>
+        <member name="T:Ceiba.Shared.DTOs.AiConfigurationDto">
+            <summary>
+            DTO for displaying and editing AI configuration.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.SaveAiConfigurationDto">
+            <summary>
+            DTO for saving AI configuration.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AiConnectionTestResultDto">
+            <summary>
+            DTO for AI connection test result.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AiProviders">
+            <summary>
+            Available AI providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AiProviderInfo">
+            <summary>
+            Information about an AI provider.
+            </summary>
+        </member>
         <member name="T:Ceiba.Shared.DTOs.AutomatedReportListDto">
             <summary>
             DTO for displaying automated report in list view.
@@ -168,6 +193,11 @@
         <member name="T:Ceiba.Shared.DTOs.NarrativeRequestDto">
             <summary>
             DTO for AI narrative generation request.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.IncidentSummaryDto">
+            <summary>
+            DTO for incident summary in narrative generation.
             </summary>
         </member>
         <member name="T:Ceiba.Shared.DTOs.NarrativeResponseDto">

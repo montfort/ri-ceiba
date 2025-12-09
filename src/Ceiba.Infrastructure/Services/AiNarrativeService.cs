@@ -363,8 +363,9 @@ public class AiNarrativeService : IAiNarrativeService
         string prompt,
         CancellationToken cancellationToken)
     {
-        var baseEndpoint = config.Endpoint ?? "https://generativelanguage.googleapis.com/v1beta/models";
-        var endpoint = $"{baseEndpoint}/{config.Modelo}:generateContent";
+        // Gemini API endpoint - always use the correct base URL (ignore config.Endpoint)
+        const string geminiBaseUrl = "https://generativelanguage.googleapis.com/v1beta/models";
+        var endpoint = $"{geminiBaseUrl}/{config.Modelo}:generateContent";
 
         var requestBody = new
         {

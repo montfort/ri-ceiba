@@ -25,6 +25,11 @@
             NULL for system operations (background jobs, migrations).
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Data.Configurations.ConfiguracionIAConfiguration">
+            <summary>
+            EF Core configuration for ConfiguracionIA entity.
+            </summary>
+        </member>
         <member name="T:Ceiba.Infrastructure.Data.Configurations.ModeloReporteConfiguration">
             <summary>
             EF Core configuration for ModeloReporte entity.
@@ -184,16 +189,47 @@
         <member name="M:Ceiba.Infrastructure.Migrations.US4_AutomatedReports.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.AddConfiguracionIA">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddConfiguracionIA.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddConfiguracionIA.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddConfiguracionIA.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.AddMaxReportesParaNarrativaToConfiguracionIA">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddMaxReportesParaNarrativaToConfiguracionIA.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddMaxReportesParaNarrativaToConfiguracionIA.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddMaxReportesParaNarrativaToConfiguracionIA.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:Ceiba.Infrastructure.Repositories.ReportRepository">
             <summary>
             Repository implementation for ReporteIncidencia entity.
             US1: T035 (supporting implementation)
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Services.AiConfigurationService">
+            <summary>
+            Service for managing AI configuration stored in the database.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
         <member name="T:Ceiba.Infrastructure.Services.AiNarrativeService">
             <summary>
             Provider-agnostic AI narrative generation service.
-            Supports OpenAI, Azure OpenAI, and can be extended for local LLMs.
+            Supports OpenAI, Azure OpenAI, Ollama, and local LLMs.
+            Configuration is loaded from database (via IAiConfigurationService) with fallback to appsettings.
             US4: Reportes Automatizados Diarios con IA.
             </summary>
         </member>
