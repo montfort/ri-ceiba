@@ -283,7 +283,8 @@
         </member>
         <member name="T:Ceiba.Infrastructure.Services.EmailService">
             <summary>
-            Email service implementation using MailKit for SMTP.
+            Email service implementation with support for SMTP and SendGrid.
+            Reads configuration from database (ConfiguracionEmail table).
             US4: Reportes Automatizados Diarios con IA.
             </summary>
         </member>
