@@ -186,6 +186,8 @@ public class AiNarrativeService : IAiNarrativeService
         sb.AppendLine("ESTADÍSTICAS GENERALES:");
         sb.AppendLine($"- Total de reportes entregados: {request.Statistics.TotalReportes}");
 
+        _logger.LogInformation("Building AI prompt for {Count} incidents", request.Incidents.Count);
+
         if (!string.IsNullOrEmpty(request.Statistics.DelitoMasFrecuente))
             sb.AppendLine($"- Delito más frecuente: {request.Statistics.DelitoMasFrecuente}");
 
@@ -242,7 +244,11 @@ public class AiNarrativeService : IAiNarrativeService
         sb.AppendLine("9. NO menciones diferencias entre 'reportes totales' y 'reportes entregados' - todos los reportes en este análisis ya fueron entregados.");
         sb.AppendLine("10. En el primer párrafo, usa solo 'reportes' o 'reportes entregados', no ambos términos juntos.");
 
-        return sb.ToString();
+        var prompt = sb.ToString();
+        _logger.LogInformation("AI prompt built. Length: {Length} characters, ~{Tokens} tokens (estimated)",
+            prompt.Length, prompt.Length / 4);
+
+        return prompt;
     }
 
     private async Task<NarrativeResponseDto> CallOpenAiAsync(
@@ -381,10 +387,12 @@ public class AiNarrativeService : IAiNarrativeService
             },
             generationConfig = new
             {
-                maxOutputTokens = config.MaxTokens,
+                maxOutputTokens = Math.Max(config.MaxTokens, 8000), // Ensure at least 8000 tokens for output
                 temperature = config.Temperature
             }
         };
+
+        _logger.LogInformation("Calling Gemini API with maxOutputTokens: {MaxTokens}", Math.Max(config.MaxTokens, 8000));
 
         using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
         request.Headers.Add("x-goog-api-key", config.ApiKey);
@@ -404,9 +412,24 @@ public class AiNarrativeService : IAiNarrativeService
 
         using var doc = JsonDocument.Parse(responseContent);
 
+        // Log the full response for debugging
+        _logger.LogInformation("Gemini API response: {Response}", responseContent.Length > 1000 ? responseContent.Substring(0, 1000) + "..." : responseContent);
+
+        // Check for finish_reason to detect truncation
+        var candidate = doc.RootElement.GetProperty("candidates")[0];
+        if (candidate.TryGetProperty("finishReason", out var finishReason))
+        {
+            var reason = finishReason.GetString();
+            _logger.LogInformation("Gemini finish reason: {FinishReason}", reason);
+
+            if (reason != "STOP" && reason != null)
+            {
+                _logger.LogWarning("Gemini response may be incomplete. Finish reason: {FinishReason}", reason);
+            }
+        }
+
         // Gemini response format: { "candidates": [{ "content": { "parts": [{ "text": "..." }] } }] }
-        var narrative = doc.RootElement
-            .GetProperty("candidates")[0]
+        var narrative = candidate
             .GetProperty("content")
             .GetProperty("parts")[0]
             .GetProperty("text")
