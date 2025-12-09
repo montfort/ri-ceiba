@@ -27,9 +27,9 @@ public class ConfiguracionIA : BaseEntity
     public string? ApiKey { get; set; }
 
     /// <summary>
-    /// Model name to use (e.g., gpt-4, gpt-3.5-turbo, llama2).
+    /// Model name to use (e.g., gpt-4o-mini, gpt-4o, llama3.2).
     /// </summary>
-    public string Modelo { get; set; } = "gpt-4";
+    public string Modelo { get; set; } = "gpt-4o-mini";
 
     /// <summary>
     /// API endpoint URL.
@@ -53,13 +53,21 @@ public class ConfiguracionIA : BaseEntity
 
     /// <summary>
     /// Maximum tokens for response generation.
+    /// Recommended: 2000-8000 for daily reports with all incidents.
     /// </summary>
-    public int MaxTokens { get; set; } = 1000;
+    public int MaxTokens { get; set; } = 4000;
 
     /// <summary>
     /// Temperature for response generation (0.0 - 2.0).
     /// </summary>
     public double Temperature { get; set; } = 0.7;
+
+    /// <summary>
+    /// Maximum number of incidents to include in AI narrative.
+    /// 0 = unlimited (include all incidents).
+    /// Recommended: 50-100 for daily reports.
+    /// </summary>
+    public int MaxReportesParaNarrativa { get; set; } = 0;
 
     /// <summary>
     /// Whether this configuration is active.
@@ -105,11 +113,14 @@ public class ConfiguracionIA : BaseEntity
         if (string.IsNullOrWhiteSpace(Modelo))
             errors.Add("El modelo es requerido.");
 
-        if (MaxTokens < 100 || MaxTokens > 32000)
-            errors.Add("MaxTokens debe estar entre 100 y 32000.");
+        if (MaxTokens < 500 || MaxTokens > 128000)
+            errors.Add("MaxTokens debe estar entre 500 y 128000.");
 
         if (Temperature < 0 || Temperature > 2)
             errors.Add("Temperature debe estar entre 0 y 2.");
+
+        if (MaxReportesParaNarrativa < 0 || MaxReportesParaNarrativa > 1000)
+            errors.Add("MaxReportesParaNarrativa debe estar entre 0 y 1000.");
 
         return (errors.Count == 0, errors);
     }

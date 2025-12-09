@@ -105,17 +105,33 @@
                                     <div class="input-group">
                                         <input type="@(ShowApiKey ? "text" : "password")"
                                                class="form-control"
-                                               @bind="Config.ApiKey"
-                                               placeholder="Ingrese la API Key del proveedor" />
+                                               value="@(UserModifiedApiKey ? NewApiKey : string.Empty)"
+                                               @oninput="OnApiKeyInput"
+                                               autocomplete="new-password"
+                                               data-lpignore="true"
+                                               data-1p-ignore="true"
+                                               placeholder="@(HasExistingApiKey ? "Dejar vacio para mantener la actual" : "Ingrese la API Key del proveedor")" />
                                         <button class="btn btn-outline-secondary" type="button" @onclick="ToggleApiKeyVisibility">
                                             <i class="bi @(ShowApiKey ? "bi-eye-slash" : "bi-eye")"></i>
                                         </button>
                                     </div>
-                                    @if (!string.IsNullOrEmpty(MaskedApiKey))
+                                    @if (HasExistingApiKey)
                                     {
-                                        <small class="text-muted">
-                                            <i class="bi bi-info-circle me-1"></i>
-                                            API Key actual: @MaskedApiKey
+                                        <div class="mt-1">
+                                            <small class="text-success d-block">
+                                                <i class="bi bi-shield-lock-fill me-1"></i>
+                                                <strong>API Key almacenada:</strong> @MaskedApiKey
+                                            </small>
+                                            <small class="text-muted">
+                                                Deje este campo vacio para mantener la clave actual, o ingrese una nueva para reemplazarla.
+                                            </small>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-warning">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            No hay API Key guardada. Ingrese una para habilitar la IA.
                                         </small>
                                     }
                                 </div>
@@ -176,33 +192,77 @@
                             </div>
 
                             <!-- Advanced Settings -->
-                            <div class="accordion mb-4" id="advancedSettings">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button collapsed" type="button"
-                                                data-bs-toggle="collapse" data-bs-target="#advancedCollapse">
-                                            <i class="bi bi-sliders me-2"></i>Configuracion Avanzada
-                                        </button>
-                                    </h2>
-                                    <div id="advancedCollapse" class="accordion-collapse collapse">
-                                        <div class="accordion-body">
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <button type="button" class="btn btn-link text-decoration-none text-dark w-100 text-start p-0"
+                                            @onclick="() => ShowAdvancedSettings = !ShowAdvancedSettings">
+                                        <i class="bi @(ShowAdvancedSettings ? "bi-chevron-down" : "bi-chevron-right") me-2"></i>
+                                        <i class="bi bi-sliders me-2"></i>
+                                        <strong>Configuración Avanzada</strong>
+                                    </button>
+                                </div>
+                                @if (ShowAdvancedSettings)
+                                {
+                                    <div class="card-body">
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Max Tokens</label>
+                                                    <label class="form-label">
+                                                        Max Tokens
+                                                        <i class="bi bi-info-circle text-info ms-1"
+                                                           data-bs-toggle="tooltip"
+                                                           title="Aumentar si tiene muchos casos por día. Recomendado: 2000-8000 para reportes diarios."></i>
+                                                    </label>
                                                     <input type="number" class="form-control" @bind="Config.MaxTokens"
-                                                           min="100" max="32000" />
-                                                    <small class="text-muted">Maximo de tokens en la respuesta (100-32000)</small>
+                                                           min="500" max="128000" step="100" />
+                                                    <small class="text-muted">
+                                                        Longitud máxima de la respuesta (500-128000).
+                                                        <strong>Importante:</strong> Aumentar si el reporte incluye muchos casos.
+                                                    </small>
                                                 </div>
                                                 <div class="col-md-6 mb-3">
-                                                    <label class="form-label">Temperature</label>
+                                                    <label class="form-label">
+                                                        Temperature
+                                                        <i class="bi bi-info-circle text-info ms-1"
+                                                           data-bs-toggle="tooltip"
+                                                           title="0 = Respuestas más precisas y consistentes. 2 = Más creativas y variadas."></i>
+                                                    </label>
                                                     <input type="number" class="form-control" @bind="Config.Temperature"
                                                            min="0" max="2" step="0.1" />
-                                                    <small class="text-muted">Creatividad de respuestas (0-2)</small>
+                                                    <small class="text-muted">Creatividad de respuestas (0-2). Recomendado: 0.7</small>
                                                 </div>
                                             </div>
-                                        </div>
+                                            <div class="row">
+                                                <div class="col-md-12 mb-3">
+                                                    <label class="form-label">
+                                                        Máximo de Reportes para Narrativa
+                                                        <i class="bi bi-info-circle text-info ms-1"
+                                                           data-bs-toggle="tooltip"
+                                                           title="Limita cuántos casos se incluyen en el reporte. 0 = ilimitado (todos los casos)."></i>
+                                                    </label>
+                                                    <input type="number" class="form-control" @bind="Config.MaxReportesParaNarrativa"
+                                                           min="0" max="1000" step="10" />
+                                                    <small class="text-muted">
+                                                        Número máximo de reportes a incluir en la narrativa de IA (0-1000).
+                                                        <strong>0 = ilimitado</strong> (incluye todos los casos del día).
+                                                        Recomendado: 50-100 para control de costos.
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="alert alert-info mb-0">
+                                                <i class="bi bi-lightbulb me-2"></i>
+                                                <strong>Recomendaciones para reportes diarios:</strong>
+                                                <ul class="mb-0 mt-2">
+                                                    <li><strong>1-10 casos/día:</strong> MaxTokens = 2000, Max Reportes = 0 (ilimitado)</li>
+                                                    <li><strong>11-50 casos/día:</strong> MaxTokens = 4000-6000, Max Reportes = 0 o 50</li>
+                                                    <li><strong>50+ casos/día:</strong> MaxTokens = 8000-16000, Max Reportes = 100 (para control de costos)</li>
+                                                </ul>
+                                                <small class="d-block mt-2">
+                                                    <strong>Nota:</strong> Valores más altos de MaxTokens y Max Reportes aumentan el costo de la API.
+                                                    Use Max Reportes = 0 para incluir todos los casos sin límite.
+                                                </small>
+                                            </div>
                                     </div>
-                                </div>
+                                }
                             </div>
 
                             <!-- Actions -->
@@ -309,13 +369,19 @@
                 </div>
                 <div class="card-body">
                     <h6>OpenAI</h6>
-                    <p class="small">Obtenga su API Key en <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></p>
+                    <p class="small mb-3">Obtenga su API Key en <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a></p>
+
+                    <h6>Google Gemini</h6>
+                    <p class="small mb-3">Obtenga su API Key gratuita en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Modelos recomendados: gemini-2.5-flash (rápido y económico) o gemini-2.5-pro (más capaz).</p>
+
+                    <h6>DeepSeek</h6>
+                    <p class="small mb-3">Obtenga su API Key en <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener">platform.deepseek.com</a>. Use deepseek-chat para tareas generales o deepseek-reasoner para razonamiento avanzado.</p>
 
                     <h6>Azure OpenAI</h6>
-                    <p class="small">Requiere una suscripcion de Azure con el servicio de OpenAI habilitado.</p>
+                    <p class="small mb-3">Requiere una suscripción de Azure con el servicio de OpenAI habilitado.</p>
 
-                    <h6>Ollama</h6>
-                    <p class="small">Instale Ollama localmente desde <a href="https://ollama.ai" target="_blank">ollama.ai</a> y ejecute un modelo como <code>ollama run llama2</code></p>
+                    <h6>Ollama (Local)</h6>
+                    <p class="small mb-0">Instale Ollama localmente desde <a href="https://ollama.ai" target="_blank" rel="noopener">ollama.ai</a> y ejecute un modelo como <code>ollama run llama3.2</code></p>
                 </div>
             </div>
         </div>
@@ -329,7 +395,7 @@
     private ConfiguracionIA Config { get; set; } = new()
     {
         Proveedor = AiProviders.OpenAI,
-        Modelo = "gpt-4",
+        Modelo = "gpt-4o-mini",
         MaxTokens = 1000,
         Temperature = 0.7
     };
@@ -337,7 +403,11 @@
     private ConfiguracionIA? CurrentConfig { get; set; }
     private string? CustomModel { get; set; }
     private string? MaskedApiKey { get; set; }
+    private string NewApiKey { get; set; } = string.Empty;
+    private bool UserModifiedApiKey { get; set; } = false;
+    private bool HasExistingApiKey => !string.IsNullOrEmpty(CurrentConfig?.ApiKey);
     private bool ShowApiKey { get; set; }
+    private bool ShowAdvancedSettings { get; set; } = false;
 
     private bool IsLoading { get; set; } = true;
     private bool IsSaving { get; set; }
@@ -373,14 +443,29 @@
                     AzureApiVersion = CurrentConfig.AzureApiVersion ?? "2024-02-15-preview",
                     LocalEndpoint = CurrentConfig.LocalEndpoint,
                     MaxTokens = CurrentConfig.MaxTokens,
-                    Temperature = CurrentConfig.Temperature
+                    Temperature = CurrentConfig.Temperature,
+                    MaxReportesParaNarrativa = CurrentConfig.MaxReportesParaNarrativa
                 };
 
-                // Don't copy the API key, but show masked version
+                // Clear the new API key field - user must explicitly enter a new one
+                NewApiKey = string.Empty;
+                UserModifiedApiKey = false;
+
+                // Show masked version of existing API key
                 if (!string.IsNullOrEmpty(CurrentConfig.ApiKey))
                 {
                     MaskedApiKey = MaskApiKey(CurrentConfig.ApiKey);
                 }
+                else
+                {
+                    MaskedApiKey = null;
+                }
+            }
+            else
+            {
+                NewApiKey = string.Empty;
+                UserModifiedApiKey = false;
+                MaskedApiKey = null;
             }
         }
         catch (Exception ex)
@@ -418,6 +503,9 @@
             }
         }
 
+        // Clear new API key when changing providers (keep existing masked display)
+        NewApiKey = string.Empty;
+        UserModifiedApiKey = false;
         TestResult = null;
         StateHasChanged();
     }
@@ -436,8 +524,14 @@
                 Config.Modelo = CustomModel;
             }
 
-            // If API key is empty and we have a current config, keep the existing key
-            if (string.IsNullOrEmpty(Config.ApiKey) && CurrentConfig != null && !string.IsNullOrEmpty(CurrentConfig.ApiKey))
+            // Determine which API key to use:
+            // - If user intentionally entered a new one, use that
+            // - Otherwise, keep the existing one from database
+            if (UserModifiedApiKey && !string.IsNullOrWhiteSpace(NewApiKey))
+            {
+                Config.ApiKey = NewApiKey;
+            }
+            else if (CurrentConfig != null && !string.IsNullOrEmpty(CurrentConfig.ApiKey))
             {
                 Config.ApiKey = CurrentConfig.ApiKey;
             }
@@ -467,18 +561,25 @@
 
         try
         {
-            // Use custom model if provided
+            // Determine which API key to use for testing:
+            // - If user intentionally entered a new one, use that
+            // - Otherwise, use the existing one from database
+            var apiKeyToTest = (UserModifiedApiKey && !string.IsNullOrWhiteSpace(NewApiKey))
+                ? NewApiKey
+                : CurrentConfig?.ApiKey;
+
             var testConfig = new ConfiguracionIA
             {
                 Proveedor = Config.Proveedor,
-                ApiKey = string.IsNullOrEmpty(Config.ApiKey) ? CurrentConfig?.ApiKey : Config.ApiKey,
+                ApiKey = apiKeyToTest,
                 Modelo = !string.IsNullOrWhiteSpace(CustomModel) ? CustomModel : Config.Modelo,
                 Endpoint = Config.Endpoint,
                 AzureEndpoint = Config.AzureEndpoint,
                 AzureApiVersion = Config.AzureApiVersion,
                 LocalEndpoint = Config.LocalEndpoint,
                 MaxTokens = Config.MaxTokens,
-                Temperature = Config.Temperature
+                Temperature = Config.Temperature,
+                MaxReportesParaNarrativa = Config.MaxReportesParaNarrativa
             };
 
             var (success, message) = await ConfigService.TestConnectionAsync(testConfig);
@@ -502,6 +603,12 @@
         {
             IsTesting = false;
         }
+    }
+
+    private void OnApiKeyInput(ChangeEventArgs e)
+    {
+        NewApiKey = e.Value?.ToString() ?? string.Empty;
+        UserModifiedApiKey = true;
     }
 
     private void ToggleApiKeyVisibility()

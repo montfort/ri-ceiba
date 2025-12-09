@@ -115,6 +115,9 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<int>("MaxReportesParaNarrativa")
+                        .HasColumnType("integer");
+
                     b.Property<int>("MaxTokens")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")

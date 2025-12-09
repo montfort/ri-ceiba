@@ -151,20 +151,43 @@ public class AutomatedReportService : IAutomatedReportService
             template ??= await _context.ModelosReporte
                 .FirstOrDefaultAsync(m => m.EsDefault && m.Activo, cancellationToken);
 
-            // 3. Get sample incidents for narrative
-            var incidents = await _context.ReportesIncidencia
+            // 3. Get incidents for narrative (limited by AI configuration if configured)
+            var aiConfig = await _context.ConfiguracionesIA
+                .Where(c => c.Activo)
+                .OrderByDescending(c => c.UpdatedAt ?? c.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var maxReportes = aiConfig?.MaxReportesParaNarrativa ?? 0;
+
+            var incidentsQuery = _context.ReportesIncidencia
                 .Where(r => r.CreatedAt >= fechaInicio && r.CreatedAt < fechaFin)
                 .OrderByDescending(r => r.CreatedAt)
-                .Take(10)
-                .Select(r => new { r.HechosReportados, r.AccionesRealizadas })
-                .ToListAsync(cancellationToken);
+                .Select(r => new {
+                    r.Id,
+                    r.HechosReportados,
+                    r.AccionesRealizadas,
+                    r.Delito,
+                    r.CreatedAt
+                });
 
-            // 4. Generate AI narrative
+            // Apply limit if configured (0 = unlimited)
+            var incidents = maxReportes > 0
+                ? await incidentsQuery.Take(maxReportes).ToListAsync(cancellationToken)
+                : await incidentsQuery.ToListAsync(cancellationToken);
+
+            // 4. Generate AI narrative with ALL incidents
             var narrativeRequest = new NarrativeRequestDto
             {
                 Statistics = statistics,
-                HechosReportados = incidents.Select(i => i.HechosReportados).ToList(),
-                AccionesRealizadas = incidents.Select(i => i.AccionesRealizadas).ToList(),
+                Incidents = incidents.Select(i => new IncidentSummaryDto
+                {
+                    Id = i.Id,
+                    Folio = $"INC-{i.Id:D6}", // Generate folio from ID
+                    Delito = i.Delito,
+                    HechosReportados = i.HechosReportados,
+                    AccionesRealizadas = i.AccionesRealizadas,
+                    FechaReporte = i.CreatedAt
+                }).ToList(),
                 FechaInicio = fechaInicio,
                 FechaFin = fechaFin
             };
