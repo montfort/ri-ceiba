@@ -581,8 +581,7 @@ public class AiNarrativeService : IAiNarrativeService
 
         sb.AppendLine($"## Resumen del período {request.FechaInicio:dd/MM/yyyy} - {request.FechaFin:dd/MM/yyyy}");
         sb.AppendLine();
-        sb.AppendLine($"Durante el período analizado se registraron un total de **{stats.TotalReportes} reportes de incidencias**, ");
-        sb.AppendLine($"de los cuales {stats.ReportesEntregados} fueron formalmente entregados.");
+        sb.AppendLine($"Durante el período analizado se registraron **{stats.TotalReportes} reportes de incidencias de género**.");
         sb.AppendLine();
 
         if (!string.IsNullOrEmpty(stats.DelitoMasFrecuente))
@@ -598,7 +597,9 @@ public class AiNarrativeService : IAiNarrativeService
         }
 
         sb.AppendLine();
-        sb.AppendLine("*Nota: Este resumen fue generado automáticamente sin asistencia de IA debido a configuración del sistema.*");
+        sb.AppendLine("---");
+        sb.AppendLine();
+        sb.AppendLine("*Nota: Este resumen básico fue generado automáticamente. Para obtener análisis narrativos detallados con IA, configure un proveedor de IA en la sección de administración.*");
 
         return new NarrativeResponseDto
         {
