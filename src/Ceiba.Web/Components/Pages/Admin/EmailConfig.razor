@@ -75,6 +75,7 @@
                                 <select class="form-select" id="proveedor" @bind="Model.Proveedor" disabled="@(!Model.Habilitado)">
                                     <option value="SMTP">SMTP (Servidor de correo tradicional)</option>
                                     <option value="SendGrid">SendGrid (Email transaccional)</option>
+                                    <option value="Mailgun">Mailgun (Email transaccional)</option>
                                 </select>
                                 <small class="text-muted">
                                     Seleccione el tipo de servicio que desea utilizar para enviar emails.
@@ -161,6 +162,51 @@
                                     <i class="bi bi-info-circle me-2"></i>
                                     <strong>SendGrid</strong> es un servicio de email transaccional que ofrece alta entregabilidad y escalabilidad.
                                     Necesitará crear una cuenta en <a href="https://sendgrid.com" target="_blank">sendgrid.com</a> para obtener una API Key.
+                                </div>
+                            }
+
+                            <!-- Configuración Mailgun -->
+                            @if (Model.Proveedor == "Mailgun")
+                            {
+                                <hr class="my-4" />
+                                <h6 class="mb-3">Configuración Mailgun</h6>
+
+                                <div class="mb-3">
+                                    <label for="mailgunApiKey" class="form-label">API Key de Mailgun</label>
+                                    <input type="password" class="form-control" id="mailgunApiKey" @bind="Model.MailgunApiKey" disabled="@(!Model.Habilitado)" />
+                                    <small class="text-muted">
+                                        @if (Config?.HasMailgunApiKey == true)
+                                        {
+                                            <span class="text-success">
+                                                <i class="bi bi-check-circle me-1"></i>API Key configurada. Dejar en blanco para mantenerla.
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span>Obtenga su API Key desde el portal de Mailgun.</span>
+                                        }
+                                    </small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="mailgunDomain" class="form-label">Dominio de Mailgun</label>
+                                    <InputText class="form-control" id="mailgunDomain" @bind-Value="Model.MailgunDomain" disabled="@(!Model.Habilitado)" placeholder="mg.example.com" />
+                                    <small class="text-muted">El dominio configurado en su cuenta de Mailgun para envío de emails.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="mailgunRegion" class="form-label">Región del servidor</label>
+                                    <select class="form-select" id="mailgunRegion" @bind="Model.MailgunRegion" disabled="@(!Model.Habilitado)">
+                                        <option value="US">Estados Unidos</option>
+                                        <option value="EU">Europa</option>
+                                    </select>
+                                    <small class="text-muted">Seleccione la región donde está alojado su dominio de Mailgun.</small>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Mailgun</strong> es un servicio de email transaccional potente y confiable con excelente entregabilidad.
+                                    Necesitará crear una cuenta en <a href="https://www.mailgun.com" target="_blank">mailgun.com</a> y verificar un dominio para obtener una API Key.
                                 </div>
                             }
 
@@ -258,12 +304,14 @@
                         <ul class="small">
                             <li><strong>SMTP</strong>: Servidor de correo tradicional. Requiere host, puerto y credenciales.</li>
                             <li><strong>SendGrid</strong>: Servicio de email transaccional con alta entregabilidad.</li>
+                            <li><strong>Mailgun</strong>: Servicio de email transaccional potente y confiable.</li>
                         </ul>
 
                         <h6 class="mt-3">Recomendaciones</h6>
                         <ul class="small">
                             <li>Pruebe la configuración antes de habilitar el servicio</li>
-                            <li>Use SendGrid para producción por su mejor entregabilidad</li>
+                            <li>Use SendGrid o Mailgun para producción por su mejor entregabilidad</li>
+                            <li>Mailgun es más flexible y no suspende cuentas inmediatamente</li>
                             <li>Mantenga las credenciales seguras</li>
                         </ul>
                     </div>
@@ -356,6 +404,8 @@
                     SmtpPort = Config.SmtpPort,
                     SmtpUsername = Config.SmtpUsername,
                     SmtpUseSsl = Config.SmtpUseSsl,
+                    MailgunDomain = Config.MailgunDomain,
+                    MailgunRegion = Config.MailgunRegion,
                     FromEmail = Config.FromEmail,
                     FromName = Config.FromName
                 };
@@ -405,6 +455,19 @@
                     if (Config?.HasSendGridApiKey != true && string.IsNullOrWhiteSpace(Model.SendGridApiKey))
                     {
                         ErrorMessage = "La API Key de SendGrid es obligatoria";
+                        return;
+                    }
+                }
+                else if (Model.Proveedor == "Mailgun")
+                {
+                    if (Config?.HasMailgunApiKey != true && string.IsNullOrWhiteSpace(Model.MailgunApiKey))
+                    {
+                        ErrorMessage = "La API Key de Mailgun es obligatoria";
+                        return;
+                    }
+                    if (string.IsNullOrWhiteSpace(Model.MailgunDomain))
+                    {
+                        ErrorMessage = "El dominio de Mailgun es obligatorio";
                         return;
                     }
                 }

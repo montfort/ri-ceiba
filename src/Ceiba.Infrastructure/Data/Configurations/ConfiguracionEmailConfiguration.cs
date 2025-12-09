@@ -53,6 +53,19 @@ public class ConfiguracionEmailConfiguration : IEntityTypeConfiguration<Configur
             .HasColumnName("sendgrid_api_key")
             .HasMaxLength(500);
 
+        // Mailgun Configuration
+        builder.Property(c => c.MailgunApiKey)
+            .HasColumnName("mailgun_api_key")
+            .HasMaxLength(500);
+
+        builder.Property(c => c.MailgunDomain)
+            .HasColumnName("mailgun_domain")
+            .HasMaxLength(255);
+
+        builder.Property(c => c.MailgunRegion)
+            .HasColumnName("mailgun_region")
+            .HasMaxLength(10);
+
         // Common Configuration
         builder.Property(c => c.FromEmail)
             .HasColumnName("from_email")

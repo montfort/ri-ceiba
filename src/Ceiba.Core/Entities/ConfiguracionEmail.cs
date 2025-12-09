@@ -9,7 +9,7 @@ public class ConfiguracionEmail : BaseEntityWithUser
     public int Id { get; set; }
 
     /// <summary>
-    /// Email provider type: SMTP, SendGrid
+    /// Email provider type: SMTP, SendGrid, Mailgun
     /// </summary>
     public string Proveedor { get; set; } = "SMTP";
 
@@ -27,6 +27,11 @@ public class ConfiguracionEmail : BaseEntityWithUser
 
     // SendGrid Configuration
     public string? SendGridApiKey { get; set; }
+
+    // Mailgun Configuration
+    public string? MailgunApiKey { get; set; }
+    public string? MailgunDomain { get; set; }
+    public string? MailgunRegion { get; set; } = "US"; // US or EU
 
     // Common Configuration
     public string FromEmail { get; set; } = string.Empty;

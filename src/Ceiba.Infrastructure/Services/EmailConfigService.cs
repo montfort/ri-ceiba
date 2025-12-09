@@ -88,8 +88,11 @@ public class EmailConfigService : IEmailConfigService
                 config.SmtpPassword = dto.SmtpPassword;
             }
 
-            // Clear SendGrid configuration when switching to SMTP
+            // Clear other providers when switching to SMTP
             config.SendGridApiKey = null;
+            config.MailgunApiKey = null;
+            config.MailgunDomain = null;
+            config.MailgunRegion = null;
         }
         else if (dto.Proveedor == "SendGrid")
         {
@@ -99,11 +102,32 @@ public class EmailConfigService : IEmailConfigService
                 config.SendGridApiKey = dto.SendGridApiKey;
             }
 
-            // Clear SMTP configuration when switching to SendGrid
+            // Clear other providers when switching to SendGrid
             config.SmtpHost = null;
             config.SmtpPort = null;
             config.SmtpUsername = null;
             config.SmtpPassword = null;
+            config.MailgunApiKey = null;
+            config.MailgunDomain = null;
+            config.MailgunRegion = null;
+        }
+        else if (dto.Proveedor == "Mailgun")
+        {
+            // Only update API key if provided
+            if (!string.IsNullOrEmpty(dto.MailgunApiKey))
+            {
+                config.MailgunApiKey = dto.MailgunApiKey;
+            }
+
+            config.MailgunDomain = dto.MailgunDomain;
+            config.MailgunRegion = dto.MailgunRegion;
+
+            // Clear other providers when switching to Mailgun
+            config.SmtpHost = null;
+            config.SmtpPort = null;
+            config.SmtpUsername = null;
+            config.SmtpPassword = null;
+            config.SendGridApiKey = null;
         }
 
         config.UpdatedAt = DateTime.UtcNow;
@@ -268,6 +292,9 @@ public class EmailConfigService : IEmailConfigService
             SmtpUsername = entity.SmtpUsername,
             SmtpUseSsl = entity.SmtpUseSsl,
             HasSendGridApiKey = !string.IsNullOrEmpty(entity.SendGridApiKey),
+            HasMailgunApiKey = !string.IsNullOrEmpty(entity.MailgunApiKey),
+            MailgunDomain = entity.MailgunDomain,
+            MailgunRegion = entity.MailgunRegion,
             FromEmail = entity.FromEmail,
             FromName = entity.FromName,
             LastTestedAt = entity.LastTestedAt,

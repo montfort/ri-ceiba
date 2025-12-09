@@ -121,6 +121,21 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("last_tested_at");
 
+                    b.Property<string>("MailgunApiKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("mailgun_api_key");
+
+                    b.Property<string>("MailgunDomain")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("mailgun_domain");
+
+                    b.Property<string>("MailgunRegion")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("mailgun_region");
+
                     b.Property<string>("Proveedor")
                         .IsRequired()
                         .HasMaxLength(50)

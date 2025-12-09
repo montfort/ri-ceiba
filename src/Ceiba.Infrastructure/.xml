@@ -237,6 +237,18 @@
         <member name="M:Ceiba.Infrastructure.Migrations.US4_AddEmailConfiguration.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.US4_AddMailgunSupport">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AddMailgunSupport.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AddMailgunSupport.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AddMailgunSupport.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:Ceiba.Infrastructure.Repositories.ReportRepository">
             <summary>
             Repository implementation for ReporteIncidencia entity.
@@ -283,7 +295,7 @@
         </member>
         <member name="T:Ceiba.Infrastructure.Services.EmailService">
             <summary>
-            Email service implementation with support for SMTP and SendGrid.
+            Email service implementation with support for SMTP, SendGrid, and Mailgun.
             Reads configuration from database (ConfiguracionEmail table).
             US4: Reportes Automatizados Diarios con IA.
             </summary>

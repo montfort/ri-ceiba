@@ -81,7 +81,7 @@
         </member>
         <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.Proveedor">
             <summary>
-            Email provider type: SMTP, SendGrid
+            Email provider type: SMTP, SendGrid, Mailgun
             </summary>
         </member>
         <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.Habilitado">

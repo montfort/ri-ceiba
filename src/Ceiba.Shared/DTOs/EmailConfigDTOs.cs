@@ -18,6 +18,11 @@ public class EmailConfigDto
     // SendGrid Configuration (API key masked for security)
     public bool HasSendGridApiKey { get; set; }
 
+    // Mailgun Configuration
+    public bool HasMailgunApiKey { get; set; }
+    public string? MailgunDomain { get; set; }
+    public string? MailgunRegion { get; set; }
+
     // Common Configuration
     public string FromEmail { get; set; } = string.Empty;
     public string FromName { get; set; } = string.Empty;
@@ -48,6 +53,11 @@ public class EmailConfigUpdateDto
 
     // SendGrid Configuration
     public string? SendGridApiKey { get; set; }
+
+    // Mailgun Configuration
+    public string? MailgunApiKey { get; set; }
+    public string? MailgunDomain { get; set; }
+    public string? MailgunRegion { get; set; }
 
     // Common Configuration
     public string FromEmail { get; set; } = string.Empty;
