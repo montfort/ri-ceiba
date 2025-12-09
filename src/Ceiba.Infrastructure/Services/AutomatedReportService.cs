@@ -745,9 +745,7 @@ public class AutomatedReportService : IAutomatedReportService
         sb.AppendLine();
         sb.AppendLine($"| Métrica | Valor |");
         sb.AppendLine($"|---------|-------|");
-        sb.AppendLine($"| Total de Reportes | {stats.TotalReportes} |");
-        sb.AppendLine($"| Reportes Entregados | {stats.ReportesEntregados} |");
-        sb.AppendLine($"| Reportes en Borrador | {stats.ReportesBorrador} |");
+        sb.AppendLine($"| Total de Reportes Entregados | {stats.TotalReportes} |");
         sb.AppendLine($"| Casos LGBTTTIQ+ | {stats.TotalLgbtttiq} |");
         sb.AppendLine($"| Casos Migrantes | {stats.TotalMigrantes} |");
         sb.AppendLine($"| Casos Situación de Calle | {stats.TotalSituacionCalle} |");
