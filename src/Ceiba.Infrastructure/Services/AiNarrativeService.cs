@@ -60,6 +60,8 @@ public class AiNarrativeService : IAiNarrativeService
             var response = config.Proveedor.ToLower() switch
             {
                 "openai" => await CallOpenAiAsync(config, prompt, cancellationToken),
+                "gemini" => await CallGeminiAsync(config, prompt, cancellationToken),
+                "deepseek" => await CallDeepSeekAsync(config, prompt, cancellationToken),
                 "azureopenai" => await CallAzureOpenAiAsync(config, prompt, cancellationToken),
                 "local" or "ollama" => await CallLocalLlmAsync(config, prompt, cancellationToken),
                 _ => await CallOpenAiAsync(config, prompt, cancellationToken)
@@ -156,7 +158,7 @@ public class AiNarrativeService : IAiNarrativeService
     {
         return provider.ToLower() switch
         {
-            "openai" or "azureopenai" => true,
+            "openai" or "azureopenai" or "gemini" or "deepseek" => true,
             _ => false
         };
     }
@@ -166,6 +168,8 @@ public class AiNarrativeService : IAiNarrativeService
         return config.Proveedor.ToLower() switch
         {
             "openai" => config.Endpoint ?? "https://api.openai.com/v1/chat/completions",
+            "gemini" => config.Endpoint ?? "https://generativelanguage.googleapis.com/v1beta/models",
+            "deepseek" => config.Endpoint ?? "https://api.deepseek.com/chat/completions",
             "azureopenai" => config.AzureEndpoint ?? config.Endpoint ?? "",
             "local" or "ollama" => config.LocalEndpoint ?? "http://localhost:11434/api/generate",
             _ => config.Endpoint ?? "https://api.openai.com/v1/chat/completions"
@@ -178,9 +182,8 @@ public class AiNarrativeService : IAiNarrativeService
         sb.AppendLine("Genera un resumen narrativo profesional para un reporte de incidencias de género.");
         sb.AppendLine($"Período: {request.FechaInicio:dd/MM/yyyy} al {request.FechaFin:dd/MM/yyyy}");
         sb.AppendLine();
-        sb.AppendLine("ESTADÍSTICAS:");
-        sb.AppendLine($"- Total de reportes: {request.Statistics.TotalReportes}");
-        sb.AppendLine($"- Reportes entregados: {request.Statistics.ReportesEntregados}");
+        sb.AppendLine("ESTADÍSTICAS GENERALES:");
+        sb.AppendLine($"- Total de reportes entregados: {request.Statistics.TotalReportes}");
 
         if (!string.IsNullOrEmpty(request.Statistics.DelitoMasFrecuente))
             sb.AppendLine($"- Delito más frecuente: {request.Statistics.DelitoMasFrecuente}");
@@ -201,24 +204,42 @@ public class AiNarrativeService : IAiNarrativeService
 
         sb.AppendLine();
         sb.AppendLine("DISTRIBUCIÓN POR TIPO DE DELITO:");
-        foreach (var item in request.Statistics.PorDelito.Take(5))
+        foreach (var item in request.Statistics.PorDelito.OrderByDescending(x => x.Value).Take(10))
             sb.AppendLine($"- {item.Key}: {item.Value}");
 
-        if (request.HechosReportados.Any())
+        // Include ALL incidents with complete details
+        if (request.Incidents.Any())
         {
             sb.AppendLine();
-            sb.AppendLine("RESUMEN DE HECHOS REPORTADOS (muestra):");
-            foreach (var hecho in request.HechosReportados.Take(3))
-                sb.AppendLine($"- {hecho.Substring(0, Math.Min(200, hecho.Length))}...");
+            sb.AppendLine($"DETALLE DE TODOS LOS CASOS REPORTADOS ({request.Incidents.Count} casos):");
+            sb.AppendLine();
+
+            int caseNumber = 1;
+            foreach (var incident in request.Incidents.OrderByDescending(i => i.FechaReporte))
+            {
+                sb.AppendLine($"--- Caso #{caseNumber} ---");
+                sb.AppendLine($"Folio: {incident.Folio}");
+                sb.AppendLine($"Fecha: {incident.FechaReporte:dd/MM/yyyy HH:mm}");
+                sb.AppendLine($"Tipo de delito: {incident.Delito}");
+                sb.AppendLine($"Hechos reportados: {incident.HechosReportados}");
+                sb.AppendLine($"Acciones realizadas: {incident.AccionesRealizadas}");
+                sb.AppendLine();
+                caseNumber++;
+            }
         }
 
         sb.AppendLine();
-        sb.AppendLine("Instrucciones:");
-        sb.AppendLine("1. Redacta un resumen ejecutivo de 2-3 párrafos.");
-        sb.AppendLine("2. Usa un tono formal y profesional.");
-        sb.AppendLine("3. Destaca las tendencias más importantes.");
-        sb.AppendLine("4. Incluye recomendaciones si es apropiado.");
-        sb.AppendLine("5. El texto debe estar en español.");
+        sb.AppendLine("INSTRUCCIONES PARA LA NARRATIVA:");
+        sb.AppendLine("1. Redacta un resumen ejecutivo que incluya TODOS los casos reportados.");
+        sb.AppendLine("2. Para cada caso, menciona el folio, tipo de delito y un breve resumen de los hechos.");
+        sb.AppendLine("3. Organiza los casos por tipo de delito o cronológicamente según consideres más apropiado.");
+        sb.AppendLine("4. Usa un tono formal y profesional.");
+        sb.AppendLine("5. Destaca las tendencias más importantes observadas.");
+        sb.AppendLine("6. Incluye recomendaciones basadas en los patrones identificados.");
+        sb.AppendLine("7. El texto debe estar en español.");
+        sb.AppendLine("8. IMPORTANTE: Asegúrate de mencionar explícitamente cada uno de los casos listados arriba.");
+        sb.AppendLine("9. NO menciones diferencias entre 'reportes totales' y 'reportes entregados' - todos los reportes en este análisis ya fueron entregados.");
+        sb.AppendLine("10. En el primer párrafo, usa solo 'reportes' o 'reportes entregados', no ambos términos juntos.");
 
         return sb.ToString();
     }
@@ -269,6 +290,135 @@ public class AiNarrativeService : IAiNarrativeService
             .GetProperty("usage")
             .GetProperty("total_tokens")
             .GetInt32();
+
+        return new NarrativeResponseDto
+        {
+            Narrativa = narrative,
+            Success = true,
+            TokensUsed = tokensUsed
+        };
+    }
+
+    private async Task<NarrativeResponseDto> CallDeepSeekAsync(
+        ConfiguracionIA config,
+        string prompt,
+        CancellationToken cancellationToken)
+    {
+        // DeepSeek API - always use the correct endpoint
+        const string endpoint = "https://api.deepseek.com/chat/completions";
+
+        var requestBody = new
+        {
+            model = config.Modelo,
+            messages = new[]
+            {
+                new { role = "system", content = "Eres un analista de seguridad pública especializado en género que genera reportes ejecutivos." },
+                new { role = "user", content = prompt }
+            },
+            max_tokens = config.MaxTokens,
+            temperature = config.Temperature
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        request.Headers.Add("Authorization", $"Bearer {config.ApiKey}");
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json");
+
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("DeepSeek API error: {StatusCode} - {Content}", response.StatusCode, responseContent);
+            throw new Exception($"DeepSeek API error: {response.StatusCode}");
+        }
+
+        using var doc = JsonDocument.Parse(responseContent);
+        var narrative = doc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString() ?? "";
+
+        var tokensUsed = 0;
+        if (doc.RootElement.TryGetProperty("usage", out var usage) &&
+            usage.TryGetProperty("total_tokens", out var totalTokens))
+        {
+            tokensUsed = totalTokens.GetInt32();
+        }
+
+        return new NarrativeResponseDto
+        {
+            Narrativa = narrative,
+            Success = true,
+            TokensUsed = tokensUsed
+        };
+    }
+
+    private async Task<NarrativeResponseDto> CallGeminiAsync(
+        ConfiguracionIA config,
+        string prompt,
+        CancellationToken cancellationToken)
+    {
+        var baseEndpoint = config.Endpoint ?? "https://generativelanguage.googleapis.com/v1beta/models";
+        var endpoint = $"{baseEndpoint}/{config.Modelo}:generateContent";
+
+        var requestBody = new
+        {
+            contents = new[]
+            {
+                new
+                {
+                    parts = new[]
+                    {
+                        new { text = $"Eres un analista de seguridad pública especializado en género que genera reportes ejecutivos.\n\n{prompt}" }
+                    }
+                }
+            },
+            generationConfig = new
+            {
+                maxOutputTokens = config.MaxTokens,
+                temperature = config.Temperature
+            }
+        };
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+        request.Headers.Add("x-goog-api-key", config.ApiKey);
+        request.Content = new StringContent(
+            JsonSerializer.Serialize(requestBody),
+            Encoding.UTF8,
+            "application/json");
+
+        var response = await _httpClient.SendAsync(request, cancellationToken);
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError("Gemini API error: {StatusCode} - {Content}", response.StatusCode, responseContent);
+            throw new Exception($"Gemini API error: {response.StatusCode}");
+        }
+
+        using var doc = JsonDocument.Parse(responseContent);
+
+        // Gemini response format: { "candidates": [{ "content": { "parts": [{ "text": "..." }] } }] }
+        var narrative = doc.RootElement
+            .GetProperty("candidates")[0]
+            .GetProperty("content")
+            .GetProperty("parts")[0]
+            .GetProperty("text")
+            .GetString() ?? "";
+
+        // Try to get token usage if available
+        int tokensUsed = 0;
+        if (doc.RootElement.TryGetProperty("usageMetadata", out var usage))
+        {
+            if (usage.TryGetProperty("totalTokenCount", out var totalTokens))
+            {
+                tokensUsed = totalTokens.GetInt32();
+            }
+        }
 
         return new NarrativeResponseDto
         {
