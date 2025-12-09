@@ -1,6 +1,5 @@
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,12 +8,11 @@ namespace Ceiba.Infrastructure.Services;
 
 /// <summary>
 /// Background service that generates automated daily reports at a configured time.
-/// US4: Reportes Automatizados Diarios con IA.
+/// US4: Reportes Automatizados Diarios con IA (Enhanced with DB configuration).
 /// </summary>
 public class AutomatedReportBackgroundService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _configuration;
     private readonly ILogger<AutomatedReportBackgroundService> _logger;
 
     private TimeSpan _generationTime;
@@ -22,32 +20,50 @@ public class AutomatedReportBackgroundService : BackgroundService
 
     public AutomatedReportBackgroundService(
         IServiceProvider serviceProvider,
-        IConfiguration configuration,
         ILogger<AutomatedReportBackgroundService> logger)
     {
         _serviceProvider = serviceProvider;
-        _configuration = configuration;
         _logger = logger;
-
-        LoadConfiguration();
     }
 
-    private void LoadConfiguration()
+    private async Task<bool> LoadConfigurationAsync(CancellationToken cancellationToken = default)
     {
-        _generationTime = TimeSpan.TryParse(_configuration["AutomatedReports:GenerationTime"], out var time)
-            ? time
-            : new TimeSpan(6, 0, 0); // Default: 6:00 AM
+        try
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var configService = scope.ServiceProvider.GetRequiredService<IAutomatedReportConfigService>();
 
-        _isEnabled = bool.TryParse(_configuration["AutomatedReports:Enabled"], out var enabled) && enabled;
+            var config = await configService.GetConfigurationAsync(cancellationToken);
 
-        _logger.LogInformation(
-            "Automated report service configured. Enabled: {Enabled}, GenerationTime: {Time}",
-            _isEnabled,
-            _generationTime);
+            if (config == null)
+            {
+                // Create default configuration
+                config = await configService.EnsureConfigurationExistsAsync(cancellationToken);
+            }
+
+            _generationTime = config.HoraGeneracion;
+            _isEnabled = config.Habilitado;
+
+            _logger.LogInformation(
+                "Automated report service configured from database. Enabled: {Enabled}, GenerationTime: {Time}",
+                _isEnabled,
+                _generationTime);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading automated report configuration from database. Service will be disabled.");
+            _isEnabled = false;
+            return false;
+        }
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Initial configuration load
+        await LoadConfigurationAsync(stoppingToken);
+
         if (!_isEnabled)
         {
             _logger.LogInformation("Automated report generation is disabled.");
@@ -60,6 +76,16 @@ public class AutomatedReportBackgroundService : BackgroundService
         {
             try
             {
+                // Reload configuration before each run to pick up changes
+                await LoadConfigurationAsync(stoppingToken);
+
+                if (!_isEnabled)
+                {
+                    _logger.LogInformation("Automated report generation has been disabled. Service will check again in 1 hour.");
+                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                    continue;
+                }
+
                 var delay = CalculateDelayUntilNextRun();
                 _logger.LogDebug("Next automated report generation in {Delay}", delay);
 

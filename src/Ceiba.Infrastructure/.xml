@@ -254,7 +254,7 @@
         <member name="T:Ceiba.Infrastructure.Services.AutomatedReportBackgroundService">
             <summary>
             Background service that generates automated daily reports at a configured time.
-            US4: Reportes Automatizados Diarios con IA.
+            US4: Reportes Automatizados Diarios con IA (Enhanced with DB configuration).
             </summary>
         </member>
         <member name="T:Ceiba.Infrastructure.Services.AutomatedReportService">

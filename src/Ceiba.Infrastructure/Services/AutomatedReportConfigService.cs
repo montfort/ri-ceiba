@@ -44,6 +44,12 @@ public class AutomatedReportConfigService : IAutomatedReportConfigService
         AutomatedReportConfigUpdateDto dto,
         CancellationToken cancellationToken = default)
     {
+        if (_currentUserId == Guid.Empty)
+        {
+            _logger.LogError("Cannot update configuration: User is not authenticated");
+            throw new UnauthorizedAccessException("User is not authenticated");
+        }
+
         var config = await _context.ConfiguracionReportesAutomatizados
             .OrderByDescending(c => c.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
@@ -84,16 +90,48 @@ public class AutomatedReportConfigService : IAutomatedReportConfigService
         if (config != null)
             return config;
 
-        // Create default configuration
-        var defaultConfig = new AutomatedReportConfigUpdateDto
+        // Create default configuration with system user or current user
+        var userId = _currentUserId != Guid.Empty ? _currentUserId : await GetAdminUserIdAsync(cancellationToken);
+
+        var defaultConfig = new ConfiguracionReportesAutomatizados
         {
             Habilitado = false,
             HoraGeneracion = new TimeSpan(6, 0, 0),
-            Destinatarios = Array.Empty<string>(),
-            RutaSalida = "./generated-reports"
+            Destinatarios = string.Empty,
+            RutaSalida = "./generated-reports",
+            UsuarioId = userId,
+            CreatedAt = DateTime.UtcNow
         };
 
-        return await UpdateConfigurationAsync(defaultConfig, cancellationToken);
+        _context.ConfiguracionReportesAutomatizados.Add(defaultConfig);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Default automated report configuration created");
+
+        return MapToDto(defaultConfig);
+    }
+
+    private async Task<Guid> GetAdminUserIdAsync(CancellationToken cancellationToken)
+    {
+        // Try to get first ADMIN user
+        var adminRole = await _context.Roles
+            .Where(r => r.Name == "ADMIN")
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (adminRole != null)
+        {
+            var adminUser = await _context.UserRoles
+                .Where(ur => ur.RoleId == adminRole.Id)
+                .Select(ur => ur.UserId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (adminUser != Guid.Empty)
+                return adminUser;
+        }
+
+        // Fallback: get any user
+        var anyUser = await _context.Users.Select(u => u.Id).FirstOrDefaultAsync(cancellationToken);
+        return anyUser != Guid.Empty ? anyUser : Guid.Empty;
     }
 
     private static AutomatedReportConfigDto MapToDto(ConfiguracionReportesAutomatizados entity)
