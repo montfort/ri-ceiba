@@ -160,7 +160,7 @@ public class AutomatedReportService : IAutomatedReportService
             var maxReportes = aiConfig?.MaxReportesParaNarrativa ?? 0;
 
             var incidentsQuery = _context.ReportesIncidencia
-                .Where(r => r.CreatedAt >= fechaInicio && r.CreatedAt < fechaFin)
+                .Where(r => r.CreatedAt >= fechaInicio && r.CreatedAt < fechaFin && r.Estado == 1) // Solo reportes entregados
                 .OrderByDescending(r => r.CreatedAt)
                 .Select(r => new {
                     r.Id,
@@ -561,16 +561,17 @@ public class AutomatedReportService : IAutomatedReportService
         var fechaInicioUtc = DateTime.SpecifyKind(fechaInicio, DateTimeKind.Utc);
         var fechaFinUtc = DateTime.SpecifyKind(fechaFin, DateTimeKind.Utc);
 
+        // Solo incluir reportes ENTREGADOS (estado == 1) para estadísticas
         var reports = await _context.ReportesIncidencia
             .Include(r => r.Zona)
-            .Where(r => r.CreatedAt >= fechaInicioUtc && r.CreatedAt < fechaFinUtc)
+            .Where(r => r.CreatedAt >= fechaInicioUtc && r.CreatedAt < fechaFinUtc && r.Estado == 1)
             .ToListAsync(cancellationToken);
 
         var stats = new ReportStatisticsDto
         {
             TotalReportes = reports.Count,
-            ReportesEntregados = reports.Count(r => r.Estado == 1),
-            ReportesBorrador = reports.Count(r => r.Estado == 0)
+            ReportesEntregados = reports.Count, // Todos son entregados por el filtro
+            ReportesBorrador = 0 // No incluimos borradores
         };
 
         // Demographics
