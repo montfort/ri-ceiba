@@ -232,6 +232,21 @@
             Validates the geographic hierarchy (Zona → Sector → Cuadrante).
             </summary>
         </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.GetConfiguration(System.Threading.CancellationToken)">
+            <summary>
+            Get current email configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.UpdateConfiguration(Ceiba.Shared.DTOs.EmailConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Update email configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.TestConfiguration(Ceiba.Shared.DTOs.TestEmailConfigDto,System.Threading.CancellationToken)">
+            <summary>
+            Test email configuration by sending a test email
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Controllers.ExportController">
             <summary>
             API controller for report export functionality.

@@ -49,6 +49,9 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
     // Automated Report Configuration (US4 Enhancement)
     public DbSet<ConfiguracionReportesAutomatizados> ConfiguracionReportesAutomatizados => Set<ConfiguracionReportesAutomatizados>();
 
+    // Email Configuration (US4 Enhancement)
+    public DbSet<ConfiguracionEmail> ConfiguracionesEmail => Set<ConfiguracionEmail>();
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

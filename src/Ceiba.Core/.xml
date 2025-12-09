@@ -73,6 +73,37 @@
             Default: 0
             </summary>
         </member>
+        <member name="T:Ceiba.Core.Entities.ConfiguracionEmail">
+            <summary>
+            Configuration for email transactional service.
+            Supports SMTP and SendGrid providers.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.Proveedor">
+            <summary>
+            Email provider type: SMTP, SendGrid
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.Habilitado">
+            <summary>
+            Whether the email service is enabled
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.LastTestedAt">
+            <summary>
+            Last time configuration was tested successfully
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.LastTestSuccess">
+            <summary>
+            Result of last connection test
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.LastTestError">
+            <summary>
+            Error message from last test (if failed)
+            </summary>
+        </member>
         <member name="T:Ceiba.Core.Entities.ConfiguracionIA">
             <summary>
             Entity for storing AI service configuration.
@@ -1114,6 +1145,32 @@
             <param name="sectorId">Sector ID</param>
             <param name="cuadranteId">Quadrant ID</param>
             <returns>True if hierarchy is valid, false otherwise</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IEmailConfigService">
+            <summary>
+            Service for managing email configuration.
+            Supports SMTP and transactional email providers like SendGrid.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.GetConfigurationAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current email configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.UpdateConfigurationAsync(Ceiba.Shared.DTOs.EmailConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Updates the email configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.EnsureConfigurationExistsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Ensures a default email configuration exists.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.TestConfigurationAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Tests the email configuration by sending a test email.
+            </summary>
         </member>
         <member name="T:Ceiba.Core.Interfaces.IEmailService">
             <summary>

@@ -206,6 +206,26 @@
             DTO for email sending result.
             </summary>
         </member>
+        <member name="T:Ceiba.Shared.DTOs.EmailConfigDto">
+            <summary>
+            DTO for email configuration display.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.EmailConfigUpdateDto">
+            <summary>
+            DTO for updating email configuration.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.TestEmailConfigDto">
+            <summary>
+            DTO for testing email configuration.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.EmailConfigTestResultDto">
+            <summary>
+            DTO for email configuration test result.
+            </summary>
+        </member>
         <member name="T:Ceiba.Shared.DTOs.Export.ExportFormat">
             <summary>
             Export format options for incident reports

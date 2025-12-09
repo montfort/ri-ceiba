@@ -85,6 +85,7 @@ try
     builder.Services.AddScoped<IAiConfigurationService, AiConfigurationService>();
     builder.Services.AddHttpClient<IAiNarrativeService, AiNarrativeService>();
     builder.Services.AddScoped<IEmailService, EmailService>();
+    builder.Services.AddScoped<IEmailConfigService, EmailConfigService>();
     builder.Services.AddScoped<IAutomatedReportService, AutomatedReportService>();
     builder.Services.AddScoped<IAutomatedReportConfigService, AutomatedReportConfigService>();
     builder.Services.AddHostedService<AutomatedReportBackgroundService>();

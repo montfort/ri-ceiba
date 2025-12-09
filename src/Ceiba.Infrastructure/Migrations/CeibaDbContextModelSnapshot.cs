@@ -77,6 +77,110 @@ namespace Ceiba.Infrastructure.Migrations
                     b.ToTable("CATALOGO_SUGERENCIA", (string)null);
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.ConfiguracionEmail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("FromEmail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("from_email");
+
+                    b.Property<string>("FromName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("from_name");
+
+                    b.Property<bool>("Habilitado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("habilitado");
+
+                    b.Property<string>("LastTestError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("last_test_error");
+
+                    b.Property<bool?>("LastTestSuccess")
+                        .HasColumnType("boolean")
+                        .HasColumnName("last_test_success");
+
+                    b.Property<DateTime?>("LastTestedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("last_tested_at");
+
+                    b.Property<string>("Proveedor")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("proveedor");
+
+                    b.Property<string>("SendGridApiKey")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("sendgrid_api_key");
+
+                    b.Property<string>("SmtpHost")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("smtp_host");
+
+                    b.Property<string>("SmtpPassword")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("smtp_password");
+
+                    b.Property<int?>("SmtpPort")
+                        .HasColumnType("integer")
+                        .HasColumnName("smtp_port");
+
+                    b.Property<bool>("SmtpUseSsl")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("smtp_use_ssl");
+
+                    b.Property<string>("SmtpUsername")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("smtp_username");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("ix_configuracion_email_created_at");
+
+                    b.HasIndex("Habilitado")
+                        .HasDatabaseName("ix_configuracion_email_habilitado");
+
+                    b.HasIndex("Proveedor")
+                        .HasDatabaseName("ix_configuracion_email_proveedor");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("configuracion_email", (string)null);
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.ConfiguracionIA", b =>
                 {
                     b.Property<int>("Id")
@@ -923,6 +1027,15 @@ namespace Ceiba.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("USUARIO_TOKEN", (string)null);
+                });
+
+            modelBuilder.Entity("Ceiba.Core.Entities.ConfiguracionEmail", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<System.Guid>", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Ceiba.Core.Entities.ConfiguracionReportesAutomatizados", b =>
