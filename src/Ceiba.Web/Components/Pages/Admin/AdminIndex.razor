@@ -113,6 +113,26 @@
                 </div>
             </div>
         </div>
+
+        <!-- Automated Reports Configuration Card -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-circle bg-dark bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-calendar-check text-dark" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="card-title mb-0">Reportes Automatizados</h5>
+                    </div>
+                    <p class="card-text flex-grow-1">
+                        Configure la generación automática de reportes diarios: hora, destinatarios y parámetros de envío.
+                    </p>
+                    <button class="btn btn-dark" @onclick="NavigateToAutomatedReportConfig">
+                        <i class="bi bi-arrow-right me-1"></i>Configurar Reportes
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -122,4 +142,5 @@
     private void NavigateToSuggestions() => Navigation.NavigateTo("/admin/suggestions");
     private void NavigateToAudit() => Navigation.NavigateTo("/admin/audit");
     private void NavigateToAiConfig() => Navigation.NavigateTo("/admin/ai-config");
+    private void NavigateToAutomatedReportConfig() => Navigation.NavigateTo("/admin/automated-report-config");
 }

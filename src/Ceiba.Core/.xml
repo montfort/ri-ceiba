@@ -158,6 +158,54 @@
             Validates the configuration based on the selected provider.
             </summary>
         </member>
+        <member name="T:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados">
+            <summary>
+            Configuración para la generación automática de reportes
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.Id">
+            <summary>
+            Identificador único de la configuración
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.Habilitado">
+            <summary>
+            Indica si la generación automática está habilitada
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.HoraGeneracion">
+            <summary>
+            Hora del día para generar reportes automáticamente (formato HH:mm:ss)
+            Por defecto: 06:00:00
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.Destinatarios">
+            <summary>
+            Lista de destinatarios de correo electrónico separados por comas
+            Ejemplo: "supervisor@example.com,director@example.com"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.RutaSalida">
+            <summary>
+            Ruta donde se guardan los archivos generados
+            Por defecto: ./generated-reports
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.UpdatedAt">
+            <summary>
+            Última vez que se modificó esta configuración
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.GetDestinatariosArray">
+            <summary>
+            Obtiene la lista de destinatarios como array
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.SetDestinatariosArray(System.String[])">
+            <summary>
+            Establece los destinatarios desde un array
+            </summary>
+        </member>
         <member name="T:Ceiba.Core.Entities.Cuadrante">
             <summary>
             Geographic quadrant entity (lowest level in geographic hierarchy).
@@ -798,6 +846,26 @@
         <member name="M:Ceiba.Core.Interfaces.AuditLogDto.#ctor(System.Int64,System.String,System.Nullable{System.Int32},System.String,System.DateTime,System.Nullable{System.Guid},System.String,System.String,System.String)">
             <summary>
             DTO for audit log query results.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAutomatedReportConfigService">
+            <summary>
+            Servicio para gestionar la configuración de reportes automatizados
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportConfigService.GetConfigurationAsync(System.Threading.CancellationToken)">
+            <summary>
+            Obtiene la configuración actual de reportes automatizados
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportConfigService.UpdateConfigurationAsync(Ceiba.Shared.DTOs.AutomatedReportConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Actualiza la configuración de reportes automatizados
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportConfigService.EnsureConfigurationExistsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Crea la configuración inicial si no existe
             </summary>
         </member>
         <member name="T:Ceiba.Core.Interfaces.IAutomatedReportService">

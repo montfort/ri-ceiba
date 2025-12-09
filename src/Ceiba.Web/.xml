@@ -161,6 +161,16 @@
             Gets related table names for filtering.
             </summary>
         </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportConfigController.GetConfiguration(System.Threading.CancellationToken)">
+            <summary>
+            Get current automated report configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportConfigController.UpdateConfiguration(Ceiba.Shared.DTOs.AutomatedReportConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Update automated report configuration
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Controllers.CatalogsController">
             <summary>
             API controller for catalog operations (Zona, Sector, Cuadrante, Suggestions).

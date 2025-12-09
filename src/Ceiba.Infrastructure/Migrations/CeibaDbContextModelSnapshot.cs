@@ -152,6 +152,67 @@ namespace Ceiba.Infrastructure.Migrations
                     b.ToTable("CONFIGURACION_IA", (string)null);
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.ConfiguracionReportesAutomatizados", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Destinatarios")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasDefaultValue("")
+                        .HasColumnName("destinatarios");
+
+                    b.Property<bool>("Habilitado")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("habilitado");
+
+                    b.Property<TimeSpan>("HoraGeneracion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("interval")
+                        .HasDefaultValue(new TimeSpan(0, 6, 0, 0, 0))
+                        .HasColumnName("hora_generacion");
+
+                    b.Property<string>("RutaSalida")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasDefaultValue("./generated-reports")
+                        .HasColumnName("ruta_salida");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Habilitado")
+                        .HasDatabaseName("idx_config_reportes_habilitado");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("CONFIGURACION_REPORTES_AUTOMATIZADOS", (string)null);
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.Cuadrante", b =>
                 {
                     b.Property<int>("Id")
@@ -862,6 +923,15 @@ namespace Ceiba.Infrastructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("USUARIO_TOKEN", (string)null);
+                });
+
+            modelBuilder.Entity("Ceiba.Core.Entities.ConfiguracionReportesAutomatizados", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser<System.Guid>", null)
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Ceiba.Core.Entities.Cuadrante", b =>

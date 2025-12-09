@@ -124,6 +124,17 @@
             Information about an AI provider.
             </summary>
         </member>
+        <member name="T:Ceiba.Shared.DTOs.AutomatedReportConfigDto">
+            <summary>
+            DTO for automated report configuration.
+            US4 Enhancement: Configurable automated reports.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Shared.DTOs.AutomatedReportConfigUpdateDto">
+            <summary>
+            DTO for updating automated report configuration.
+            </summary>
+        </member>
         <member name="T:Ceiba.Shared.DTOs.AutomatedReportListDto">
             <summary>
             DTO for displaying automated report in list view.
@@ -158,31 +169,6 @@
         <member name="T:Ceiba.Shared.DTOs.UpdateTemplateDto">
             <summary>
             DTO for updating a template.
-            </summary>
-        </member>
-        <member name="T:Ceiba.Shared.DTOs.AutomatedReportConfigDto">
-            <summary>
-            DTO for automated report configuration.
-            </summary>
-        </member>
-        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.GenerationTime">
-            <summary>
-            Time of day for automatic report generation (e.g., "06:00:00").
-            </summary>
-        </member>
-        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.Recipients">
-            <summary>
-            Email recipients for automated reports.
-            </summary>
-        </member>
-        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.Enabled">
-            <summary>
-            Whether automated report generation is enabled.
-            </summary>
-        </member>
-        <member name="P:Ceiba.Shared.DTOs.AutomatedReportConfigDto.DefaultTemplateId">
-            <summary>
-            Default template ID to use for generation.
             </summary>
         </member>
         <member name="T:Ceiba.Shared.DTOs.GenerateReportRequestDto">

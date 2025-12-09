@@ -1,0 +1,297 @@
+@page "/admin/automated-report-config"
+@using Ceiba.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@inject HttpClient Http
+@inject ILogger<AutomatedReportConfig> Logger
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>Configuración de Reportes Automatizados</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-gear me-2"></i>Configuración de Reportes Automatizados</h2>
+            <p class="text-muted">Configure la generación automática de reportes diarios</p>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-sliders me-2"></i>Parámetros de Generación</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(ErrorMessage))
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                @ErrorMessage
+                                <button type="button" class="btn-close" @onclick="@(() => ErrorMessage = null)"></button>
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(SuccessMessage))
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle me-2"></i>
+                                @SuccessMessage
+                                <button type="button" class="btn-close" @onclick="@(() => SuccessMessage = null)"></button>
+                            </div>
+                        }
+
+                        <EditForm Model="@Model" OnValidSubmit="@HandleSubmit">
+                            <DataAnnotationsValidator />
+
+                            <!-- Habilitar/Deshabilitar -->
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <InputCheckbox class="form-check-input" id="habilitado" @bind-Value="Model.Habilitado" />
+                                    <label class="form-check-label" for="habilitado">
+                                        <strong>Habilitar generación automática</strong>
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    Cuando está habilitado, el sistema generará reportes automáticamente cada día a la hora configurada.
+                                </small>
+                            </div>
+
+                            <!-- Hora de Generación -->
+                            <div class="mb-4">
+                                <label for="horaGeneracion" class="form-label">
+                                    <i class="bi bi-clock me-1"></i>Hora de Generación
+                                </label>
+                                <input type="time"
+                                       class="form-control"
+                                       id="horaGeneracion"
+                                       value="@HoraGeneracionString"
+                                       @onchange="@((ChangeEventArgs e) => HoraGeneracionString = e.Value?.ToString() ?? "")"
+                                       disabled="@(!Model.Habilitado)" />
+                                <small class="text-muted">
+                                    Hora del día en que se generarán los reportes automáticamente (formato 24 horas).
+                                </small>
+                            </div>
+
+                            <!-- Destinatarios -->
+                            <div class="mb-4">
+                                <label for="destinatarios" class="form-label">
+                                    <i class="bi bi-envelope me-1"></i>Destinatarios de Email
+                                </label>
+                                <textarea class="form-control"
+                                          id="destinatarios"
+                                          rows="4"
+                                          @bind="DestinatariosString"
+                                          placeholder="supervisor@example.com&#10;director@example.com&#10;admin@example.com"
+                                          disabled="@(!Model.Habilitado)"></textarea>
+                                <small class="text-muted">
+                                    Ingrese un email por línea. Estos destinatarios recibirán los reportes generados automáticamente.
+                                </small>
+                            </div>
+
+                            <!-- Ruta de Salida -->
+                            <div class="mb-4">
+                                <label for="rutaSalida" class="form-label">
+                                    <i class="bi bi-folder me-1"></i>Ruta de Salida
+                                </label>
+                                <InputText class="form-control"
+                                           id="rutaSalida"
+                                           @bind-Value="Model.RutaSalida"
+                                           disabled="@(!Model.Habilitado)" />
+                                <small class="text-muted">
+                                    Directorio donde se guardarán los archivos Word generados.
+                                </small>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" @onclick="LoadConfiguration" disabled="@IsSaving">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Recargar
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@IsSaving">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-save me-1"></i>
+                                    }
+                                    Guardar Configuración
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información</h6>
+                    </div>
+                    <div class="card-body">
+                        <h6>Estado Actual</h6>
+                        <p class="mb-2">
+                            <strong>Generación Automática:</strong>
+                            @if (Config?.Habilitado == true)
+                            {
+                                <span class="badge bg-success">Habilitada</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Deshabilitada</span>
+                            }
+                        </p>
+                        @if (Config != null)
+                        {
+                            <p class="mb-2">
+                                <strong>Hora de Generación:</strong> @Config.HoraGeneracion.ToString(@"hh\:mm")
+                            </p>
+                            <p class="mb-2">
+                                <strong>Destinatarios:</strong> @Config.Destinatarios.Length
+                            </p>
+                            @if (Config.UpdatedAt.HasValue)
+                            {
+                                <p class="mb-0 text-muted small">
+                                    Última modificación: @Config.UpdatedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </p>
+                            }
+                        }
+
+                        <hr />
+
+                        <h6>Notas Importantes</h6>
+                        <ul class="small">
+                            <li>Los cambios se aplican inmediatamente</li>
+                            <li>Los reportes se generan a la hora especificada en UTC</li>
+                            <li>Se requiere al menos un destinatario para habilitar la generación automática</li>
+                            <li>Los reportes también pueden generarse manualmente desde la sección de REVISOR</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private AutomatedReportConfigDto? Config { get; set; }
+    private AutomatedReportConfigUpdateDto Model { get; set; } = new();
+    private bool IsLoading { get; set; } = true;
+    private bool IsSaving { get; set; }
+    private string? ErrorMessage { get; set; }
+    private string? SuccessMessage { get; set; }
+
+    private string HoraGeneracionString
+    {
+        get => Model.HoraGeneracion.ToString(@"hh\:mm");
+        set
+        {
+            if (TimeSpan.TryParse(value, out var time))
+            {
+                Model.HoraGeneracion = time;
+            }
+        }
+    }
+
+    private string DestinatariosString
+    {
+        get => string.Join(Environment.NewLine, Model.Destinatarios);
+        set
+        {
+            Model.Destinatarios = value
+                .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(d => d.Trim())
+                .Where(d => !string.IsNullOrWhiteSpace(d))
+                .ToArray();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadConfiguration();
+    }
+
+    private async Task LoadConfiguration()
+    {
+        IsLoading = true;
+        ErrorMessage = null;
+
+        try
+        {
+            var response = await Http.GetAsync("/api/automated-report-config");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Config = await response.Content.ReadFromJsonAsync<AutomatedReportConfigDto>();
+
+                if (Config != null)
+                {
+                    Model = new AutomatedReportConfigUpdateDto
+                    {
+                        Habilitado = Config.Habilitado,
+                        HoraGeneracion = Config.HoraGeneracion,
+                        Destinatarios = Config.Destinatarios,
+                        RutaSalida = Config.RutaSalida
+                    };
+                }
+            }
+            else
+            {
+                ErrorMessage = "Error al cargar la configuración";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading automated report configuration");
+            ErrorMessage = "Error al cargar la configuración";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        IsSaving = true;
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync("/api/automated-report-config", Model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Config = await response.Content.ReadFromJsonAsync<AutomatedReportConfigDto>();
+                SuccessMessage = "Configuración guardada exitosamente";
+            }
+            else
+            {
+                var error = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                ErrorMessage = error?["error"] ?? "Error al guardar la configuración";
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving automated report configuration");
+            ErrorMessage = "Error al guardar la configuración";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+}

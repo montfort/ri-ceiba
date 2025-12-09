@@ -213,6 +213,18 @@
         <member name="M:Ceiba.Infrastructure.Migrations.AddMaxReportesParaNarrativaToConfiguracionIA.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.US4_AddAutomatedReportConfig">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AddAutomatedReportConfig.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AddAutomatedReportConfig.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.US4_AddAutomatedReportConfig.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:Ceiba.Infrastructure.Repositories.ReportRepository">
             <summary>
             Repository implementation for ReporteIncidencia entity.

@@ -1,6 +1,53 @@
 namespace Ceiba.Shared.DTOs;
 
 /// <summary>
+/// DTO for automated report configuration.
+/// US4 Enhancement: Configurable automated reports.
+/// </summary>
+public class AutomatedReportConfigDto
+{
+    public int Id { get; set; }
+    public bool Habilitado { get; set; }
+    public TimeSpan HoraGeneracion { get; set; }
+    public string[] Destinatarios { get; set; } = Array.Empty<string>();
+    public string RutaSalida { get; set; } = string.Empty;
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    // Compatibility properties for existing code
+    public TimeSpan GenerationTime
+    {
+        get => HoraGeneracion;
+        set => HoraGeneracion = value;
+    }
+
+    public List<string> Recipients
+    {
+        get => Destinatarios.ToList();
+        set => Destinatarios = value.ToArray();
+    }
+
+    public bool Enabled
+    {
+        get => Habilitado;
+        set => Habilitado = value;
+    }
+
+    public int? DefaultTemplateId { get; set; }
+}
+
+/// <summary>
+/// DTO for updating automated report configuration.
+/// </summary>
+public class AutomatedReportConfigUpdateDto
+{
+    public bool Habilitado { get; set; }
+    public TimeSpan HoraGeneracion { get; set; }
+    public string[] Destinatarios { get; set; } = Array.Empty<string>();
+    public string RutaSalida { get; set; } = string.Empty;
+}
+
+/// <summary>
 /// DTO for displaying automated report in list view.
 /// US4: Reportes Automatizados Diarios con IA.
 /// </summary>
@@ -121,32 +168,6 @@ public class UpdateTemplateDto
     public string ContenidoMarkdown { get; set; } = string.Empty;
     public bool Activo { get; set; } = true;
     public bool EsDefault { get; set; }
-}
-
-/// <summary>
-/// DTO for automated report configuration.
-/// </summary>
-public class AutomatedReportConfigDto
-{
-    /// <summary>
-    /// Time of day for automatic report generation (e.g., "06:00:00").
-    /// </summary>
-    public TimeSpan GenerationTime { get; set; } = new TimeSpan(6, 0, 0);
-
-    /// <summary>
-    /// Email recipients for automated reports.
-    /// </summary>
-    public List<string> Recipients { get; set; } = new();
-
-    /// <summary>
-    /// Whether automated report generation is enabled.
-    /// </summary>
-    public bool Enabled { get; set; } = true;
-
-    /// <summary>
-    /// Default template ID to use for generation.
-    /// </summary>
-    public int? DefaultTemplateId { get; set; }
 }
 
 /// <summary>

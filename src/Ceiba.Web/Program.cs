@@ -86,6 +86,7 @@ try
     builder.Services.AddHttpClient<IAiNarrativeService, AiNarrativeService>();
     builder.Services.AddScoped<IEmailService, EmailService>();
     builder.Services.AddScoped<IAutomatedReportService, AutomatedReportService>();
+    builder.Services.AddScoped<IAutomatedReportConfigService, AutomatedReportConfigService>();
     builder.Services.AddHostedService<AutomatedReportBackgroundService>();
 
     // Configurar HttpClient para componentes Blazor
