@@ -185,7 +185,7 @@
                         @if (ViewMode == "preview")
                         {
                             <div class="markdown-content">
-                                @((MarkupString)Markdown.ToHtml(Report.ContenidoMarkdown))
+                                @((MarkupString)RenderMarkdown(Report.ContenidoMarkdown))
                             </div>
                         }
                         else
@@ -263,13 +263,79 @@
 </div>
 
 <style>
-    .markdown-content h1 { font-size: 1.75rem; border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; }
-    .markdown-content h2 { font-size: 1.5rem; margin-top: 1.5rem; }
-    .markdown-content h3 { font-size: 1.25rem; margin-top: 1.25rem; }
-    .markdown-content table { width: 100%; margin: 1rem 0; border-collapse: collapse; }
-    .markdown-content th, .markdown-content td { border: 1px solid #dee2e6; padding: 0.5rem; }
-    .markdown-content th { background-color: #f8f9fa; }
-    .markdown-content hr { margin: 1.5rem 0; }
+    .markdown-content h1 {
+        font-size: 1.75rem;
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        margin-top: 1.5rem;
+    }
+    .markdown-content h2 {
+        font-size: 1.5rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: #212529;
+    }
+    .markdown-content h3 {
+        font-size: 1.25rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: #495057;
+    }
+    .markdown-content table {
+        width: 100%;
+        margin: 1rem 0;
+        border-collapse: collapse;
+        display: table;
+        border: 1px solid #dee2e6;
+    }
+    .markdown-content thead {
+        background-color: #f8f9fa;
+    }
+    .markdown-content th, .markdown-content td {
+        border: 1px solid #dee2e6;
+        padding: 0.75rem;
+        text-align: left;
+    }
+    .markdown-content th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #212529;
+    }
+    .markdown-content tbody tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+    .markdown-content tbody tr:hover {
+        background-color: #e9ecef;
+    }
+    .markdown-content hr {
+        margin: 1.5rem 0;
+        border: 0;
+        border-top: 1px solid #dee2e6;
+    }
+    .markdown-content ul, .markdown-content ol {
+        margin: 1rem 0;
+        padding-left: 2rem;
+    }
+    .markdown-content p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    .markdown-content strong {
+        font-weight: 600;
+    }
+    .markdown-content code {
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-size: 0.9em;
+    }
+    .markdown-content pre {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 5px;
+        overflow-x: auto;
+    }
 </style>
 
 @code {
@@ -284,6 +350,19 @@
 
     private void SetViewModePreview() => ViewMode = "preview";
     private void SetViewModeMarkdown() => ViewMode = "markdown";
+
+    private string RenderMarkdown(string markdown)
+    {
+        if (string.IsNullOrEmpty(markdown))
+            return string.Empty;
+
+        // Configure Markdig pipeline with advanced extensions including tables
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAdvancedExtensions() // Includes tables, task lists, definition lists, etc.
+            .Build();
+
+        return Markdown.ToHtml(markdown, pipeline);
+    }
 
     protected override async Task OnInitializedAsync()
     {
