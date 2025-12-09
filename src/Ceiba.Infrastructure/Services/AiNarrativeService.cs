@@ -71,7 +71,8 @@ public class AiNarrativeService : IAiNarrativeService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error generating AI narrative. Using fallback.");
+            _logger.LogError(ex, "Error generating AI narrative with provider {Provider}. Error: {Message}. Using fallback.",
+                config.Proveedor, ex.Message);
             return CreateFallbackNarrative(request);
         }
     }
