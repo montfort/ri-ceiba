@@ -210,7 +210,8 @@ jobs:
         run: |
           cd src/Ceiba.Web
           echo "Starting application..."
-          nohup dotnet run --no-build --configuration Release > app.log 2>&1 &
+          # Use --no-launch-profile to ignore launchSettings.json and respect env vars
+          nohup dotnet run --no-build --configuration Release --no-launch-profile > app.log 2>&1 &
           APP_PID=$!
           echo $APP_PID > app.pid
           echo "Application started with PID: $APP_PID"
