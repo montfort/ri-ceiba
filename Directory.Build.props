@@ -32,7 +32,7 @@
   <!-- Security Analyzers (T020h - RS-002, RS-006 Mitigation) -->
   <ItemGroup>
     <!-- Microsoft built-in analyzers -->
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -60,10 +60,7 @@
     <!-- SCS0029: Cross-Site Request Forgery -->
   </PropertyGroup>
 
-  <!-- Common Package References -->
-  <ItemGroup Condition="'$(MSBuildProjectExtension)' != '.dcproj'">
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
-  </ItemGroup>
+  <!-- Note: Microsoft.Extensions.Logging.Abstractions is included via FrameworkReference in ASP.NET Core projects -->
 
   <!-- Test Projects Configuration -->
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('.Tests'))">
