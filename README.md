@@ -21,11 +21,13 @@ El proyecto sigue una estructura de capas bien definida, inspirada en la Arquite
 
 ## 🛠️ Tecnologías Utilizadas
 
-*   **Backend:** .NET, ASP.NET Core
+*   **Backend:** .NET 10, ASP.NET Core
 *   **Frontend:** Blazor Server
 *   **Base de Datos:** PostgreSQL
 *   **ORM:** Entity Framework Core
 *   **Autenticación:** ASP.NET Core Identity
+*   **Orquestación:** Aspire 13.0 (opcional)
+*   **Observabilidad:** OpenTelemetry
 *   **Logging:** Serilog
 *   **Pruebas:** xUnit
 
@@ -33,10 +35,31 @@ El proyecto sigue una estructura de capas bien definida, inspirada en la Arquite
 
 ### Prerrequisitos
 
-*   [.NET SDK](https://dotnet.microsoft.com/download)
-*   [PostgreSQL](https://www.postgresql.org/download/)
+*   [.NET 10 SDK](https://dotnet.microsoft.com/download)
+*   [Docker](https://www.docker.com/products/docker-desktop/) (para ejecución con Aspire)
+*   [PostgreSQL](https://www.postgresql.org/download/) (solo si ejecutas sin Aspire)
 
-### Pasos de Instalación
+### Opción 1: Con Aspire (Recomendado para desarrollo)
+
+Aspire orquesta automáticamente PostgreSQL en un contenedor Docker, sin necesidad de instalación local.
+
+```sh
+# Clonar e iniciar
+git clone <URL-del-repositorio>
+cd ri-ceiba
+dotnet run --project Ceiba.AppHost --launch-profile https
+```
+
+Esto inicia:
+- **Dashboard de Aspire:** https://localhost:17157 (métricas, logs, trazas)
+- **PostgreSQL:** En contenedor Docker con datos persistentes
+- **Ceiba Web:** URL mostrada en el dashboard
+
+Las migraciones se aplican automáticamente al iniciar.
+
+### Opción 2: Sin Aspire (Tradicional)
+
+Si prefieres usar tu propia instancia de PostgreSQL:
 
 1.  **Clonar el repositorio:**
     ```sh
@@ -45,20 +68,19 @@ El proyecto sigue una estructura de capas bien definida, inspirada en la Arquite
     ```
 
 2.  **Configurar la conexión a la base de datos:**
-    *   Abre el archivo `src/Ceiba.Web/appsettings.Development.json`.
-    *   Modifica el `ConnectionString` "DefaultConnection" para apuntar a tu instancia de PostgreSQL. Asegúrate de que el usuario y la contraseña sean correctos.
+    *   Crea el archivo `src/Ceiba.Web/appsettings.Development.json`
+    *   Configura el `ConnectionString` "DefaultConnection" para tu instancia de PostgreSQL
 
 3.  **Aplicar las migraciones de la base de datos:**
-    Desde la raíz del proyecto, ejecuta el siguiente comando para crear las tablas en la base de datos:
     ```sh
-    dotnet ef database update --project src/Ceiba.Infrastructure
+    dotnet ef database update --project src/Ceiba.Infrastructure --startup-project src/Ceiba.Web
     ```
 
 4.  **Ejecutar la aplicación:**
     ```sh
     dotnet run --project src/Ceiba.Web
     ```
-    La aplicación estará disponible en `https://localhost:7241` (o el puerto que se indique en la consola).
+    La aplicación estará disponible en `https://localhost:7241` (o el puerto indicado en consola).
 
 ## 🚢 Notas para Producción
 
