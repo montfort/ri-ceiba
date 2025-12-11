@@ -1,0 +1,406 @@
+@page "/admin/users/new"
+@page "/admin/users/{UserId:guid}/edit"
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authorization
+@inject IUserManagementService UserService
+@inject NavigationManager Navigation
+@inject ILogger<UserForm> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "ADMIN")]
+
+<PageTitle>@(IsEditMode ? "Editar Usuario" : "Nuevo Usuario") - Ceiba</PageTitle>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi @(IsEditMode ? "bi-pencil" : "bi-person-plus") me-2"></i>
+                        @(IsEditMode ? "Editar Usuario" : "Nuevo Usuario")
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (IsLoading)
+                    {
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-3">Cargando datos...</p>
+                        </div>
+                    }
+                    else if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @ErrorMessage
+                            <button type="button" class="btn btn-link p-0 ms-2" @onclick="() => ErrorMessage = null">
+                                Cerrar
+                            </button>
+                        </div>
+                    }
+                    else if (NotFound)
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-question-circle me-2"></i>
+                            Usuario no encontrado.
+                        </div>
+                        <button class="btn btn-secondary" @onclick="NavigateBack">
+                            <i class="bi bi-arrow-left me-1"></i>Volver
+                        </button>
+                    }
+                    else
+                    {
+                        <EditForm Model="@FormModel" OnValidSubmit="HandleSubmit">
+                            <DataAnnotationsValidator />
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    Email <span class="text-danger">*</span>
+                                </label>
+                                <InputText id="email" class="form-control" @bind-Value="FormModel.Email"
+                                           placeholder="usuario@ejemplo.com" />
+                                <ValidationMessage For="@(() => FormModel.Email)" class="text-danger small" />
+                            </div>
+
+                            <!-- Nombre -->
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">
+                                    Nombre <span class="text-danger">*</span>
+                                </label>
+                                <InputText id="nombre" class="form-control" @bind-Value="FormModel.Nombre"
+                                           placeholder="Nombre completo" />
+                                <ValidationMessage For="@(() => FormModel.Nombre)" class="text-danger small" />
+                            </div>
+
+                            <!-- Password -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    @if (IsEditMode)
+                                    {
+                                        <span>Nueva Contraseña <small class="text-muted">(dejar vacío para mantener)</small></span>
+                                    }
+                                    else
+                                    {
+                                        <span>Contraseña <span class="text-danger">*</span></span>
+                                    }
+                                </label>
+                                <div class="input-group">
+                                    <InputText id="password" type="@(ShowPassword ? "text" : "password")"
+                                               class="form-control" @bind-Value="FormModel.Password"
+                                               placeholder="@(IsEditMode ? "Nueva contraseña" : "Mínimo 10 caracteres")" />
+                                    <button type="button" class="btn btn-outline-secondary" @onclick="TogglePasswordVisibility">
+                                        <i class="bi @(ShowPassword ? "bi-eye-slash" : "bi-eye")"></i>
+                                    </button>
+                                </div>
+                                <ValidationMessage For="@(() => FormModel.Password)" class="text-danger small" />
+                                @if (!IsEditMode)
+                                {
+                                    <small class="text-muted">
+                                        Mínimo 10 caracteres, debe incluir mayúscula y número.
+                                    </small>
+                                }
+                            </div>
+
+                            <!-- Confirm Password (only for new users) -->
+                            @if (!IsEditMode)
+                            {
+                                <div class="mb-3">
+                                    <label for="confirmPassword" class="form-label">
+                                        Confirmar Contraseña <span class="text-danger">*</span>
+                                    </label>
+                                    <InputText id="confirmPassword" type="@(ShowPassword ? "text" : "password")"
+                                               class="form-control" @bind-Value="FormModel.ConfirmPassword"
+                                               placeholder="Repetir contraseña" />
+                                    <ValidationMessage For="@(() => FormModel.ConfirmPassword)" class="text-danger small" />
+                                </div>
+                            }
+
+                            <!-- Roles -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    Roles <span class="text-danger">*</span>
+                                </label>
+                                <div class="card">
+                                    <div class="card-body py-2">
+                                        @foreach (var role in AvailableRoles)
+                                        {
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="role_@role"
+                                                       checked="@FormModel.SelectedRoles.Contains(role)"
+                                                       @onchange="(e) => ToggleRole(role, (bool?)e.Value ?? false)" />
+                                                <label class="form-check-label" for="role_@role">
+                                                    <span class="badge @GetRoleBadgeClass(role)">@role</span>
+                                                    <small class="text-muted ms-2">@GetRoleDescription(role)</small>
+                                                </label>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                @if (!FormModel.SelectedRoles.Any())
+                                {
+                                    <small class="text-danger">Debe seleccionar al menos un rol.</small>
+                                }
+                            </div>
+
+                            <!-- Active Status (only for edit mode) -->
+                            @if (IsEditMode)
+                            {
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="activo"
+                                               checked="@FormModel.Activo" @onchange="(e) => FormModel.Activo = (bool?)e.Value ?? true" />
+                                        <label class="form-check-label" for="activo">
+                                            Usuario activo
+                                        </label>
+                                    </div>
+                                    @if (!FormModel.Activo)
+                                    {
+                                        <small class="text-warning">
+                                            <i class="bi bi-exclamation-triangle me-1"></i>
+                                            El usuario no podrá iniciar sesión mientras esté suspendido.
+                                        </small>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Form Actions -->
+                            <div class="d-flex justify-content-between pt-3 border-top">
+                                <button type="button" class="btn btn-secondary" @onclick="NavigateBack" disabled="@IsSaving">
+                                    <i class="bi bi-arrow-left me-1"></i>Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary" disabled="@(IsSaving || !FormModel.SelectedRoles.Any())">
+                                    @if (IsSaving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                                        <span>Guardando...</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check-lg me-1"></i>
+                                        <span>@(IsEditMode ? "Guardar Cambios" : "Crear Usuario")</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    }
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(SuccessMessage))
+            {
+                <div class="alert alert-success mt-3" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    @SuccessMessage
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Guid? UserId { get; set; }
+
+    private bool IsEditMode => UserId.HasValue;
+    private bool IsLoading { get; set; } = true;
+    private bool IsSaving { get; set; }
+    private bool NotFound { get; set; }
+    private bool ShowPassword { get; set; }
+    private string? ErrorMessage { get; set; }
+    private string? SuccessMessage { get; set; }
+    private List<string> AvailableRoles { get; set; } = new();
+    private Guid CurrentUserId { get; set; }
+
+    private UserFormModel FormModel { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Get current admin user ID
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+            {
+                CurrentUserId = userId;
+            }
+
+            // Load available roles
+            AvailableRoles = await UserService.GetAvailableRolesAsync();
+
+            // If editing, load user data
+            if (IsEditMode && UserId.HasValue)
+            {
+                var user = await UserService.GetUserByIdAsync(UserId.Value);
+                if (user == null)
+                {
+                    NotFound = true;
+                }
+                else
+                {
+                    FormModel = new UserFormModel
+                    {
+                        Email = user.Email,
+                        Nombre = user.Nombre,
+                        SelectedRoles = new List<string>(user.Roles),
+                        Activo = user.Activo
+                    };
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initializing user form");
+            ErrorMessage = "Error al cargar los datos.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void ToggleRole(string role, bool isChecked)
+    {
+        if (isChecked && !FormModel.SelectedRoles.Contains(role))
+        {
+            FormModel.SelectedRoles.Add(role);
+        }
+        else if (!isChecked && FormModel.SelectedRoles.Contains(role))
+        {
+            FormModel.SelectedRoles.Remove(role);
+        }
+    }
+
+    private void TogglePasswordVisibility()
+    {
+        ShowPassword = !ShowPassword;
+    }
+
+    private async Task HandleSubmit()
+    {
+        ErrorMessage = null;
+        SuccessMessage = null;
+
+        // Additional validation
+        if (!FormModel.SelectedRoles.Any())
+        {
+            ErrorMessage = "Debe seleccionar al menos un rol.";
+            return;
+        }
+
+        if (!IsEditMode)
+        {
+            if (string.IsNullOrWhiteSpace(FormModel.Password))
+            {
+                ErrorMessage = "La contraseña es requerida.";
+                return;
+            }
+            if (FormModel.Password != FormModel.ConfirmPassword)
+            {
+                ErrorMessage = "Las contraseñas no coinciden.";
+                return;
+            }
+        }
+
+        IsSaving = true;
+
+        try
+        {
+            if (IsEditMode && UserId.HasValue)
+            {
+                // Update existing user
+                var updateDto = new UpdateUserDto
+                {
+                    Nombre = FormModel.Nombre,
+                    Email = FormModel.Email,
+                    NewPassword = string.IsNullOrWhiteSpace(FormModel.Password) ? null : FormModel.Password,
+                    Roles = FormModel.SelectedRoles,
+                    Activo = FormModel.Activo
+                };
+
+                await UserService.UpdateUserAsync(UserId.Value, updateDto, CurrentUserId);
+                SuccessMessage = "Usuario actualizado correctamente.";
+
+                // Navigate after short delay
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/admin/users");
+            }
+            else
+            {
+                // Create new user
+                var createDto = new CreateUserDto
+                {
+                    Nombre = FormModel.Nombre,
+                    Email = FormModel.Email,
+                    Password = FormModel.Password,
+                    Roles = FormModel.SelectedRoles
+                };
+
+                await UserService.CreateUserAsync(createDto, CurrentUserId);
+                SuccessMessage = "Usuario creado correctamente.";
+
+                // Navigate after short delay
+                await Task.Delay(1500);
+                Navigation.NavigateTo("/admin/users");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving user");
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/admin/users");
+    }
+
+    private static string GetRoleBadgeClass(string role) => role switch
+    {
+        "ADMIN" => "bg-danger",
+        "REVISOR" => "bg-primary",
+        "CREADOR" => "bg-info",
+        _ => "bg-secondary"
+    };
+
+    private static string GetRoleDescription(string role) => role switch
+    {
+        "ADMIN" => "Gestión de usuarios y configuración del sistema",
+        "REVISOR" => "Revisión y exportación de reportes",
+        "CREADOR" => "Creación de reportes de incidencias",
+        _ => ""
+    };
+
+    /// <summary>
+    /// Form model for user creation/editing
+    /// </summary>
+    private class UserFormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El email es requerido")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "El email no es válido")]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El nombre es requerido")]
+        [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
+        public string Nombre { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 10, ErrorMessage = "La contraseña debe tener al menos 10 caracteres")]
+        public string Password { get; set; } = string.Empty;
+
+        public string ConfirmPassword { get; set; } = string.Empty;
+
+        public List<string> SelectedRoles { get; set; } = new();
+
+        public bool Activo { get; set; } = true;
+    }
+}

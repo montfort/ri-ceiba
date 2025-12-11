@@ -151,33 +151,33 @@ Based on plan.md Clean Architecture structure:
 
 ### Tests for User Story 2
 
-- [ ] T047 [P] [US2] Contract test for GET /api/reports (all reports) in tests/Ceiba.Integration.Tests/ReportContractTests.cs
-- [ ] T048 [P] [US2] Contract test for export endpoints in tests/Ceiba.Integration.Tests/ExportContractTests.cs
-- [ ] T049 [P] [US2] Unit test for PDF generation in tests/Ceiba.Application.Tests/ExportServiceTests.cs
+- [X] T047 [P] [US2] Contract test for GET /api/reports (all reports) in tests/Ceiba.Integration.Tests/ReportContractTests.cs
+- [X] T048 [P] [US2] Contract test for export endpoints in tests/Ceiba.Integration.Tests/ExportContractTests.cs (via ExportServiceTests)
+- [X] T049 [P] [US2] Unit test for PDF generation in tests/Ceiba.Application.Tests/ExportServiceTests.cs
 - [ ] T050 [P] [US2] Component test for report filtering in tests/Ceiba.Web.Tests/ReportFilterComponentTests.cs
 
 ### Implementation for User Story 2
 
 #### Services
 
-- [ ] T051 [P] [US2] Create IExportService interface in src/Ceiba.Core/Interfaces/IExportService.cs
-- [ ] T052 [US2] Implement ExportService with QuestPDF in src/Ceiba.Application/Services/ExportService.cs
-- [ ] T052a [P] [US2] RT-003 Mitigation: Enforce export limits (50 PDFs, 100 JSONs) with clear error messages in src/Ceiba.Application/Services/ExportService.cs
+- [X] T051 [P] [US2] Create IExportService interface in src/Ceiba.Application/Services/Export/IExportService.cs
+- [X] T052 [US2] Implement ExportService with QuestPDF in src/Ceiba.Application/Services/Export/ExportService.cs
+- [ ] T052a [P] [US2] RT-003 Mitigation: Enforce export limits (50 PDFs, 100 JSONs) with clear error messages in src/Ceiba.Application/Services/Export/ExportService.cs
 - [ ] T052b [P] [US2] RT-003 Mitigation: Implement streaming PDF generation (no full in-memory buffer) using FileStreamResult
 - [ ] T052c [P] [US2] RT-003 Mitigation: Create background export job for >50 reports with Hangfire and email notification in src/Ceiba.Application/Jobs/ExportJob.cs
 - [ ] T052d [P] [US2] RT-003 Mitigation: Configure Hangfire max 3 concurrent export jobs and 2-minute timeout
 - [ ] T052e [P] [US2] RT-003 Mitigation: Add export monitoring (report count, file size, generation time) with alerts for >30s or >500MB
-- [ ] T053 [US2] Add search/filter methods to ReportService in src/Ceiba.Application/Services/ReportService.cs
-- [ ] T054 [US2] Create export DTOs in src/Ceiba.Shared/DTOs/ExportDTOs.cs
+- [X] T053 [US2] Add search/filter methods to ReportService in src/Ceiba.Application/Services/ReportService.cs
+- [X] T054 [US2] Create export DTOs in src/Ceiba.Shared/DTOs/Export/
 
 #### API & UI
 
-- [ ] T055 [US2] Add export endpoints to ReportsController in src/Ceiba.Web/Controllers/ReportsController.cs
+- [X] T055 [US2] Add export endpoints to ExportController in src/Ceiba.Web/Controllers/ExportController.cs
 - [ ] T056 [US2] Create ReportFilter.razor component in src/Ceiba.Web/Components/Shared/ReportFilter.razor
-- [ ] T057 [US2] Create RevisorReportList.razor with all reports in src/Ceiba.Web/Components/Pages/Reports/RevisorReportList.razor
-- [ ] T058 [US2] Create ReportDetail.razor for view/edit in src/Ceiba.Web/Components/Pages/Reports/ReportDetail.razor
-- [ ] T059 [US2] Add batch selection UI for export in src/Ceiba.Web/Components/Pages/Reports/RevisorReportList.razor
-- [ ] T060 [US2] Add authorization policy for REVISOR role in src/Ceiba.Web/Program.cs
+- [X] T057 [US2] Create RevisorReportList.razor with all reports in src/Ceiba.Web/Components/Pages/Reports/ReportListRevisor.razor
+- [X] T058 [US2] Create ReportDetail.razor for view/edit in src/Ceiba.Web/Components/Pages/Reports/ReportView.razor
+- [X] T059 [US2] Add batch selection UI for export in src/Ceiba.Web/Components/Pages/Reports/ReportListRevisor.razor
+- [X] T060 [US2] Add authorization policy for REVISOR role in src/Ceiba.Web/Program.cs
 
 **Checkpoint**: User Story 2 complete - REVISOR can manage and export all reports
 
@@ -191,38 +191,38 @@ Based on plan.md Clean Architecture structure:
 
 ### Tests for User Story 3
 
-- [ ] T061 [P] [US3] Contract test for user management endpoints in tests/Ceiba.Integration.Tests/AdminContractTests.cs
-- [ ] T062 [P] [US3] Contract test for catalog management in tests/Ceiba.Integration.Tests/CatalogContractTests.cs
-- [ ] T063 [P] [US3] Contract test for audit log endpoints in tests/Ceiba.Integration.Tests/AuditContractTests.cs
-- [ ] T064 [P] [US3] Unit test for UserManagementService in tests/Ceiba.Application.Tests/UserManagementServiceTests.cs
+- [X] T061 [P] [US3] Contract test for user management endpoints in tests/Ceiba.Integration.Tests/AdminContractTests.cs
+- [X] T062 [P] [US3] Contract test for catalog management in tests/Ceiba.Integration.Tests/CatalogContractTests.cs
+- [X] T063 [P] [US3] Contract test for audit log endpoints in tests/Ceiba.Integration.Tests/AuditContractTests.cs
+- [X] T064 [P] [US3] Unit test for UserManagementService in tests/Ceiba.Application.Tests/Services/UserManagementServiceTests.cs
 
 ### Implementation for User Story 3
 
 #### Entities
 
-- [ ] T065 [P] [US3] Create RegistroAuditoria entity in src/Ceiba.Core/Entities/RegistroAuditoria.cs
-- [ ] T066 [US3] Create EF configuration for RegistroAuditoria in src/Ceiba.Infrastructure/Data/Configurations/
+- [X] T065 [P] [US3] Create RegistroAuditoria entity in src/Ceiba.Core/Entities/RegistroAuditoria.cs
+- [X] T066 [US3] Create EF configuration for RegistroAuditoria in src/Ceiba.Infrastructure/Data/Configurations/RegistroAuditoriaConfiguration.cs
 
 #### Services
 
-- [ ] T067 [P] [US3] Create IUserManagementService interface in src/Ceiba.Core/Interfaces/IUserManagementService.cs
-- [ ] T068 [P] [US3] Create ICatalogAdminService interface in src/Ceiba.Core/Interfaces/ICatalogAdminService.cs
-- [ ] T069 [US3] Implement UserManagementService in src/Ceiba.Application/Services/UserManagementService.cs
-- [ ] T070 [US3] Implement CatalogAdminService in src/Ceiba.Application/Services/CatalogAdminService.cs
-- [ ] T071 [US3] Create admin DTOs in src/Ceiba.Shared/DTOs/AdminDTOs.cs
+- [X] T067 [P] [US3] Create IUserManagementService interface in src/Ceiba.Core/Interfaces/IUserManagementService.cs
+- [X] T068 [P] [US3] Create ICatalogAdminService interface in src/Ceiba.Core/Interfaces/ICatalogAdminService.cs
+- [X] T069 [US3] Implement UserManagementService in src/Ceiba.Infrastructure/Services/UserManagementService.cs
+- [X] T070 [US3] Implement CatalogAdminService in src/Ceiba.Infrastructure/Services/CatalogAdminService.cs
+- [X] T071 [US3] Create admin DTOs in src/Ceiba.Shared/DTOs/AdminDTOs.cs
 
 #### API & UI
 
-- [ ] T072 [US3] Create AdminController for user management in src/Ceiba.Web/Controllers/AdminController.cs
-- [ ] T073 [US3] Add catalog management endpoints to AdminController
-- [ ] T074 [US3] Create AuditController in src/Ceiba.Web/Controllers/AuditController.cs
-- [ ] T075 [US3] Create UserList.razor in src/Ceiba.Web/Components/Pages/Admin/UserList.razor
-- [ ] T076 [US3] Create UserForm.razor in src/Ceiba.Web/Components/Pages/Admin/UserForm.razor
-- [ ] T077 [US3] Create CatalogManager.razor for zona/sector/cuadrante in src/Ceiba.Web/Components/Pages/Admin/CatalogManager.razor
-- [ ] T078 [US3] Create SuggestionManager.razor in src/Ceiba.Web/Components/Pages/Admin/SuggestionManager.razor
-- [ ] T079 [US3] Create AuditLogViewer.razor in src/Ceiba.Web/Components/Pages/Admin/AuditLogViewer.razor
-- [ ] T080 [US3] Add authorization policy for ADMIN role in src/Ceiba.Web/Program.cs
-- [ ] T081 [US3] Add EF migration for US3 entities
+- [X] T072 [US3] Create AdminController for user management in src/Ceiba.Web/Controllers/AdminController.cs
+- [X] T073 [US3] Add catalog management endpoints to AdminController
+- [X] T074 [US3] Create AuditController in src/Ceiba.Web/Controllers/AuditController.cs
+- [X] T075 [US3] Create UserList.razor in src/Ceiba.Web/Components/Pages/Admin/UserList.razor
+- [X] T076 [US3] Create UserForm.razor in src/Ceiba.Web/Components/Pages/Admin/UserForm.razor
+- [X] T077 [US3] Create CatalogManager.razor for zona/sector/cuadrante in src/Ceiba.Web/Components/Pages/Admin/CatalogManager.razor
+- [X] T078 [US3] Create SuggestionManager.razor in src/Ceiba.Web/Components/Pages/Admin/SuggestionManager.razor
+- [X] T079 [US3] Create AuditLogViewer.razor in src/Ceiba.Web/Components/Pages/Admin/AuditLogViewer.razor
+- [X] T080 [US3] Add authorization policy for ADMIN role in src/Ceiba.Web/Program.cs
+- [X] T081 [US3] Add EF migration for US3 entities
 
 **Checkpoint**: User Story 3 complete - ADMIN can manage users, catalogs, and view audits
 
@@ -245,39 +245,39 @@ Based on plan.md Clean Architecture structure:
 
 #### Entities
 
-- [ ] T086 [P] [US4] Create ReporteAutomatizado entity in src/Ceiba.Core/Entities/ReporteAutomatizado.cs
-- [ ] T087 [P] [US4] Create ModeloReporte entity in src/Ceiba.Core/Entities/ModeloReporte.cs
-- [ ] T088 [US4] Create EF configurations for US4 entities in src/Ceiba.Infrastructure/Data/Configurations/
+- [X] T086 [P] [US4] Create ReporteAutomatizado entity in src/Ceiba.Core/Entities/ReporteAutomatizado.cs
+- [X] T087 [P] [US4] Create ModeloReporte entity in src/Ceiba.Core/Entities/ModeloReporte.cs
+- [X] T088 [US4] Create EF configurations for US4 entities in src/Ceiba.Infrastructure/Data/Configurations/
 
 #### Services
 
-- [ ] T089 [P] [US4] Create IAIService interface in src/Ceiba.Core/Interfaces/IAIService.cs
-- [ ] T090 [P] [US4] Create IEmailService interface in src/Ceiba.Core/Interfaces/IEmailService.cs
-- [ ] T091 [P] [US4] Create IAutomatedReportService interface in src/Ceiba.Core/Interfaces/IAutomatedReportService.cs
-- [ ] T092 [US4] Implement AIService with provider-agnostic abstraction (supports OpenAI, Azure OpenAI, local LLM) in src/Ceiba.Infrastructure/ExternalServices/AIService.cs
-- [ ] T092a [P] [US4] RT-001 Mitigation: Configure Polly policies (30s timeout, circuit breaker after 5 failures) for AIService in src/Ceiba.Infrastructure/ExternalServices/AIService.cs
+- [X] T089 [P] [US4] Create IAiNarrativeService interface in src/Ceiba.Core/Interfaces/IAiNarrativeService.cs
+- [X] T090 [P] [US4] Create IEmailService interface in src/Ceiba.Core/Interfaces/IEmailService.cs
+- [X] T091 [P] [US4] Create IAutomatedReportService interface in src/Ceiba.Core/Interfaces/IAutomatedReportService.cs
+- [X] T092 [US4] Implement AiNarrativeService with provider-agnostic abstraction in src/Ceiba.Infrastructure/Services/AiNarrativeService.cs
+- [ ] T092a [P] [US4] RT-001 Mitigation: Configure Polly policies (30s timeout, circuit breaker after 5 failures) for AiNarrativeService
 - [ ] T092b [P] [US4] RT-001 Mitigation: Implement AIServiceMock with deterministic responses in tests/Ceiba.Infrastructure.Tests/Mocks/AIServiceMock.cs
-- [ ] T092c [P] [US4] RT-001 Mitigation: Add response caching layer with IMemoryCache for identical prompts in src/Ceiba.Infrastructure/ExternalServices/AIService.cs
-- [ ] T092d [P] [US4] RT-001 Mitigation: Implement graceful fallback (statistics-only reports) when AI unavailable in src/Ceiba.Application/Services/AutomatedReportService.cs
-- [ ] T092e [P] [US4] RT-001 Mitigation: Add AI call monitoring (latency, tokens, success rate) in src/Ceiba.Application/Services/AutomatedReportService.cs
-- [ ] T093 [US4] Implement EmailService with MailKit using SMTP configuration from environment variables in src/Ceiba.Infrastructure/ExternalServices/EmailService.cs
+- [ ] T092c [P] [US4] RT-001 Mitigation: Add response caching layer with IMemoryCache for identical prompts
+- [ ] T092d [P] [US4] RT-001 Mitigation: Implement graceful fallback (statistics-only reports) when AI unavailable
+- [ ] T092e [P] [US4] RT-001 Mitigation: Add AI call monitoring (latency, tokens, success rate)
+- [X] T093 [US4] Implement EmailService with MailKit/SendGrid/Mailgun in src/Ceiba.Infrastructure/Services/EmailService.cs
 - [ ] T094 [US4] Implement markdown to Word conversion in src/Ceiba.Application/Services/DocumentConversionService.cs
 - [ ] T094a [P] [US4] RT-006 Mitigation: Add Pandoc availability check in application startup (Program.cs) with fail-fast if missing
 - [ ] T094b [P] [US4] RT-006 Mitigation: Implement 10-second timeout on Pandoc process invocations
 - [ ] T094c [P] [US4] RT-006 Mitigation: Add HTML email fallback if Pandoc conversion fails
 - [ ] T094d [P] [US4] RT-006 Mitigation: Create integration tests with sample Markdown to detect Pandoc regressions
-- [ ] T095 [US4] Implement AutomatedReportService in src/Ceiba.Application/Services/AutomatedReportService.cs
-- [ ] T096 [US4] Configure Hangfire for scheduling in src/Ceiba.Web/Program.cs
-- [ ] T097 [US4] Create Hangfire job for daily report in src/Ceiba.Application/Jobs/DailyReportJob.cs
+- [X] T095 [US4] Implement AutomatedReportService in src/Ceiba.Infrastructure/Services/AutomatedReportService.cs
+- [X] T096 [US4] Configure Hangfire for scheduling in src/Ceiba.Web/Program.cs
+- [X] T097 [US4] Create Hangfire job for daily report (integrated in AutomatedReportService)
 
 #### API & UI
 
-- [ ] T098 [US4] Create AutomatedReportsController in src/Ceiba.Web/Controllers/AutomatedReportsController.cs
-- [ ] T099 [US4] Create ReportTemplatesController in src/Ceiba.Web/Controllers/ReportTemplatesController.cs
-- [ ] T100 [US4] Create AutomatedReportList.razor in src/Ceiba.Web/Components/Pages/Automated/AutomatedReportList.razor
-- [ ] T101 [US4] Create AutomatedReportDetail.razor in src/Ceiba.Web/Components/Pages/Automated/AutomatedReportDetail.razor
-- [ ] T102 [US4] Create TemplateEditor.razor in src/Ceiba.Web/Components/Pages/Automated/TemplateEditor.razor
-- [ ] T103 [US4] Add EF migration for US4 entities
+- [X] T098 [US4] Create AutomatedReportsController in src/Ceiba.Web/Controllers/AutomatedReportsController.cs
+- [X] T099 [US4] Create AutomatedReportConfigController in src/Ceiba.Web/Controllers/AutomatedReportConfigController.cs
+- [X] T100 [US4] Create AutomatedReportList.razor in src/Ceiba.Web/Components/Pages/Automated/AutomatedReportList.razor
+- [X] T101 [US4] Create AutomatedReportDetail.razor in src/Ceiba.Web/Components/Pages/Automated/AutomatedReportDetail.razor
+- [X] T102 [US4] Create TemplateList.razor in src/Ceiba.Web/Components/Pages/Automated/TemplateList.razor
+- [X] T103 [US4] Add EF migration for US4 entities
 
 **Checkpoint**: User Story 4 complete - Automated daily reports with AI and email
 

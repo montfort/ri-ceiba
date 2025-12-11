@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ceiba.Application\Ceiba.Application.csproj" />
     <ProjectReference Include="..\..\src\Ceiba.Core\Ceiba.Core.csproj" />
+    <ProjectReference Include="..\..\src\Ceiba.Infrastructure\Ceiba.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
