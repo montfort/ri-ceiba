@@ -90,9 +90,12 @@ public class DocumentConversionService : IDocumentConversionService
         }
 
         var stopwatch = Stopwatch.StartNew();
-        var tempDir = Path.GetTempPath();
-        var inputFile = Path.Combine(tempDir, $"ceiba_convert_{Guid.NewGuid()}.md");
-        var outputFile = Path.Combine(tempDir, $"ceiba_output_{Guid.NewGuid()}.docx");
+
+        // Security: Create a private subdirectory in temp to avoid publicly writable directory issues
+        // This mitigates symlink attacks and unauthorized access to temp files (SonarQube security)
+        var tempDir = CreateSecureTempDirectory();
+        var inputFile = Path.Combine(tempDir, $"input_{Guid.NewGuid():N}.md");
+        var outputFile = Path.Combine(tempDir, $"output_{Guid.NewGuid():N}.docx");
 
         try
         {
@@ -126,9 +129,10 @@ public class DocumentConversionService : IDocumentConversionService
         }
         finally
         {
-            // Cleanup temp files
+            // Cleanup temp files and directory
             TryDeleteFile(inputFile);
             TryDeleteFile(outputFile);
+            TryDeleteDirectory(tempDir);
         }
     }
 
@@ -291,6 +295,23 @@ public class DocumentConversionService : IDocumentConversionService
     }
 
     /// <summary>
+    /// Creates a secure temporary directory for file operations.
+    /// This mitigates security risks from using publicly writable directories directly.
+    /// </summary>
+    private static string CreateSecureTempDirectory()
+    {
+        // Create a unique subdirectory under the system temp path
+        // Using a GUID ensures no collision and unpredictable names
+        var baseTempPath = Path.GetTempPath();
+        var secureTempDir = Path.Combine(baseTempPath, "ceiba_pandoc", Guid.NewGuid().ToString("N"));
+
+        // Create directory with default permissions (inherited from parent, user-only on most systems)
+        Directory.CreateDirectory(secureTempDir);
+
+        return secureTempDir;
+    }
+
+    /// <summary>
     /// Safely tries to delete a file.
     /// </summary>
     private void TryDeleteFile(string filePath)
@@ -305,6 +326,24 @@ public class DocumentConversionService : IDocumentConversionService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to delete temp file: {FilePath}", filePath);
+        }
+    }
+
+    /// <summary>
+    /// Safely tries to delete a directory.
+    /// </summary>
+    private void TryDeleteDirectory(string dirPath)
+    {
+        try
+        {
+            if (Directory.Exists(dirPath))
+            {
+                Directory.Delete(dirPath, recursive: false);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to delete temp directory: {DirPath}", dirPath);
         }
     }
 
