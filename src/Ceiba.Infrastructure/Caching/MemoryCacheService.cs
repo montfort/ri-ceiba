@@ -37,7 +37,8 @@ public class MemoryCacheService : ICacheService
 
         var value = await factory();
 
-        if (value != null)
+        // Use EqualityComparer to properly handle both reference and value types (SonarQube S2955)
+        if (!EqualityComparer<T>.Default.Equals(value, default))
         {
             var options = new MemoryCacheEntryOptions
             {
