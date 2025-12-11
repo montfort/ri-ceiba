@@ -1,0 +1,129 @@
+@using Ceiba.Shared.DTOs
+@using Microsoft.AspNetCore.Components
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <label for="filterEstado" class="form-label">Estado</label>
+                <select id="filterEstado" class="form-select" @bind="Filter.Estado" @bind:after="OnFilterChanged">
+                    <option value="">Todos</option>
+                    <option value="0">Borrador</option>
+                    <option value="1">Entregado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="filterDelito" class="form-label">Delito</label>
+                <input id="filterDelito" type="text" class="form-control"
+                       placeholder="Buscar por delito"
+                       @bind="Filter.Delito"
+                       @bind:event="oninput"
+                       @bind:after="OnFilterChangedDebounced" />
+            </div>
+            @if (ShowZonaFilter)
+            {
+                <div class="col-md-2">
+                    <label for="filterZona" class="form-label">Zona</label>
+                    <input id="filterZona" type="text" class="form-control"
+                           placeholder="Zona"
+                           @bind="ZonaFilter"
+                           @bind:event="oninput"
+                           @bind:after="OnFilterChangedDebounced" />
+                </div>
+            }
+            <div class="col-md-2">
+                <label for="filterFechaDesde" class="form-label">Desde</label>
+                <input id="filterFechaDesde" type="date" class="form-control"
+                       @bind="Filter.FechaDesde"
+                       @bind:after="OnFilterChanged" />
+            </div>
+            <div class="col-md-2">
+                <label for="filterFechaHasta" class="form-label">Hasta</label>
+                <input id="filterFechaHasta" type="date" class="form-control"
+                       @bind="Filter.FechaHasta"
+                       @bind:after="OnFilterChanged" />
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+                <button type="button" class="btn btn-secondary w-100" @onclick="ClearFilters" title="Limpiar filtros">
+                    <i class="bi bi-x-circle"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private System.Threading.Timer? _debounceTimer;
+    private string? ZonaFilter { get; set; }
+
+    /// <summary>
+    /// The filter state to bind to.
+    /// </summary>
+    [Parameter]
+    public ReportFilterDto Filter { get; set; } = new();
+
+    /// <summary>
+    /// Callback when filter values change.
+    /// </summary>
+    [Parameter]
+    public EventCallback<ReportFilterDto> FilterChanged { get; set; }
+
+    /// <summary>
+    /// Show the zona filter input. Defaults to true.
+    /// </summary>
+    [Parameter]
+    public bool ShowZonaFilter { get; set; } = true;
+
+    /// <summary>
+    /// Debounce delay in milliseconds for text input filters.
+    /// </summary>
+    [Parameter]
+    public int DebounceDelay { get; set; } = 500;
+
+    /// <summary>
+    /// Callback when clear filters button is clicked.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnClear { get; set; }
+
+    private async Task OnFilterChanged()
+    {
+        await FilterChanged.InvokeAsync(Filter);
+    }
+
+    private void OnFilterChangedDebounced()
+    {
+        _debounceTimer?.Dispose();
+        _debounceTimer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(async () =>
+            {
+                await FilterChanged.InvokeAsync(Filter);
+                StateHasChanged();
+            });
+        }, null, DebounceDelay, Timeout.Infinite);
+    }
+
+    private async Task ClearFilters()
+    {
+        Filter.Estado = null;
+        Filter.Delito = null;
+        Filter.FechaDesde = null;
+        Filter.FechaHasta = null;
+        ZonaFilter = null;
+
+        if (OnClear.HasDelegate)
+        {
+            await OnClear.InvokeAsync();
+        }
+        else
+        {
+            await FilterChanged.InvokeAsync(Filter);
+        }
+    }
+
+    public void Dispose()
+    {
+        _debounceTimer?.Dispose();
+    }
+}
