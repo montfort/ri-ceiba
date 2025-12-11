@@ -5,6 +5,12 @@
     <ProjectReference Include="..\Ceiba.Application\Ceiba.Application.csproj" />
     <ProjectReference Include="..\Ceiba.Infrastructure\Ceiba.Infrastructure.csproj" />
     <ProjectReference Include="..\Ceiba.Shared\Ceiba.Shared.csproj" />
+    <ProjectReference Include="..\..\Ceiba.ServiceDefaults\Ceiba.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <!-- Aspire PostgreSQL EF Core integration -->
+  <ItemGroup>
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

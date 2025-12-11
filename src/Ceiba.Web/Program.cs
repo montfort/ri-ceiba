@@ -6,6 +6,7 @@ using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Repositories;
 using Ceiba.Infrastructure.Services;
+using Ceiba.ServiceDefaults;
 using Ceiba.Web.Components;
 using Ceiba.Web.Configuration;
 using Ceiba.Web.Middleware;
@@ -26,20 +27,39 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    // Agregar Aspire ServiceDefaults (health checks, OpenTelemetry, service discovery)
+    builder.AddServiceDefaults();
+
     // Usar Serilog como logger
     builder.Host.UseSerilog();
 
-    // Configurar DbContext con PostgreSQL (T009)
-    builder.Services.AddDbContext<CeibaDbContext>((serviceProvider, options) =>
+    // Configurar DbContext con PostgreSQL
+    // Detecta si está corriendo con Aspire (connection string "ceiba") o standalone ("DefaultConnection")
+    var aspireConnectionString = builder.Configuration.GetConnectionString("ceiba");
+    if (!string.IsNullOrEmpty(aspireConnectionString))
     {
-        var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-        options.UseNpgsql(connectionString, npgsqlOptions =>
+        // Aspire está orquestando - usar integración Aspire para PostgreSQL
+        builder.AddNpgsqlDbContext<CeibaDbContext>("ceiba", settings =>
         {
-            npgsqlOptions.MigrationsAssembly("Ceiba.Infrastructure");
-            npgsqlOptions.CommandTimeout(30);
+            settings.DisableRetry = false;
         });
-        options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
-    });
+        Log.Information("Using Aspire-orchestrated PostgreSQL connection");
+    }
+    else
+    {
+        // Ejecución standalone - usar configuración tradicional (T009)
+        builder.Services.AddDbContext<CeibaDbContext>((serviceProvider, options) =>
+        {
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            options.UseNpgsql(connectionString, npgsqlOptions =>
+            {
+                npgsqlOptions.MigrationsAssembly("Ceiba.Infrastructure");
+                npgsqlOptions.CommandTimeout(30);
+            });
+            options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+        });
+        Log.Information("Using standalone PostgreSQL connection");
+    }
 
     // Configurar ASP.NET Identity (T010-T010e)
     builder.Services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
@@ -223,6 +243,9 @@ try
     app.MapControllers(); // Para APIs REST
     app.MapRazorComponents<App>()
         .AddInteractiveServerRenderMode();
+
+    // Mapear endpoints de Aspire (health checks: /health, /alive)
+    app.MapDefaultEndpoints();
 
     // Migración automática y seed data en desarrollo (T019, T020)
     // Skip migrations in Testing environment (handled by WebApplicationFactory)

@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ceiba.Web.Tests", "tests\Ce
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ceiba.Integration.Tests", "tests\Ceiba.Integration.Tests\Ceiba.Integration.Tests.csproj", "{965124A3-CC05-40FB-B1F7-B1ADB14A08AB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ceiba.AppHost", "Ceiba.AppHost\Ceiba.AppHost.csproj", "{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ceiba.ServiceDefaults", "Ceiba.ServiceDefaults\Ceiba.ServiceDefaults.csproj", "{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -157,6 +161,30 @@ Global
 		{965124A3-CC05-40FB-B1F7-B1ADB14A08AB}.Release|x64.Build.0 = Release|Any CPU
 		{965124A3-CC05-40FB-B1F7-B1ADB14A08AB}.Release|x86.ActiveCfg = Release|Any CPU
 		{965124A3-CC05-40FB-B1F7-B1ADB14A08AB}.Release|x86.Build.0 = Release|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Debug|x64.Build.0 = Debug|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Debug|x86.Build.0 = Debug|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Release|x64.ActiveCfg = Release|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Release|x64.Build.0 = Release|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Release|x86.ActiveCfg = Release|Any CPU
+		{C3BF799D-F5A4-41AB-8727-3B79AFDB0569}.Release|x86.Build.0 = Release|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Debug|x64.Build.0 = Debug|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Debug|x86.Build.0 = Debug|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Release|x64.ActiveCfg = Release|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Release|x64.Build.0 = Release|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Release|x86.ActiveCfg = Release|Any CPU
+		{1957C31B-6066-4BA0-915C-DDAA2A21EBDB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
