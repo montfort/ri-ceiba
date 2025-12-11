@@ -267,6 +267,37 @@ dotnet_naming_style.upper_snake_case.word_separator = _
 # - Constants/enums use UPPER_SNAKE_CASE convention (common practice)
 dotnet_diagnostic.CA1707.severity = none
 
+# CA2007: ConfigureAwait
+# Rationale: Not applicable for ASP.NET Core/Blazor Server applications.
+# ASP.NET Core does not have a SynchronizationContext, so ConfigureAwait(false)
+# provides no benefit and only adds noise to the codebase.
+# Reference: https://devblogs.microsoft.com/dotnet/configureawait-faq/
+dotnet_diagnostic.CA2007.severity = none
+
+# CA1848: Use LoggerMessage delegates for performance
+# Rationale: Performance optimization that adds significant code complexity.
+# The current logging pattern is clear and maintainable. Only optimize if
+# profiling identifies logging as a bottleneck in production.
+dotnet_diagnostic.CA1848.severity = none
+
+# CA1031: Do not catch general exception types
+# Rationale: In infrastructure/utility code (file operations, external process calls,
+# error recovery), catching Exception is intentional for resilience. The code logs
+# all caught exceptions, which is the recommended practice for defensive programming.
+dotnet_diagnostic.CA1031.severity = none
+
+# CA1062: Validate arguments of public methods
+# Rationale: Project uses Nullable Reference Types (<Nullable>enable</Nullable>)
+# with CS8600-CS8604 treated as errors. The compiler already enforces non-null
+# parameters through the type system, making explicit null checks redundant.
+dotnet_diagnostic.CA1062.severity = none
+
+# CA1305: Specify IFormatProvider
+# Rationale: Date/time formatting uses invariant formats (ISO 8601) that are
+# culture-independent. The formats used (yyyy-MM-dd, etc.) produce identical
+# output regardless of culture settings.
+dotnet_diagnostic.CA1305.severity = none
+
 # Migration files - disable additional rules that don't apply
 [**/Migrations/*.cs]
 dotnet_diagnostic.CA1707.severity = none
