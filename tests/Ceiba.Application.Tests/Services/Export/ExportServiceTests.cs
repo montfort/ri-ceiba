@@ -3,6 +3,7 @@ using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs.Export;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -20,6 +21,7 @@ public class ExportServiceTests
     private readonly Mock<IPdfGenerator> _mockPdfGenerator;
     private readonly Mock<IJsonExporter> _mockJsonExporter;
     private readonly Mock<IUserManagementService> _mockUserService;
+    private readonly Mock<ILogger<ExportService>> _mockLogger;
     private readonly ExportService _exportService;
 
     public ExportServiceTests()
@@ -28,12 +30,14 @@ public class ExportServiceTests
         _mockPdfGenerator = new Mock<IPdfGenerator>();
         _mockJsonExporter = new Mock<IJsonExporter>();
         _mockUserService = new Mock<IUserManagementService>();
+        _mockLogger = new Mock<ILogger<ExportService>>();
 
         _exportService = new ExportService(
             _mockReportRepo.Object,
             _mockPdfGenerator.Object,
             _mockJsonExporter.Object,
-            _mockUserService.Object
+            _mockUserService.Object,
+            _mockLogger.Object
         );
     }
 

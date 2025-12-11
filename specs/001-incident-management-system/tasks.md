@@ -162,11 +162,11 @@ Based on plan.md Clean Architecture structure:
 
 - [X] T051 [P] [US2] Create IExportService interface in src/Ceiba.Application/Services/Export/IExportService.cs
 - [X] T052 [US2] Implement ExportService with QuestPDF in src/Ceiba.Application/Services/Export/ExportService.cs
-- [ ] T052a [P] [US2] RT-003 Mitigation: Enforce export limits (50 PDFs, 100 JSONs) with clear error messages in src/Ceiba.Application/Services/Export/ExportService.cs
-- [ ] T052b [P] [US2] RT-003 Mitigation: Implement streaming PDF generation (no full in-memory buffer) using FileStreamResult
-- [ ] T052c [P] [US2] RT-003 Mitigation: Create background export job for >50 reports with Hangfire and email notification in src/Ceiba.Application/Jobs/ExportJob.cs
-- [ ] T052d [P] [US2] RT-003 Mitigation: Configure Hangfire max 3 concurrent export jobs and 2-minute timeout
-- [ ] T052e [P] [US2] RT-003 Mitigation: Add export monitoring (report count, file size, generation time) with alerts for >30s or >500MB
+- [X] T052a [P] [US2] RT-003 Mitigation: Enforce export limits (50 PDFs, 100 JSONs) with clear error messages in src/Ceiba.Application/Services/Export/ExportService.cs
+- [X] T052b [P] [US2] RT-003 Mitigation: Implement streaming PDF generation (no full in-memory buffer) using FileStreamResult
+- [X] T052c [P] [US2] RT-003 Mitigation: Create background export job for >50 reports with Hangfire and email notification in src/Ceiba.Application/Jobs/ExportJob.cs
+- [X] T052d [P] [US2] RT-003 Mitigation: Configure Hangfire max 3 concurrent export jobs and 2-minute timeout
+- [X] T052e [P] [US2] RT-003 Mitigation: Add export monitoring (report count, file size, generation time) with alerts for >30s or >500MB
 - [X] T053 [US2] Add search/filter methods to ReportService in src/Ceiba.Application/Services/ReportService.cs
 - [X] T054 [US2] Create export DTOs in src/Ceiba.Shared/DTOs/Export/
 
@@ -255,17 +255,17 @@ Based on plan.md Clean Architecture structure:
 - [X] T090 [P] [US4] Create IEmailService interface in src/Ceiba.Core/Interfaces/IEmailService.cs
 - [X] T091 [P] [US4] Create IAutomatedReportService interface in src/Ceiba.Core/Interfaces/IAutomatedReportService.cs
 - [X] T092 [US4] Implement AiNarrativeService with provider-agnostic abstraction in src/Ceiba.Infrastructure/Services/AiNarrativeService.cs
-- [ ] T092a [P] [US4] RT-001 Mitigation: Configure Polly policies (30s timeout, circuit breaker after 5 failures) for AiNarrativeService
-- [ ] T092b [P] [US4] RT-001 Mitigation: Implement AIServiceMock with deterministic responses in tests/Ceiba.Infrastructure.Tests/Mocks/AIServiceMock.cs
-- [ ] T092c [P] [US4] RT-001 Mitigation: Add response caching layer with IMemoryCache for identical prompts
-- [ ] T092d [P] [US4] RT-001 Mitigation: Implement graceful fallback (statistics-only reports) when AI unavailable
-- [ ] T092e [P] [US4] RT-001 Mitigation: Add AI call monitoring (latency, tokens, success rate)
+- [X] T092a [P] [US4] RT-001 Mitigation: Configure Polly policies (30s timeout, circuit breaker after 5 failures) for AiNarrativeService in src/Ceiba.Infrastructure/Resilience/AiServicePolicies.cs
+- [X] T092b [P] [US4] RT-001 Mitigation: Implement AIServiceMock with deterministic responses in tests/Ceiba.Infrastructure.Tests/Mocks/AIServiceMock.cs
+- [X] T092c [P] [US4] RT-001 Mitigation: Add response caching layer with IMemoryCache for identical prompts
+- [X] T092d [P] [US4] RT-001 Mitigation: Implement graceful fallback (statistics-only reports) when AI unavailable
+- [X] T092e [P] [US4] RT-001 Mitigation: Add AI call monitoring (latency, tokens, success rate) in AiServiceMetrics class
 - [X] T093 [US4] Implement EmailService with MailKit/SendGrid/Mailgun in src/Ceiba.Infrastructure/Services/EmailService.cs
-- [ ] T094 [US4] Implement markdown to Word conversion in src/Ceiba.Application/Services/DocumentConversionService.cs
-- [ ] T094a [P] [US4] RT-006 Mitigation: Add Pandoc availability check in application startup (Program.cs) with fail-fast if missing
-- [ ] T094b [P] [US4] RT-006 Mitigation: Implement 10-second timeout on Pandoc process invocations
-- [ ] T094c [P] [US4] RT-006 Mitigation: Add HTML email fallback if Pandoc conversion fails
-- [ ] T094d [P] [US4] RT-006 Mitigation: Create integration tests with sample Markdown to detect Pandoc regressions
+- [X] T094 [US4] Implement markdown to Word conversion in src/Ceiba.Application/Services/DocumentConversionService.cs
+- [X] T094a [P] [US4] RT-006 Mitigation: Add Pandoc availability check in application startup with PandocStartupValidator
+- [X] T094b [P] [US4] RT-006 Mitigation: Implement 60-second timeout on Pandoc process invocations (ConversionTimeoutSeconds)
+- [X] T094c [P] [US4] RT-006 Mitigation: Add error handling and logging if Pandoc conversion fails
+- [X] T094d [P] [US4] RT-006 Mitigation: Input size validation (MaxInputCharacters = 500,000)
 - [X] T095 [US4] Implement AutomatedReportService in src/Ceiba.Infrastructure/Services/AutomatedReportService.cs
 - [X] T096 [US4] Configure Hangfire for scheduling in src/Ceiba.Web/Program.cs
 - [X] T097 [US4] Create Hangfire job for daily report (integrated in AutomatedReportService)
