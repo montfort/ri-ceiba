@@ -4,10 +4,41 @@
         <name>Ceiba.Integration.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Integration.Tests.AdminContractTests">
+            <summary>
+            Contract tests for Admin API endpoints (US3: User Management)
+            T061: Validates that admin endpoints require ADMIN role and follow API contracts
+            </summary>
+        </member>
+        <member name="T:Ceiba.Integration.Tests.AuditContractTests">
+            <summary>
+            Contract tests for Audit Log API endpoints (US3)
+            T063: Validates audit endpoints require ADMIN role and follow API contracts
+            FR-031 to FR-036: Audit log viewing and filtering
+            </summary>
+        </member>
         <member name="T:Ceiba.Integration.Tests.AuthorizationMatrixTests">
             <summary>
             T020c: RS-001 Mitigation - Authorization Matrix Tests
             Tests Role × Functionality matrix to ensure proper authorization enforcement
+            </summary>
+        </member>
+        <member name="T:Ceiba.Integration.Tests.AutomatedReportJobTests">
+            <summary>
+            Integration tests for automated report generation workflow.
+            US4: Reportes Automatizados Diarios con IA.
+            Tests T085: End-to-end automated report generation, templates, and email delivery.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Integration.Tests.AutomatedReportJobTests.JsonOptions">
+            <summary>
+            JSON options matching those used in AutomatedReportService for consistent serialization.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Integration.Tests.CatalogContractTests">
+            <summary>
+            Contract tests for Catalog Management API endpoints (US3)
+            T062: Validates catalog endpoints (Zonas, Sectores, Cuadrantes, Sugerencias) require ADMIN role
             </summary>
         </member>
         <member name="T:Ceiba.Integration.Tests.CeibaWebApplicationFactory">
@@ -24,10 +55,13 @@
             </summary>
         </member>
         <member name="T:Ceiba.Integration.Tests.InputValidationTests">
-            <summary>
-            T020i: RS-002 Mitigation - Input Validation Integration Tests
-            Tests that all user inputs are properly validated to prevent injection attacks
-            </summary>
+             <summary>
+             T020i: RS-002 Mitigation - Input Validation Integration Tests
+             Tests that all user inputs are properly validated to prevent injection attacks.
+            
+             Only tests for EXISTING endpoints are enabled. Tests for non-existent endpoints
+             are kept but marked with Skip for future implementation reference.
+             </summary>
         </member>
         <member name="T:Ceiba.Integration.Tests.IntegrationTestCollection">
             <summary>

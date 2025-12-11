@@ -157,6 +157,23 @@ public class AccountController : Controller
         }
     }
 
+    [HttpGet("perform-logout")]
+    public async Task<IActionResult> PerformLogout()
+    {
+        try
+        {
+            var userName = User.Identity?.Name ?? "Unknown";
+            await _signInManager.SignOutAsync();
+            _logger.LogInformation("User {UserName} logged out successfully", userName);
+            return Redirect("/login?logout=success");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during logout");
+            return Redirect("/login?error=logout");
+        }
+    }
+
     public class LoginRequest
     {
         [Required(ErrorMessage = "El correo electrónico es obligatorio")]

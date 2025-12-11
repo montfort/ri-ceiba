@@ -4,7 +4,13 @@
       "Bash(Select-Object -Last 30)",
       "WebSearch",
       "WebFetch(domain:ai.google.dev)",
-      "Bash(PGPASSWORD=ceiba123 psql:*)"
+      "Bash(PGPASSWORD=ceiba123 psql:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(findstr:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat(us3): Add contract tests and UserForm component for admin module\n\nUS3 Implementation:\n- T061: Add AdminContractTests.cs - contract tests for user management endpoints\n- T062: Add CatalogContractTests.cs - contract tests for catalog management (Zonas, Sectores, Cuadrantes, Sugerencias)\n- T063: Add AuditContractTests.cs - contract tests for audit log endpoints\n- T064: Add UserManagementServiceTests.cs - unit tests for UserManagementService\n- T076: Add UserForm.razor - standalone user create/edit component with routes /admin/users/new and /admin/users/{id}/edit\n\nAlso updates tasks.md to mark ~30 previously implemented tasks as complete.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

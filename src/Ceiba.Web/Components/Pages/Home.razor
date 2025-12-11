@@ -50,19 +50,52 @@
                 <AuthorizeView Roles="REVISOR" Context="revisorContext">
                     <Authorized>
                         <div class="col-12">
-                            <div class="card shadow-sm border-0">
+                            <div class="card shadow-sm border-0 border-start border-info border-4">
                                 <div class="card-body p-4">
                                     <h3 class="card-title mb-4">
-                                        <i class="bi bi-search text-info me-2"></i>
+                                        <i class="bi bi-clipboard-check text-info me-2"></i>
                                         Panel de Supervisión
                                     </h3>
-                                    <p class="card-text text-muted mb-4">
-                                        Revisa y gestiona todos los reportes de incidencias del sistema.
+                                    <p class="card-text text-muted mb-3">
+                                        Revisa y gestiona todos los reportes de incidencias del sistema. Exporta datos y genera reportes automatizados con IA.
                                     </p>
-                                    <div class="alert alert-info">
-                                        <i class="bi bi-info-circle me-2"></i>
-                                        Módulo de supervisión en desarrollo (User Story 2)
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-6 col-md-3">
+                                            <a href="/supervisor/reports" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-clipboard-check text-primary" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Todos los Reportes</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <a href="/supervisor/export" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-download text-success" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Exportar</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <a href="/automated" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-robot text-info" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Reportes Auto</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <a href="/automated/templates" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-file-earmark-code text-warning" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Plantillas</div>
+                                                </div>
+                                            </a>
+                                        </div>
                                     </div>
+                                    <a href="/supervisor" class="btn btn-info">
+                                        <i class="bi bi-speedometer2 me-2"></i>Ir al Panel de Supervisión
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -73,19 +106,68 @@
                 <AuthorizeView Roles="ADMIN" Context="adminContext">
                     <Authorized>
                         <div class="col-12">
-                            <div class="card shadow-sm border-0">
+                            <div class="card shadow-sm border-0 border-start border-warning border-4">
                                 <div class="card-body p-4">
                                     <h3 class="card-title mb-4">
                                         <i class="bi bi-gear text-warning me-2"></i>
                                         Panel de Administración
                                     </h3>
-                                    <p class="card-text text-muted mb-4">
-                                        Gestiona usuarios, roles y configuración del sistema.
+                                    <p class="card-text text-muted mb-3">
+                                        Gestiona usuarios, catálogos geográficos, configuración del sistema y revisa el registro de auditoría.
                                     </p>
-                                    <div class="alert alert-warning">
-                                        <i class="bi bi-info-circle me-2"></i>
-                                        Módulo de administración en desarrollo (User Story 3)
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-6 col-md-3 col-lg-2">
+                                            <a href="/admin/users" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-people text-primary" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Usuarios</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3 col-lg-2">
+                                            <a href="/admin/catalogs" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-geo-alt text-success" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Catálogos</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3 col-lg-2">
+                                            <a href="/admin/suggestions" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-list-check text-warning" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Sugerencias</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3 col-lg-2">
+                                            <a href="/admin/ai-config" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-robot text-info" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Config. IA</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3 col-lg-2">
+                                            <a href="/admin/email-config" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-envelope-at text-secondary" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Config. Email</div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        <div class="col-6 col-md-3 col-lg-2">
+                                            <a href="/admin/audit" class="card text-decoration-none h-100 border-0 bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <i class="bi bi-shield-check text-danger" style="font-size: 1.5rem;"></i>
+                                                    <div class="small mt-2">Auditoría</div>
+                                                </div>
+                                            </a>
+                                        </div>
                                     </div>
+                                    <a href="/admin" class="btn btn-warning">
+                                        <i class="bi bi-gear me-2"></i>Ir al Panel de Administración
+                                    </a>
                                 </div>
                             </div>
                         </div>

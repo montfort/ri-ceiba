@@ -352,5 +352,35 @@
             Detects and blocks suspicious session hijacking attempts by validating User-Agent consistency.
             </summary>
         </member>
+        <member name="T:Ceiba.Web.Components.Pages.Admin.UserForm.UserFormModel">
+            <summary>
+            Form model for user creation/editing
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.Filter">
+            <summary>
+            The filter state to bind to.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.FilterChanged">
+            <summary>
+            Callback when filter values change.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.ShowZonaFilter">
+            <summary>
+            Show the zona filter input. Defaults to true.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.DebounceDelay">
+            <summary>
+            Debounce delay in milliseconds for text input filters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.OnClear">
+            <summary>
+            Callback when clear filters button is clicked.
+            </summary>
+        </member>
     </members>
 </doc>

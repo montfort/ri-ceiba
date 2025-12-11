@@ -674,6 +674,21 @@ public class AutomatedReportService : IAutomatedReportService
 
     private List<string> GetConfiguredRecipients()
     {
+        // First try to get recipients from database configuration
+        var dbConfig = _context.ConfiguracionReportesAutomatizados
+            .OrderByDescending(c => c.CreatedAt)
+            .FirstOrDefault();
+
+        if (dbConfig != null)
+        {
+            var recipients = dbConfig.GetDestinatariosArray();
+            if (recipients.Length > 0)
+            {
+                return recipients.ToList();
+            }
+        }
+
+        // Fallback to appsettings.json
         return _configuration.GetSection("AutomatedReports:Recipients").Get<List<string>>() ?? new();
     }
 

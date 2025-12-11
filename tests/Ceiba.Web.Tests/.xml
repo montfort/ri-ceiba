@@ -4,6 +4,12 @@
         <name>Ceiba.Web.Tests</name>
     </assembly>
     <members>
+        <member name="T:Ceiba.Web.Tests.ReportFilterComponentTests">
+            <summary>
+            Component tests for ReportFilter Blazor component (US2).
+            Tests T050: Report filtering functionality for supervisor view.
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Tests.ReportFormComponentTests">
             <summary>
             Component tests for ReportForm Blazor component (US1)

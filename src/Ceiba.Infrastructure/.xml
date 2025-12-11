@@ -255,6 +255,103 @@
             US1: T035 (supporting implementation)
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Resilience.AiServicePolicies">
+            <summary>
+            Polly resilience policies for AI service HTTP calls.
+            T092a: Configure Polly policies (30s timeout, circuit breaker after 5 failures).
+            </summary>
+        </member>
+        <member name="F:Ceiba.Infrastructure.Resilience.AiServicePolicies.TimeoutSeconds">
+            <summary>
+            Timeout for AI API calls in seconds (T092a)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Infrastructure.Resilience.AiServicePolicies.CircuitBreakerFailuresBeforeOpen">
+            <summary>
+            Number of consecutive failures before circuit opens (T092a)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Infrastructure.Resilience.AiServicePolicies.CircuitBreakerDuration">
+            <summary>
+            Duration the circuit stays open before allowing test requests
+            </summary>
+        </member>
+        <member name="F:Ceiba.Infrastructure.Resilience.AiServicePolicies.RetryCount">
+            <summary>
+            Number of retry attempts for transient failures
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServicePolicies.GetResiliencePolicy(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Creates the combined resilience policy for AI HTTP client.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServicePolicies.GetTimeoutPolicy(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            T092a: 30 second timeout policy
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServicePolicies.GetRetryPolicy(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Retry policy for transient HTTP failures
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServicePolicies.GetCircuitBreakerPolicy(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            T092a: Circuit breaker after 5 consecutive failures
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Resilience.AiServiceMetrics">
+            <summary>
+            Metrics tracking for AI service calls.
+            T092e: Add AI call monitoring (latency, tokens, success rate).
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServiceMetrics.RecordSuccess(System.TimeSpan,System.Int32,System.String)">
+            <summary>
+            Records a successful AI call.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServiceMetrics.RecordFailure(System.TimeSpan,System.String,System.String)">
+            <summary>
+            Records a failed AI call.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServiceMetrics.RecordFallback(System.String)">
+            <summary>
+            Records a fallback being used.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Infrastructure.Resilience.AiServiceMetrics.SuccessRate">
+            <summary>
+            Gets the current success rate.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Infrastructure.Resilience.AiServiceMetrics.AverageLatencyMs">
+            <summary>
+            Gets the average latency in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Infrastructure.Resilience.AiServiceMetrics.TotalTokensUsed">
+            <summary>
+            Gets the total tokens used across all calls.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServiceMetrics.GetSummary">
+            <summary>
+            Gets current metrics summary.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Infrastructure.Resilience.AiServiceMetrics.Reset">
+            <summary>
+            Resets all metrics.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Resilience.AiServiceMetricsSummary">
+            <summary>
+            Summary of AI service metrics.
+            </summary>
+        </member>
         <member name="T:Ceiba.Infrastructure.Services.AiConfigurationService">
             <summary>
             Service for managing AI configuration stored in the database.

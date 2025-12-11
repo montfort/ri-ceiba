@@ -1,0 +1,310 @@
+@page "/supervisor"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Ceiba.Core.Interfaces
+@using Ceiba.Shared.DTOs
+@inject NavigationManager Navigation
+@inject IReportService ReportService
+@inject IAutomatedReportService AutomatedReportService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@attribute [Authorize(Roles = "REVISOR")]
+
+<PageTitle>Supervisión - Ceiba</PageTitle>
+
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-clipboard-check me-2"></i>Panel de Supervisión</h2>
+            <p class="text-muted">Revise reportes, exporte información y gestione reportes automatizados</p>
+        </div>
+    </div>
+
+    @if (IsLoading)
+    {
+        <div class="d-flex justify-content-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Statistics Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-white-50">Total Reportes</h6>
+                                <h3 class="card-title mb-0">@TotalReports</h3>
+                            </div>
+                            <i class="bi bi-file-earmark-text" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-dark-50">Borradores</h6>
+                                <h3 class="card-title mb-0">@DraftReports</h3>
+                            </div>
+                            <i class="bi bi-pencil" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-white-50">Entregados</h6>
+                                <h3 class="card-title mb-0">@DeliveredReports</h3>
+                            </div>
+                            <i class="bi bi-check-circle" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-subtitle mb-1 text-white-50">Reportes Auto</h6>
+                                <h3 class="card-title mb-0">@AutomatedReportsCount</h3>
+                            </div>
+                            <i class="bi bi-robot" style="font-size: 2rem; opacity: 0.5;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Cards -->
+        <div class="row g-4">
+            <!-- All Reports Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                <i class="bi bi-clipboard-check text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Todos los Reportes</h5>
+                        </div>
+                        <p class="card-text flex-grow-1">
+                            Visualice y edite todos los reportes de incidencias del sistema. Filtre por fecha, estado, zona o creador.
+                        </p>
+                        <button class="btn btn-primary" @onclick="NavigateToReports">
+                            <i class="bi bi-arrow-right me-1"></i>Ver Reportes
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3">
+                                <i class="bi bi-download text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Exportar Reportes</h5>
+                        </div>
+                        <p class="card-text flex-grow-1">
+                            Exporte reportes individuales o en lote a formatos PDF y JSON. Seleccione por rango de fechas.
+                        </p>
+                        <button class="btn btn-success" @onclick="NavigateToExport">
+                            <i class="bi bi-arrow-right me-1"></i>Ir a Exportar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Automated Reports Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                                <i class="bi bi-robot text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Reportes Automatizados</h5>
+                        </div>
+                        <p class="card-text flex-grow-1">
+                            Genere y visualice reportes narrativos generados por IA. Envíe por email o descargue en Word.
+                        </p>
+                        <button class="btn btn-info" @onclick="NavigateToAutomated">
+                            <i class="bi bi-arrow-right me-1"></i>Ver Reportes Auto
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3">
+                                <i class="bi bi-file-earmark-code text-warning" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Plantillas de Reporte</h5>
+                        </div>
+                        <p class="card-text flex-grow-1">
+                            Configure plantillas para los reportes automatizados. Defina el formato y estilo de la narrativa.
+                        </p>
+                        <button class="btn btn-warning" @onclick="NavigateToTemplates">
+                            <i class="bi bi-arrow-right me-1"></i>Ver Plantillas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Generate Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100 border-primary">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                <i class="bi bi-lightning-charge text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Generar Reporte Rápido</h5>
+                        </div>
+                        <p class="card-text flex-grow-1">
+                            Genere un reporte automatizado del día de hoy con un solo clic usando la plantilla predeterminada.
+                        </p>
+                        <button class="btn btn-outline-primary" @onclick="NavigateToAutomatedWithGenerate">
+                            <i class="bi bi-plus-circle me-1"></i>Generar Ahora
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Card -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-secondary bg-opacity-10 p-3 me-3">
+                                <i class="bi bi-clock-history text-secondary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Actividad Reciente</h5>
+                        </div>
+                        <div class="flex-grow-1">
+                            @if (RecentReports.Any())
+                            {
+                                <ul class="list-unstyled mb-0 small">
+                                    @foreach (var report in RecentReports.Take(3))
+                                    {
+                                        <li class="mb-2 d-flex align-items-center">
+                                            <span class="badge @GetEstadoBadgeClass(report.Estado) me-2">@GetEstadoText(report.Estado)</span>
+                                            <span class="text-truncate" style="max-width: 150px;">@(report.UsuarioEmail ?? "Desconocido")</span>
+                                            <span class="text-muted ms-auto">@report.CreatedAt.ToString("dd/MM")</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted small mb-0">No hay reportes recientes</p>
+                            }
+                        </div>
+                        <button class="btn btn-secondary mt-3" @onclick="NavigateToReports">
+                            <i class="bi bi-arrow-right me-1"></i>Ver Todos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool IsLoading { get; set; } = true;
+    private int TotalReports { get; set; }
+    private int DraftReports { get; set; }
+    private int DeliveredReports { get; set; }
+    private int AutomatedReportsCount { get; set; }
+    private List<ReportDto> RecentReports { get; set; } = new();
+    private Guid CurrentUserId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get current user ID
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userIdClaim = authState.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+        {
+            CurrentUserId = userId;
+        }
+
+        await LoadStatisticsAsync();
+    }
+
+    private async Task LoadStatisticsAsync()
+    {
+        try
+        {
+            IsLoading = true;
+
+            // Load report statistics - get all reports for REVISOR
+            var filter = new ReportFilterDto
+            {
+                Page = 1,
+                PageSize = 1000, // Get enough to count
+                SortBy = "createdAt",
+                SortDesc = true
+            };
+
+            var response = await ReportService.ListReportsAsync(filter, CurrentUserId, isRevisor: true);
+            var reports = response.Items;
+
+            TotalReports = response.TotalCount;
+            DraftReports = reports.Count(r => r.Estado == 0); // 0 = Borrador
+            DeliveredReports = reports.Count(r => r.Estado == 1); // 1 = Entregado
+
+            // Get recent reports (first 5)
+            RecentReports = reports.Take(5).ToList();
+
+            // Load automated reports count
+            var automatedReports = await AutomatedReportService.GetReportsAsync(take: 1000);
+            AutomatedReportsCount = automatedReports.Count;
+        }
+        catch (Exception)
+        {
+            // Handle silently - statistics are not critical
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void NavigateToReports() => Navigation.NavigateTo("/supervisor/reports");
+    private void NavigateToExport() => Navigation.NavigateTo("/supervisor/export");
+    private void NavigateToAutomated() => Navigation.NavigateTo("/automated");
+    private void NavigateToTemplates() => Navigation.NavigateTo("/automated/templates");
+    private void NavigateToAutomatedWithGenerate() => Navigation.NavigateTo("/automated?generate=true");
+
+    private static string GetEstadoBadgeClass(int estado) => estado switch
+    {
+        0 => "bg-warning text-dark", // Borrador
+        1 => "bg-success",           // Entregado
+        _ => "bg-secondary"
+    };
+
+    private static string GetEstadoText(int estado) => estado switch
+    {
+        0 => "Borrador",
+        1 => "Entregado",
+        _ => "Desconocido"
+    };
+}

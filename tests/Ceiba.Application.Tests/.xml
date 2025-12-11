@@ -10,6 +10,38 @@
             Tests create/edit functionality per T024
             </summary>
         </member>
+        <member name="T:Ceiba.Application.Tests.Services.AiNarrativeServiceTests">
+            <summary>
+            Unit tests for AiNarrativeService (US4: T082)
+            Tests AI narrative generation with multiple providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.AutomatedReportServiceTests">
+            <summary>
+            Unit tests for AutomatedReportService.
+            US4: Reportes Automatizados Diarios con IA.
+            Tests T084: Automated report generation, templates, and statistics.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Tests.Services.AutomatedReportServiceTests.JsonOptions">
+            <summary>
+            JSON options matching those used in AutomatedReportService for consistent serialization.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Tests.Services.AutomatedReportServiceTests.CreateMockListSection(System.Collections.Generic.List{System.String})">
+            <summary>
+            Creates a mock IConfigurationSection that simulates a list of strings.
+            This is needed because Moq cannot mock extension methods like Get&lt;T&gt;().
+            The Get&lt;List&lt;string&gt;&gt;() extension method works by iterating GetChildren().
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.EmailServiceTests">
+            <summary>
+            Unit tests for EmailService.
+            US4: Reportes Automatizados Diarios con IA.
+            Tests T083: Email service operations for SMTP, SendGrid, and Mailgun providers.
+            </summary>
+        </member>
         <member name="T:Ceiba.Application.Tests.Services.Export.ExportServiceTests">
             <summary>
             Unit tests for Export orchestration service
@@ -26,6 +58,12 @@
             <summary>
             Unit tests for PDF generation service
             Tests T-US2-001 to T-US2-005
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.UserManagementServiceTests">
+            <summary>
+            Unit tests for UserManagementService (US3: T064)
+            FR-021 to FR-026: User management operations
             </summary>
         </member>
     </members>
