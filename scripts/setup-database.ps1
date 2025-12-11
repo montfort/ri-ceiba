@@ -20,8 +20,10 @@ try {
 Write-Host ""
 Write-Host "Este script creará:" -ForegroundColor Yellow
 Write-Host "  - Base de datos: ceiba" -ForegroundColor White
-Write-Host "  - Usuario: ceiba (contraseña: ceiba123)" -ForegroundColor White
+Write-Host "  - Usuario: ceiba (contraseña: definida en setup-database.sql)" -ForegroundColor White
 Write-Host "  - Permisos completos para el usuario ceiba" -ForegroundColor White
+Write-Host ""
+Write-Host "IMPORTANTE: Edite setup-database.sql y reemplace 'CHANGE_THIS_PASSWORD' con su contraseña" -ForegroundColor Yellow
 Write-Host ""
 
 # Solicitar credenciales de superusuario
@@ -52,8 +54,11 @@ try {
         Write-Host "  ✓ Base de datos configurada exitosamente" -ForegroundColor Green
         Write-Host "==================================================" -ForegroundColor Green
         Write-Host ""
-        Write-Host "Cadena de conexión configurada en appsettings.json:" -ForegroundColor Cyan
-        Write-Host "  Host=localhost;Database=ceiba;Username=ceiba;Password=ceiba123" -ForegroundColor White
+        Write-Host "Cadena de conexión (reemplace YOUR_PASSWORD):" -ForegroundColor Cyan
+        Write-Host "  Host=localhost;Database=ceiba;Username=ceiba;Password=YOUR_PASSWORD" -ForegroundColor White
+        Write-Host ""
+        Write-Host "O configure la variable de entorno:" -ForegroundColor Cyan
+        Write-Host "  `$env:DB_PASSWORD='your_password'" -ForegroundColor White
         Write-Host ""
         Write-Host "Siguiente paso:" -ForegroundColor Yellow
         Write-Host "  1. Ejecuta la aplicación con: dotnet run --project src/Ceiba.Web" -ForegroundColor White

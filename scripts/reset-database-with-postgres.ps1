@@ -3,7 +3,8 @@
 
 param(
     [switch]$SkipConfirmation,
-    [string]$PostgresPassword = $env:POSTGRES_PASSWORD
+    [string]$PostgresPassword = $env:POSTGRES_PASSWORD,
+    [string]$CeibaPassword = $env:DB_PASSWORD
 )
 
 $ErrorActionPreference = "Stop"
@@ -32,6 +33,15 @@ if ([string]::IsNullOrEmpty($PostgresPassword)) {
     $securePassword = Read-Host -AsSecureString
     $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
     $PostgresPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+}
+
+# Verificar si se proporcionó la contraseña para el usuario ceiba
+if ([string]::IsNullOrEmpty($CeibaPassword)) {
+    Write-Host ""
+    Write-Host "Ingrese la contraseña para el usuario 'ceiba':" -ForegroundColor Yellow
+    $securePassword = Read-Host -AsSecureString
+    $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+    $CeibaPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 }
 
 Write-Host ""
@@ -69,8 +79,8 @@ Write-Host ""
 Write-Host "Paso 3: Creando base de datos con propietario 'ceiba'..." -ForegroundColor Yellow
 
 try {
-    # Crear usuario ceiba si no existe
-    psql -h localhost -U postgres -d postgres -c "CREATE USER ceiba WITH PASSWORD 'ceiba123';" 2>&1 | Out-Null
+    # Crear usuario ceiba si no existe (con contraseña proporcionada)
+    psql -h localhost -U postgres -d postgres -c "CREATE USER ceiba WITH PASSWORD '$CeibaPassword';" 2>&1 | Out-Null
 
     # Crear base de datos con propietario ceiba
     psql -h localhost -U postgres -d postgres -c "CREATE DATABASE ceiba OWNER ceiba;" 2>&1 | Out-Null

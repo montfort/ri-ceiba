@@ -67,10 +67,10 @@ usuario_creador UUID := '019ac648-b096-7afc-b2cb-6610f7b6711f'; -- Reemplazar co
 ### 2. Ejecutar el Script
 
 ```bash
-# Con credenciales en línea de comandos
-PGPASSWORD=ceiba123 psql -h localhost -U ceiba -d ceiba -f scripts/generate-dummy-reports.sql
+# Set DB_PASSWORD environment variable first, then run:
+PGPASSWORD=$DB_PASSWORD psql -h localhost -U ceiba -d ceiba -f scripts/generate-dummy-reports.sql
 
-# O de forma interactiva
+# Or interactively (will prompt for password)
 psql -h localhost -U ceiba -d ceiba -f scripts/generate-dummy-reports.sql
 ```
 

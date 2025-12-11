@@ -40,9 +40,10 @@ using Ceiba.Core.Entities;
 
 var services = new ServiceCollection();
 
-// Add DbContext
-services.AddDbContext<CeibaDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=ceiba;Username=ceiba;Password=ceiba123"));
+// Add DbContext - connection string from environment
+var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? "Host=localhost;Database=ceiba;Username=ceiba;Password=" + (Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "");
+services.AddDbContext<CeibaDbContext>(options => options.UseNpgsql(connStr));
 
 // Add Identity
 services.AddIdentity<Usuario, IdentityRole<Guid>>()
@@ -123,7 +124,13 @@ Write-Host "Creating user via database connection..." -ForegroundColor Yellow
 Write-Host ""
 
 # Since we can't easily run arbitrary C# scripts, we'll use SQL instead
-$connectionString = "Host=localhost;Database=ceiba;Username=ceiba;Password=ceiba123"
+# Connection string from environment variable
+if (-not $env:DB_PASSWORD) {
+    Write-Host "ERROR: DB_PASSWORD environment variable is required" -ForegroundColor Red
+    Write-Host "Usage: `$env:DB_PASSWORD='your_password'; .\create-test-user.ps1" -ForegroundColor Yellow
+    exit 1
+}
+$connectionString = "Host=localhost;Database=ceiba;Username=ceiba;Password=$env:DB_PASSWORD"
 
 # Check if psql is available
 try {
@@ -173,7 +180,9 @@ BEGIN
 END `$`$;
 "@
 
+$env:PGPASSWORD = $env:DB_PASSWORD
 $sqlScript | psql -h localhost -U ceiba -d ceiba 2>&1
+$env:PGPASSWORD = ""
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Cyan

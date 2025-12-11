@@ -9,7 +9,14 @@ DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${DB_NAME:-ceiba}"
 DB_USER="${DB_USER:-ceiba}"
-export PGPASSWORD="${DB_PASSWORD:-ceiba123}"
+
+# DB_PASSWORD is required - no default for security
+if [ -z "${DB_PASSWORD:-}" ]; then
+    echo "ERROR: DB_PASSWORD environment variable is required"
+    echo "Usage: DB_PASSWORD=your_password $0 [connection_string]"
+    exit 1
+fi
+export PGPASSWORD="$DB_PASSWORD"
 
 CONN_STRING="${1:-host=$DB_HOST port=$DB_PORT dbname=$DB_NAME user=$DB_USER}"
 

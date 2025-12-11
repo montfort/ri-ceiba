@@ -396,8 +396,11 @@ AutomatedReports__Recipients=["email1@example.com","email2@example.com"]
 ```
 
 ### Default Development Credentials
-- **Database**: Host=localhost, DB=ceiba, User=ceiba, Pass=ceiba123
+- **Database**: Host=localhost, DB=ceiba, User=ceiba, Pass=`$DB_PASSWORD` (set via environment variable)
 - **Admin User**: admin@ceiba.local / Admin123! ⚠️ Change after first login!
+
+> **Security Note**: Database passwords should be set via environment variables, never hardcoded.
+> See `docs/SECURITY-CREDENTIALS-GUIDE.md` for configuration instructions.
 
 ### Session & Security Settings
 - **Session Timeout**: 30 minutes of inactivity

@@ -104,12 +104,21 @@ public class MigrationBackupService
             .Where(kv => kv.Length == 2)
             .ToDictionary(kv => kv[0].Trim().ToLower(), kv => kv[1].Trim());
 
+        // Password is required - no default value for security
+        var password = dict.GetValueOrDefault("password", "");
+        if (string.IsNullOrEmpty(password))
+        {
+            throw new InvalidOperationException(
+                "Database password is required in connection string. " +
+                "Ensure the Password parameter is set in ConnectionStrings:DefaultConnection.");
+        }
+
         return (
             dict.GetValueOrDefault("host", "localhost"),
             dict.GetValueOrDefault("port", "5432"),
             dict.GetValueOrDefault("database", "ceiba"),
             dict.GetValueOrDefault("username", "ceiba"),
-            dict.GetValueOrDefault("password", "ceiba123")
+            password
         );
     }
 

@@ -7,9 +7,19 @@ param(
     [string]$DbHost = "localhost",
     [string]$DbName = "ceiba",
     [string]$DbUser = "ceiba",
-    [string]$DbPassword = "ceiba123",
-    [switch]$SkipDbTests = $false
+    [string]$DbPassword = $env:DB_PASSWORD,
+    [switch]$SkipDbTests = $false,
+    [switch]$SkipSslValidation = $false
 )
+
+# Validate DB_PASSWORD for database tests
+if (-not $SkipDbTests -and [string]::IsNullOrEmpty($DbPassword)) {
+    Write-Host "ERROR: DB_PASSWORD environment variable or -DbPassword parameter is required for database tests" -ForegroundColor Red
+    Write-Host "Usage: `$env:DB_PASSWORD='your_password'; .\e2e-verification.ps1" -ForegroundColor Yellow
+    Write-Host "   Or: .\e2e-verification.ps1 -DbPassword 'your_password'" -ForegroundColor Yellow
+    Write-Host "   Or: .\e2e-verification.ps1 -SkipDbTests" -ForegroundColor Yellow
+    exit 1
+}
 
 $ErrorActionPreference = "Continue"
 $script:PassedTests = 0
@@ -48,8 +58,10 @@ function Write-Skip($testName, $reason = "") {
     $script:TestResults += @{ Name = $testName; Status = "SKIP"; Message = $reason }
 }
 
-# Ignore SSL certificate errors for localhost
-add-type @"
+# SSL certificate validation - only disable if explicitly requested
+if ($SkipSslValidation) {
+    Write-Host "WARNING: SSL certificate validation is disabled (-SkipSslValidation)" -ForegroundColor Yellow
+    add-type @"
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 public class TrustAllCertsPolicy : ICertificatePolicy {
@@ -60,7 +72,8 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
     }
 }
 "@
-[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+    [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+}
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Write-TestHeader "CEIBA - E2E Verification Script"

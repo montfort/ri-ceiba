@@ -64,8 +64,10 @@ Ejecuta el script de PowerShell desde la raíz del proyecto:
 
 El script te pedirá las credenciales del superusuario de PostgreSQL (por defecto `postgres`) y creará automáticamente:
 - Base de datos `ceiba`
-- Usuario `ceiba` con contraseña `ceiba123`
+- Usuario `ceiba` con la contraseña que especifiques
 - Todos los permisos necesarios
+
+> ⚠️ **IMPORTANTE**: Configure la variable de entorno `DB_PASSWORD` con su contraseña segura.
 
 ## Solución Manual - SQL
 
@@ -81,8 +83,8 @@ Luego ejecuta:
 -- Crear la base de datos
 CREATE DATABASE ceiba;
 
--- Crear el usuario (si no existe)
-CREATE USER ceiba WITH PASSWORD 'ceiba123';
+-- Crear el usuario (si no existe) - use a secure password!
+CREATE USER ceiba WITH PASSWORD 'YOUR_SECURE_PASSWORD';
 
 -- Otorgar privilegios
 GRANT ALL PRIVILEGES ON DATABASE ceiba TO ceiba;
@@ -115,9 +117,11 @@ Una vez que la base de datos esté configurada:
 1. Verifica la cadena de conexión en `src/Ceiba.Web/appsettings.json`:
    ```json
    "ConnectionStrings": {
-     "DefaultConnection": "Host=localhost;Database=ceiba;Username=ceiba;Password=ceiba123"
+     "DefaultConnection": "Host=localhost;Database=ceiba;Username=ceiba;Password=${DB_PASSWORD}"
    }
    ```
+
+   > **Nota**: Configure la variable de entorno `DB_PASSWORD` con su contraseña.
 
 2. Ejecuta la aplicación:
    ```bash
@@ -138,9 +142,9 @@ psql -U ceiba -d ceiba -h localhost
 # ceiba=>
 ```
 
-## Cambiar la Contraseña (Producción)
+## Configurar Contraseña Segura (Requerido)
 
-⚠️ **IMPORTANTE**: La contraseña `ceiba123` es solo para desarrollo. En producción:
+⚠️ **IMPORTANTE**: Nunca use contraseñas hardcodeadas. Siempre configure una contraseña segura:
 
 1. Cambia la contraseña en PostgreSQL:
    ```sql

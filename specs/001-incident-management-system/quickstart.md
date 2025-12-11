@@ -126,7 +126,7 @@ tests/
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=ceiba;Username=ceiba;Password=ceiba123"
+    "DefaultConnection": "Host=localhost;Database=ceiba;Username=ceiba;Password=${DB_PASSWORD}"
   },
   "Identity": {
     "SessionTimeout": 30,

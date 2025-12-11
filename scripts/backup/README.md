@@ -30,7 +30,7 @@ Script principal de respaldo de base de datos.
 - `DB_PORT` - Puerto (default: 5432)
 - `DB_NAME` - Nombre de la base de datos (default: ceiba)
 - `DB_USER` - Usuario (default: ceiba)
-- `DB_PASSWORD` - Contraseña (default: ceiba123)
+- `DB_PASSWORD` - Contraseña (**requerida**, sin valor por defecto)
 
 ### `restore-database.sh` / `restore-database.ps1` (T115b)
 

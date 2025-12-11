@@ -187,7 +187,8 @@ Se habilitaron 26 tests de seguridad InputValidation que prueban:
 
 ### SQL (Database Health Check)
 ```bash
-PGPASSWORD=ceiba123 psql -h localhost -U ceiba -d ceiba -f scripts/verification/db-health-check.sql
+# Set DB_PASSWORD environment variable first
+PGPASSWORD=$DB_PASSWORD psql -h localhost -U ceiba -d ceiba -f scripts/verification/db-health-check.sql
 ```
 
 ---

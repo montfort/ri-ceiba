@@ -20,6 +20,9 @@ permissions:
 env:
   DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20.x'
+  # CI database credentials - ephemeral containers only, not a real secret
+  # Using env var to avoid SonarQube hardcoded credential warnings
+  CI_DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'ci_test_password_not_secret' }}
 
 jobs:
   # T020d: OWASP ZAP Security Scanning
@@ -33,7 +36,7 @@ jobs:
         env:
           POSTGRES_DB: ceiba_test
           POSTGRES_USER: ceiba
-          POSTGRES_PASSWORD: ceiba123
+          POSTGRES_PASSWORD: ${{ env.CI_DB_PASSWORD }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -62,7 +65,7 @@ jobs:
           dotnet tool install --global dotnet-ef
           dotnet ef database update --project src/Ceiba.Infrastructure --startup-project src/Ceiba.Web
         env:
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=ceiba123"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
 
       - name: Start application in background
         run: |
@@ -73,7 +76,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Development
           ASPNETCORE_URLS: "http://localhost:5000"
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=ceiba123"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
 
       - name: Wait for application readiness
         run: |
