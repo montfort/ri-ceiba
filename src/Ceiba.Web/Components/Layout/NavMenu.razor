@@ -1,18 +1,24 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="top-row ps-3 navbar navbar-dark">
+<div class="top-row ps-3 navbar navbar-dark" role="banner">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">
-            <i class="bi bi-shield-check me-2"></i>Ceiba
+        <a class="navbar-brand" href="" aria-label="Ceiba - Ir al inicio">
+            <i class="bi bi-shield-check me-2" aria-hidden="true"></i>Ceiba
         </a>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox"
+       id="nav-toggle"
+       title="Abrir o cerrar menú de navegación"
+       class="navbar-toggler"
+       aria-controls="nav-menu"
+       aria-expanded="false" />
+<label for="nav-toggle" class="visually-hidden">Menú de navegación</label>
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
+    <nav id="nav-menu" class="nav flex-column" role="navigation" aria-label="Navegación principal">
         <AuthorizeView Context="mainAuth">
             <Authorized>
                 <!-- Home -->

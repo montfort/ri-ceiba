@@ -2,43 +2,53 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<SkipLink />
+<LiveAnnouncer />
 
-    <main>
-        <div class="top-row px-4 d-flex justify-content-between align-items-center">
+<div class="page" role="application" aria-label="Aplicación Ceiba">
+    <aside class="sidebar" role="complementary" aria-label="Menú de navegación">
+        <NavMenu />
+    </aside>
+
+    <main id="main-content" tabindex="-1" role="main" aria-label="Contenido principal">
+        <header class="top-row px-4 d-flex justify-content-between align-items-center" role="banner">
             <div class="d-flex align-items-center">
-                <span class="text-muted small d-none d-md-inline">
-                    <i class="bi bi-calendar3 me-1"></i>
+                <time class="text-muted small d-none d-md-inline"
+                      datetime="@DateTime.Now.ToString("yyyy-MM-dd")"
+                      aria-label="Fecha actual">
+                    <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
                     @DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-MX"))
-                </span>
+                </time>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <AuthorizeView>
                     <Authorized>
-                        <span class="badge bg-success">
-                            <i class="bi bi-person-check me-1"></i>
+                        <span class="badge bg-success" role="status" aria-label="Usuario autenticado: @context.User.Identity?.Name">
+                            <i class="bi bi-person-check me-1" aria-hidden="true"></i>
                             @context.User.Identity?.Name
                         </span>
                     </Authorized>
                 </AuthorizeView>
-                <a href="https://github.com/SSC-CDMX/ceiba" target="_blank" class="text-decoration-none text-muted" title="Repositorio">
-                    <i class="bi bi-github"></i>
+                <a href="https://github.com/SSC-CDMX/ceiba"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="text-decoration-none text-muted"
+                   title="Repositorio en GitHub"
+                   aria-label="Abrir repositorio de Ceiba en GitHub (abre en nueva ventana)">
+                    <i class="bi bi-github" aria-hidden="true"></i>
                 </a>
             </div>
-        </div>
+        </header>
 
-        <article class="content px-4">
+        <article class="content px-4" aria-live="polite">
             @Body
         </article>
 
-        <footer class="footer px-4 py-3 mt-auto border-top">
-            <div class="d-flex justify-content-between align-items-center">
+        <footer class="footer px-4 py-3 mt-auto border-top" role="contentinfo">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <small class="text-muted">
-                    <i class="bi bi-shield-check me-1"></i>
-                    Ceiba - Sistema de Reportes de Incidencias
+                    <i class="bi bi-shield-check me-1" aria-hidden="true"></i>
+                    <span>Ceiba - Sistema de Reportes de Incidencias</span>
                 </small>
                 <small class="text-muted">
                     SSC CDMX - Unidad Especializada en Genero v1.0.0
@@ -48,11 +58,14 @@
     </main>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    <i class="bi bi-exclamation-triangle me-2"></i>
-    Ha ocurrido un error inesperado.
-    <a href="." class="reload">Recargar</a>
-    <span class="dismiss">X</span>
+<div id="blazor-error-ui"
+     data-nosnippet
+     role="alert"
+     aria-live="assertive">
+    <i class="bi bi-exclamation-triangle me-2" aria-hidden="true"></i>
+    <span>Ha ocurrido un error inesperado.</span>
+    <a href="." class="reload" aria-label="Recargar página">Recargar</a>
+    <button type="button" class="dismiss" aria-label="Descartar mensaje de error">X</button>
 </div>
 
 <ReconnectModal />

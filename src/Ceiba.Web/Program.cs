@@ -99,6 +99,10 @@ try
     builder.Services.AddScoped<IUserManagementService, Ceiba.Infrastructure.Services.UserManagementService>();
     builder.Services.AddScoped<ICatalogAdminService, Ceiba.Infrastructure.Services.CatalogAdminService>();
 
+    // Registrar servicio de seguridad de login (T113a-e)
+    builder.Services.AddMemoryCache();
+    builder.Services.AddSingleton<ILoginSecurityService, LoginSecurityService>();
+
     // Registrar servicios de User Story 4 - Automated Reports (US4)
     builder.Services.AddHttpClient(); // IHttpClientFactory para pruebas de conexión
     builder.Services.AddScoped<IAiConfigurationService, AiConfigurationService>();
