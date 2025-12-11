@@ -9,7 +9,7 @@ version: '3.8'
 services:
   # PostgreSQL Database
   ceiba-db:
-    image: postgres:18-alpine
+    image: postgres:17
     container_name: ceiba-db
     restart: unless-stopped
     environment:

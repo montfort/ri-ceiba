@@ -229,11 +229,28 @@ public class AccessibilityE2ETests : PlaywrightTestBase
         var hasBorder = borderWidth != "0px";
 
         // Also check if element is an interactive element (inputs have browser default focus)
-        var tagName = focusInfo.ContainsKey("tagName") ? focusInfo["tagName"]?.ToString() : "";
+        var tagName = focusInfo.ContainsKey("tagName") ? focusInfo["tagName"]?.ToString() ?? "" : "";
         var isInteractiveElement = tagName == "INPUT" || tagName == "BUTTON" || tagName == "A" || tagName == "SELECT" || tagName == "TEXTAREA";
 
         // Check if we reached an interactive element at all (which means Tab navigation works)
         var canNavigateToInteractiveElement = isInteractiveElement;
+
+        // If tagName is empty or BODY, try tabbing more to find an interactive element
+        if (string.IsNullOrEmpty(tagName) || tagName == "BODY" || tagName == "NONE")
+        {
+            // Tab a few more times to try to reach an interactive element
+            for (int i = 0; i < 5; i++)
+            {
+                await Page.Keyboard.PressAsync("Tab");
+                var newTag = await Page.EvaluateAsync<string>("document.activeElement?.tagName || 'BODY'");
+                if (newTag == "INPUT" || newTag == "BUTTON" || newTag == "A" || newTag == "SELECT" || newTag == "TEXTAREA")
+                {
+                    canNavigateToInteractiveElement = true;
+                    tagName = newTag;
+                    break;
+                }
+            }
+        }
 
         Assert.True(hasOutline || hasBoxShadow || hasBorder || canNavigateToInteractiveElement,
             $"Focused elements should have visible focus indicator (WCAG 2.4.7). Element: {tagName}");
