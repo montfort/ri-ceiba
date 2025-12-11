@@ -130,69 +130,8 @@ jobs:
             report_md.md
           retention-days: 30
 
-  # T020g: SonarQube Code Quality & Security Analysis
-  sonarqube-scan:
-    name: SonarQube Code Quality Analysis
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for better analysis
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@v4
-        with:
-          path: ~\.sonar\cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Install SonarScanner
-        run: dotnet tool install --global dotnet-sonarscanner
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Begin SonarQube Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          dotnet sonarscanner begin \
-            /k:"ceiba-reportes-incidencias" \
-            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.coverage.exclusions="**Tests/**,**/Migrations/**" \
-            /d:sonar.exclusions="**/Migrations/**,**/obj/**,**/bin/**"
-
-      - name: Build and Test with Coverage
-        run: |
-          dotnet build --no-restore --configuration Release
-          dotnet test --no-build --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-
-      - name: End SonarQube Analysis
-        if: ${{ secrets.SONAR_TOKEN != '' }}
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-
-      - name: Upload Coverage Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-reports
-          path: coverage/
-          retention-days: 30
+  # NOTE: SonarQube analysis moved to dedicated workflow: .github/workflows/sonar.yml
+  # This provides better separation of concerns and uses SonarCloud configuration.
 
   # T020g: Snyk Security Vulnerability Scanning
   snyk-scan:
@@ -288,7 +227,7 @@ jobs:
   security-summary:
     name: Security Scan Summary
     runs-on: ubuntu-latest
-    needs: [owasp-zap-scan, sonarqube-scan, snyk-scan, codeql-analysis]
+    needs: [owasp-zap-scan, snyk-scan, codeql-analysis]
     if: always()
 
     steps:
@@ -299,10 +238,10 @@ jobs:
           echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| OWASP ZAP | ${{ needs.owasp-zap-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| SonarQube | ${{ needs.sonarqube-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Snyk | ${{ needs.snyk-scan.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| CodeQL | ${{ needs.codeql-analysis.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** SonarQube analysis runs in separate workflow (sonar.yml)" >> $GITHUB_STEP_SUMMARY
           echo "**Scan completed at:** $(date -u)" >> $GITHUB_STEP_SUMMARY
 
       - name: Comment on PR (if applicable)
@@ -311,14 +250,15 @@ jobs:
         with:
           script: |
             const summary = `
-            ## 🔒 Security Scan Results
+            ## Security Scan Results
 
             | Scan Type | Status |
             |-----------|--------|
             | OWASP ZAP | ${{ needs.owasp-zap-scan.result }} |
-            | SonarQube | ${{ needs.sonarqube-scan.result }} |
             | Snyk | ${{ needs.snyk-scan.result }} |
             | CodeQL | ${{ needs.codeql-analysis.result }} |
+
+            **Note:** SonarQube analysis runs in separate workflow.
 
             View detailed reports in the workflow artifacts.
             `;
