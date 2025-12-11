@@ -246,3 +246,28 @@ dotnet_naming_style.camel_case_with_underscore.required_prefix = _
 dotnet_naming_style.camel_case_with_underscore.required_suffix =
 dotnet_naming_style.camel_case_with_underscore.word_separator =
 dotnet_naming_style.camel_case_with_underscore.capitalization = camel_case
+
+#### Code Analysis Rules ####
+
+# CA1707: Identifiers should not contain underscores
+# Suppress for const fields (UPPER_SNAKE_CASE is acceptable for constants)
+dotnet_naming_rule.constants_should_be_upper_case.severity = suggestion
+dotnet_naming_rule.constants_should_be_upper_case.symbols = constants
+dotnet_naming_rule.constants_should_be_upper_case.style = upper_snake_case
+
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+
+dotnet_naming_style.upper_snake_case.capitalization = all_upper
+dotnet_naming_style.upper_snake_case.word_separator = _
+
+# Disable CA1707 globally (underscores in identifiers)
+# Rationale:
+# - Test methods use Method_Scenario_Expected convention (industry standard)
+# - Constants/enums use UPPER_SNAKE_CASE convention (common practice)
+dotnet_diagnostic.CA1707.severity = none
+
+# Migration files - disable additional rules that don't apply
+[**/Migrations/*.cs]
+dotnet_diagnostic.CA1707.severity = none
+generated_code = true
