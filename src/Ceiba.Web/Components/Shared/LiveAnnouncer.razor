@@ -14,11 +14,19 @@
     public string Politeness { get; set; } = "polite";
 
     private string _message = string.Empty;
+
+    // Static instance for global access - intentional singleton pattern for accessibility announcements
+    // S2696: Suppressed because this is a deliberate singleton pattern for screen reader announcements
+#pragma warning disable S2696
     private static LiveAnnouncer? _instance;
+#pragma warning restore S2696
 
     protected override void OnInitialized()
     {
+        // S2696: Suppressed - singleton pattern for accessibility
+#pragma warning disable S2696
         _instance = this;
+#pragma warning restore S2696
     }
 
     public static void Announce(string message)
@@ -39,9 +47,12 @@
 
     public void Dispose()
     {
+        // S2696: Suppressed - singleton pattern for accessibility
+#pragma warning disable S2696
         if (_instance == this)
         {
             _instance = null;
         }
+#pragma warning restore S2696
     }
 }

@@ -18,7 +18,7 @@ env:
   DOTNET_NOLOGO: true
   # CI database credentials - ephemeral containers only, not a real secret
   # Using env var to avoid SonarQube hardcoded credential warnings
-  CI_DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'ci_test_password_not_secret' }}
+  CI_DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'CeibaE2E_Ci_2025!' }}
 
 jobs:
   # Build and Unit Tests
@@ -154,7 +154,7 @@ jobs:
         env:
           POSTGRES_DB: ceiba_e2e
           POSTGRES_USER: ceiba
-          POSTGRES_PASSWORD: ceiba_e2e_password
+          POSTGRES_PASSWORD: ${{ env.CI_DB_PASSWORD }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -201,10 +201,10 @@ jobs:
           dotnet ef database update \
             --project src/Ceiba.Infrastructure \
             --startup-project src/Ceiba.Web \
-            --connection "Host=localhost;Database=ceiba_e2e;Username=ceiba;Password=ceiba_e2e_password" \
+            --connection "Host=localhost;Database=ceiba_e2e;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}" \
             --verbose
           echo "Verifying database tables..."
-          PGPASSWORD=ceiba_e2e_password psql -h localhost -U ceiba -d ceiba_e2e -c "\dt" || echo "Could not list tables (psql not installed)"
+          PGPASSWORD="${{ env.CI_DB_PASSWORD }}" psql -h localhost -U ceiba -d ceiba_e2e -c "\dt" || echo "Could not list tables (psql not installed)"
 
       - name: Start application
         run: |
@@ -221,7 +221,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Testing
           ASPNETCORE_URLS: "http://localhost:5000"
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_e2e;Username=ceiba;Password=ceiba_e2e_password"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_e2e;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
 
       - name: Wait for application
         run: |

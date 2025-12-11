@@ -3,6 +3,7 @@
 @using Ceiba.Shared.DTOs
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
+@implements IDisposable
 @inject IUserManagementService UserService
 @inject NavigationManager Navigation
 @inject ILogger<UserList> Logger

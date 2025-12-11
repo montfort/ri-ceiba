@@ -433,44 +433,12 @@
         {
             Logger.LogInformation("Submitting email configuration update");
 
-            // Validate
-            if (Model.Habilitado)
+            // Validate configuration
+            var validationError = ValidateEmailConfiguration();
+            if (validationError != null)
             {
-                if (string.IsNullOrWhiteSpace(Model.FromEmail) || string.IsNullOrWhiteSpace(Model.FromName))
-                {
-                    ErrorMessage = "El email y nombre del remitente son obligatorios";
-                    return;
-                }
-
-                if (Model.Proveedor == "SMTP")
-                {
-                    if (string.IsNullOrWhiteSpace(Model.SmtpHost) || !Model.SmtpPort.HasValue)
-                    {
-                        ErrorMessage = "El host y puerto SMTP son obligatorios";
-                        return;
-                    }
-                }
-                else if (Model.Proveedor == "SendGrid")
-                {
-                    if (Config?.HasSendGridApiKey != true && string.IsNullOrWhiteSpace(Model.SendGridApiKey))
-                    {
-                        ErrorMessage = "La API Key de SendGrid es obligatoria";
-                        return;
-                    }
-                }
-                else if (Model.Proveedor == "Mailgun")
-                {
-                    if (Config?.HasMailgunApiKey != true && string.IsNullOrWhiteSpace(Model.MailgunApiKey))
-                    {
-                        ErrorMessage = "La API Key de Mailgun es obligatoria";
-                        return;
-                    }
-                    if (string.IsNullOrWhiteSpace(Model.MailgunDomain))
-                    {
-                        ErrorMessage = "El dominio de Mailgun es obligatorio";
-                        return;
-                    }
-                }
+                ErrorMessage = validationError;
+                return;
             }
 
             Config = await ConfigService.UpdateConfigurationAsync(Model);
@@ -491,6 +459,58 @@
         {
             IsSaving = false;
         }
+    }
+
+    private string? ValidateEmailConfiguration()
+    {
+        if (!Model.Habilitado)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(Model.FromEmail) || string.IsNullOrWhiteSpace(Model.FromName))
+        {
+            return "El email y nombre del remitente son obligatorios";
+        }
+
+        return Model.Proveedor switch
+        {
+            "SMTP" => ValidateSmtpConfiguration(),
+            "SendGrid" => ValidateSendGridConfiguration(),
+            "Mailgun" => ValidateMailgunConfiguration(),
+            _ => null
+        };
+    }
+
+    private string? ValidateSmtpConfiguration()
+    {
+        if (string.IsNullOrWhiteSpace(Model.SmtpHost) || !Model.SmtpPort.HasValue)
+        {
+            return "El host y puerto SMTP son obligatorios";
+        }
+        return null;
+    }
+
+    private string? ValidateSendGridConfiguration()
+    {
+        if (Config?.HasSendGridApiKey != true && string.IsNullOrWhiteSpace(Model.SendGridApiKey))
+        {
+            return "La API Key de SendGrid es obligatoria";
+        }
+        return null;
+    }
+
+    private string? ValidateMailgunConfiguration()
+    {
+        if (Config?.HasMailgunApiKey != true && string.IsNullOrWhiteSpace(Model.MailgunApiKey))
+        {
+            return "La API Key de Mailgun es obligatoria";
+        }
+        if (string.IsNullOrWhiteSpace(Model.MailgunDomain))
+        {
+            return "El dominio de Mailgun es obligatorio";
+        }
+        return null;
     }
 
     private void ShowTestDialog()

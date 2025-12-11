@@ -333,9 +333,6 @@
     private List<string> DelitoSuggestions { get; set; } = new();
     private List<string> TipoDeAtencionSuggestions { get; set; } = new();
 
-    private int _previousZonaId = 0;
-    private int _previousSectorId = 0;
-
     protected override async Task OnInitializedAsync()
     {
         try
@@ -430,10 +427,6 @@
                 Traslados = ExistingReport.Traslados,
                 Observaciones = ExistingReport.Observaciones
             };
-
-            // Update tracking variables to prevent OnZonaChanged/OnSectorChanged from resetting values
-            _previousZonaId = savedZonaId;
-            _previousSectorId = savedSectorId;
 
             Logger.LogInformation("Loaded report {ReportId}: Zona={ZonaId}, Sector={SectorId}, Cuadrante={CuadranteId}",
                 ReportId, savedZonaId, savedSectorId, savedCuadranteId);
