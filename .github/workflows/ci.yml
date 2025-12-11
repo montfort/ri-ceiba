@@ -255,7 +255,7 @@ jobs:
         run: dotnet test tests/Ceiba.Integration.Tests/Ceiba.Integration.Tests.csproj --no-build --configuration Release --filter "Category=E2E" --verbosity normal --logger "trx;LogFileName=e2e-tests.trx" --results-directory ./TestResults
         env:
           BASE_URL: "http://localhost:5000"
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_e2e;Username=ceiba;Password=ceiba_e2e_password"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_e2e;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
 
       - name: Upload Playwright traces
         if: failure()

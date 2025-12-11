@@ -4,12 +4,14 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
-          <!-- Generate both formats: OpenCover for SonarQube, Cobertura for other tools -->
-          <Format>opencover,cobertura</Format>
+          <!-- Generate OpenCover format for SonarCloud -->
+          <Format>opencover</Format>
+          <!-- Exclude test assemblies and migrations from coverage -->
           <Exclude>[*]*.Migrations.*,[*]*Tests*,[*]*.Program,[*]*.Startup</Exclude>
-          <ExcludeByFile>**/Migrations/**/*.cs</ExcludeByFile>
-          <Include>[Ceiba.*]*</Include>
-          <IncludeDirectory>src/</IncludeDirectory>
+          <ExcludeByFile>**/Migrations/**/*.cs,**/obj/**/*.cs</ExcludeByFile>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+          <!-- Include only Ceiba assemblies -->
+          <Include>[Ceiba.Core]*,[Ceiba.Application]*,[Ceiba.Infrastructure]*,[Ceiba.Web]*,[Ceiba.Shared]*</Include>
           <SingleHit>false</SingleHit>
           <UseSourceLink>true</UseSourceLink>
           <IncludeTestAssembly>false</IncludeTestAssembly>

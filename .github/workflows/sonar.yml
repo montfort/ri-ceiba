@@ -69,11 +69,11 @@ jobs:
             /o:"montfort" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
-            /d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx" \
-            /d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/Program.cs,**/Startup.cs" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+            /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/Program.cs,**/*.Designer.cs" \
             /d:sonar.cpd.exclusions="**/Migrations/**" \
-            /d:sonar.exclusions="**/wwwroot/**,**/Migrations/**"
+            /d:sonar.exclusions="**/wwwroot/**,**/Migrations/**,**/obj/**"
 
       - name: Build solution
         run: dotnet build --no-restore --no-incremental
@@ -85,7 +85,14 @@ jobs:
             --collect:"XPlat Code Coverage" \
             --results-directory ./TestResults \
             --settings coverlet.runsettings \
-            --logger "trx;LogFileName=test-results.trx"
+            --logger "trx;LogFileName=test-results.trx" \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+
+      - name: List coverage files (debug)
+        if: always()
+        run: |
+          echo "=== Coverage files generated ==="
+          find . -name "coverage.opencover.xml" -o -name "*.trx" | head -50
 
       - name: End SonarQube analysis
         env:
@@ -98,7 +105,6 @@ jobs:
         with:
           name: coverage-reports
           path: |
-            **/coverage.opencover.xml
-            **/coverage.cobertura.xml
-            **/TestResults/*.trx
+            **/TestResults/**/coverage.opencover.xml
+            **/TestResults/**/*.trx
           retention-days: 7
