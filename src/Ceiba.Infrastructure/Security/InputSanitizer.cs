@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -9,6 +10,13 @@ namespace Ceiba.Infrastructure.Security;
 /// </summary>
 public partial class InputSanitizer : IInputSanitizer
 {
+    // Timeout for regex operations to prevent ReDoS attacks (SonarQube security fix)
+    private static readonly TimeSpan RegexTimeout = TimeSpan.FromSeconds(1);
+
+    // Cache for dynamically created regex patterns to avoid recompilation
+    private static readonly ConcurrentDictionary<string, Regex> TagRegexCache = new();
+    private static readonly ConcurrentDictionary<string, Regex> AttributeRegexCache = new();
+
     // Dangerous HTML tags and attributes
     private static readonly string[] DangerousTags =
     {
@@ -207,16 +215,28 @@ public partial class InputSanitizer : IInputSanitizer
     [GeneratedRegex(@"(javascript|vbscript|data)\s*:", RegexOptions.IgnoreCase)]
     private static partial Regex RemoveJsUrlRegex();
 
+    /// <summary>
+    /// Creates a cached regex for removing HTML tags with timeout protection against ReDoS.
+    /// </summary>
     private static Regex RemoveTagRegex(string tag)
     {
-        return new Regex($@"<\s*{tag}[^>]*>.*?<\s*/\s*{tag}\s*>|<\s*{tag}[^>]*/?\s*>",
-            RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        return TagRegexCache.GetOrAdd(tag, t =>
+            new Regex(
+                $@"<\s*{Regex.Escape(t)}[^>]*>.*?<\s*/\s*{Regex.Escape(t)}\s*>|<\s*{Regex.Escape(t)}[^>]*/?\s*>",
+                RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.NonBacktracking,
+                RegexTimeout));
     }
 
+    /// <summary>
+    /// Creates a cached regex for removing HTML attributes with timeout protection against ReDoS.
+    /// </summary>
     private static Regex RemoveAttributeRegex(string attr)
     {
-        return new Regex($@"\s*{attr}\s*=\s*['""][^'""]*['""]|\s*{attr}\s*=\s*\S+",
-            RegexOptions.IgnoreCase);
+        return AttributeRegexCache.GetOrAdd(attr, a =>
+            new Regex(
+                $@"\s*{Regex.Escape(a)}\s*=\s*['""][^'""]*['""]|\s*{Regex.Escape(a)}\s*=\s*\S+",
+                RegexOptions.IgnoreCase | RegexOptions.NonBacktracking,
+                RegexTimeout));
     }
 }
 
