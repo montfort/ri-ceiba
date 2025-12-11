@@ -62,7 +62,7 @@ jobs:
         run: dotnet test tests/Ceiba.Web.Tests/Ceiba.Web.Tests.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=web-tests.trx" --results-directory ./TestResults
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@3a74b29d8ef2d54a65bd929f41119a15e10a0e85 # v2.20.0
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           files: ./TestResults/*.trx
@@ -127,7 +127,7 @@ jobs:
           ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
 
       - name: Publish Integration Test Results
-        uses: EnricoMi/publish-unit-test-result-action@3a74b29d8ef2d54a65bd929f41119a15e10a0e85 # v2.20.0
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           files: ./TestResults/*.trx
