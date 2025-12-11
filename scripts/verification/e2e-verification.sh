@@ -6,7 +6,8 @@
 set -e
 
 # Configuration
-BASE_URL="${BASE_URL:-https://localhost:5001}"
+# Default to HTTP for localhost development; use HTTPS with valid certs in production
+BASE_URL="${BASE_URL:-http://localhost:5000}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_NAME="${DB_NAME:-ceiba}"
 DB_USER="${DB_USER:-ceiba}"
@@ -18,11 +19,17 @@ if [ -z "${DB_PASSWORD:-}" ]; then
     exit 1
 fi
 
-# SSL certificate validation - set to "true" to skip validation (development only)
-# WARNING: Only use SKIP_SSL_VERIFY=true for localhost with self-signed certificates
-SKIP_SSL_VERIFY="${SKIP_SSL_VERIFY:-false}"
-if [ "$SKIP_SSL_VERIFY" = "true" ]; then
-    echo "WARNING: SSL certificate validation is disabled (SKIP_SSL_VERIFY=true)"
+# Custom CA certificate for self-signed certificates (optional)
+# Set CA_CERT_PATH to use a custom CA certificate for HTTPS validation
+# Example: CA_CERT_PATH=/path/to/ca-cert.pem ./e2e-verification.sh
+CA_CERT_PATH="${CA_CERT_PATH:-}"
+if [ -n "$CA_CERT_PATH" ]; then
+    if [ -f "$CA_CERT_PATH" ]; then
+        echo "Using custom CA certificate: $CA_CERT_PATH"
+    else
+        echo "ERROR: CA certificate file not found: $CA_CERT_PATH"
+        exit 1
+    fi
 fi
 
 # Colors
@@ -73,21 +80,19 @@ skip() {
 }
 
 # HTTP request helpers
-# SSL validation is controlled by SKIP_SSL_VERIFY environment variable
-# When SKIP_SSL_VERIFY=true, uses --insecure flag (development only with self-signed certs)
+# Uses standard certificate validation; optionally accepts custom CA via CA_CERT_PATH
+# For self-signed certs: export the CA and set CA_CERT_PATH=/path/to/ca.pem
 http_get() {
-    if [ "$SKIP_SSL_VERIFY" = "true" ]; then
-        # SECURITY: --insecure used only when explicitly opted-in via SKIP_SSL_VERIFY=true
-        curl -s --insecure -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
+    if [ -n "$CA_CERT_PATH" ]; then
+        curl -s --cacert "$CA_CERT_PATH" -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
     else
         curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
     fi
 }
 
 http_get_body() {
-    if [ "$SKIP_SSL_VERIFY" = "true" ]; then
-        # SECURITY: --insecure used only when explicitly opted-in via SKIP_SSL_VERIFY=true
-        curl -s --insecure --max-time 10 "$1" 2>/dev/null || echo ""
+    if [ -n "$CA_CERT_PATH" ]; then
+        curl -s --cacert "$CA_CERT_PATH" --max-time 10 "$1" 2>/dev/null || echo ""
     else
         curl -s --max-time 10 "$1" 2>/dev/null || echo ""
     fi
