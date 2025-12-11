@@ -10,5 +10,28 @@
             Tests audit trail creation for all entity modifications.
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.CatalogAdminServiceTests">
+            <summary>
+            Unit tests for CatalogAdminService (US5: T105)
+            Tests suggestion management operations.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.LoginSecurityServiceTests">
+            <summary>
+            Unit tests for LoginSecurityService (T113a-e: Login security features)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.ResilientEmailServiceTests">
+            <summary>
+            T146-T155: RO-003 Email resilience tests.
+            Tests retry logic, circuit breaker, and email queue functionality.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.ServiceResilienceTests">
+            <summary>
+            T156-T165: RO-004 Service resilience tests.
+            Tests health checks and graceful degradation functionality.
+            </summary>
+        </member>
     </members>
 </doc>

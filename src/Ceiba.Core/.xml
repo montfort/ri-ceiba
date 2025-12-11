@@ -1265,6 +1265,187 @@
             <param name="reportId">Report ID</param>
             <param name="usuarioId">ID of the CREADOR user deleting the report</param>
         </member>
+        <member name="T:Ceiba.Core.Interfaces.IResilientEmailService">
+            <summary>
+            T146-T155: RO-003 Resilient email service interface.
+            Provides retry logic, circuit breaker, and email queue functionality.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IResilientEmailService.CurrentCircuitState">
+            <summary>
+            Current state of the circuit breaker.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IResilientEmailService.QueuedEmailCount">
+            <summary>
+            Number of emails currently in the retry queue.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IResilientEmailService.LastSuccessfulSend">
+            <summary>
+            Timestamp of the last successful email send.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IResilientEmailService.SendWithRetryAsync(Ceiba.Shared.DTOs.SendEmailRequestDto,System.Threading.CancellationToken)">
+            <summary>
+            Sends an email with automatic retry logic and circuit breaker protection.
+            </summary>
+            <param name="request">The email request to send.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Result indicating success or failure.</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IResilientEmailService.ProcessQueueAsync(System.Threading.CancellationToken)">
+            <summary>
+            Processes queued emails that failed to send.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Number of successfully sent emails.</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IResilientEmailService.GetHealth">
+            <summary>
+            Gets the current health status of the email service.
+            </summary>
+            <returns>Health status information.</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.CircuitState">
+            <summary>
+            Circuit breaker states.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.CircuitState.Closed">
+            <summary>Normal operation - requests pass through.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.CircuitState.Open">
+            <summary>Failing - requests are rejected.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.CircuitState.HalfOpen">
+            <summary>Testing if service recovered.</summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.EmailServiceHealth">
+            <summary>
+            Email service health status.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.EmailResilienceOptions">
+            <summary>
+            Configuration options for email resilience.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxRetries">
+            <summary>
+            Maximum number of retry attempts for a single email.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.RetryDelayMs">
+            <summary>
+            Initial delay between retries in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.QueueOnFailure">
+            <summary>
+            Whether to queue emails when sending fails.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueSize">
+            <summary>
+            Maximum number of emails in the queue.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueTime">
+            <summary>
+            Maximum time an email can stay in the queue.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueRetries">
+            <summary>
+            Maximum retry attempts for queued emails.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueBatchSize">
+            <summary>
+            Maximum emails to process per queue batch.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.FailureThreshold">
+            <summary>
+            Number of consecutive failures before opening circuit.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.CircuitBreakerTimeout">
+            <summary>
+            How long to wait before testing circuit recovery.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IServiceHealthCheck">
+            <summary>
+            T156-T165: RO-004 Service health check interface.
+            Provides health status for services with circuit breaker patterns.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IServiceHealthCheck.ServiceName">
+            <summary>
+            Gets the name of the service being monitored.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IServiceHealthCheck.CheckHealthAsync(System.Threading.CancellationToken)">
+            <summary>
+            Checks if the service is healthy and available.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ServiceHealthStatus">
+            <summary>
+            Health status for a service.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.ServiceName">
+            <summary>
+            Name of the service.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.IsHealthy">
+            <summary>
+            Whether the service is healthy.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.Status">
+            <summary>
+            Current service status.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.Details">
+            <summary>
+            Additional details about the service health.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.LastChecked">
+            <summary>
+            When the health was last checked.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.ResponseTimeMs">
+            <summary>
+            Response time of the health check in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.ErrorMessage">
+            <summary>
+            Error message if the service is unhealthy.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ServiceStatus">
+            <summary>
+            Service availability status levels.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.ServiceStatus.Healthy">
+            <summary>Service is fully operational.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.ServiceStatus.Degraded">
+            <summary>Service is operational but may have degraded performance.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.ServiceStatus.Unhealthy">
+            <summary>Service is unavailable.</summary>
+        </member>
         <member name="T:Ceiba.Core.Interfaces.IUserManagementService">
             <summary>
             Service interface for user management operations.

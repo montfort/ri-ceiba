@@ -369,6 +369,42 @@
             Composes the PDF footer with page numbers and generation timestamp
             </summary>
         </member>
+        <member name="T:Ceiba.Application.Services.ILoginSecurityService">
+            <summary>
+            Service for login security including rate limiting and progressive delays.
+            Implements OWASP recommendations for brute force protection.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.IsIpBlockedAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Checks if the IP address is currently blocked due to rate limiting.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.RecordFailedAttemptAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Records a failed login attempt for the given IP and email.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.RecordSuccessfulLoginAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Records a successful login, clearing failed attempts.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.GetProgressiveDelayAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the progressive delay in milliseconds based on failed attempts.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.GetRemainingLockoutSecondsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the remaining lockout time in seconds, or 0 if not locked.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.GetFailedAttemptCountAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the number of failed attempts for an IP address.
+            </summary>
+        </member>
         <member name="T:Ceiba.Application.Services.ReportService">
             <summary>
             Service implementation for report management operations.

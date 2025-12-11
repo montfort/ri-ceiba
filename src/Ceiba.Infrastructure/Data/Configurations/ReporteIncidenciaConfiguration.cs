@@ -183,6 +183,26 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
             .HasDatabaseName("idx_reporte_composite_revisor")
             .IsDescending(true, false, false);
 
+        // T117: Additional performance indexes
+        // Index for user's draft reports (CREADOR view)
+        builder.HasIndex(r => new { r.UsuarioId, r.Estado, r.CreatedAt })
+            .HasDatabaseName("idx_reporte_usuario_estado")
+            .IsDescending(false, false, true);
+
+        // Index for date range queries (common in reports)
+        builder.HasIndex(r => r.DatetimeHechos)
+            .HasDatabaseName("idx_reporte_datetime_hechos");
+
+        // Index for sector filtering (hierarchical geographic)
+        builder.HasIndex(r => new { r.SectorId, r.CreatedAt })
+            .HasDatabaseName("idx_reporte_sector_fecha")
+            .IsDescending(false, true);
+
+        // Index for cuadrante filtering
+        builder.HasIndex(r => new { r.CuadranteId, r.CreatedAt })
+            .HasDatabaseName("idx_reporte_cuadrante_fecha")
+            .IsDescending(false, true);
+
         // Check Constraints
         builder.ToTable(t =>
         {

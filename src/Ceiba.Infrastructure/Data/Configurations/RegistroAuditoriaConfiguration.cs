@@ -26,5 +26,19 @@ public class RegistroAuditoriaConfiguration : IEntityTypeConfiguration<RegistroA
         builder.HasIndex(r => r.UsuarioId).HasDatabaseName("idx_auditoria_usuario");
         builder.HasIndex(r => r.Codigo).HasDatabaseName("idx_auditoria_codigo");
         builder.HasIndex(r => new { r.TablaRelacionada, r.IdRelacionado }).HasDatabaseName("idx_auditoria_entidad");
+
+        // T117: Additional performance indexes for audit log queries
+        // Composite index for date range + user queries (admin view)
+        builder.HasIndex(r => new { r.CreatedAt, r.UsuarioId })
+            .HasDatabaseName("idx_auditoria_fecha_usuario")
+            .IsDescending(true, false);
+
+        // Composite index for filtering by action code and date
+        builder.HasIndex(r => new { r.Codigo, r.CreatedAt })
+            .HasDatabaseName("idx_auditoria_codigo_fecha")
+            .IsDescending(false, true);
+
+        // Index for IP address queries (security analysis)
+        builder.HasIndex(r => r.Ip).HasDatabaseName("idx_auditoria_ip");
     }
 }

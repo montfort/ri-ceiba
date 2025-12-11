@@ -1,10 +1,12 @@
 using Ceiba.Application.Services;
 using Ceiba.Application.Services.Export;
 using Ceiba.Core.Interfaces;
+using Ceiba.Infrastructure.Caching;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Repositories;
+using Ceiba.Infrastructure.Security;
 using Ceiba.Infrastructure.Services;
 using Ceiba.Web.Components;
 using Ceiba.Web.Configuration;
@@ -103,6 +105,13 @@ try
     builder.Services.AddMemoryCache();
     builder.Services.AddSingleton<ILoginSecurityService, LoginSecurityService>();
 
+    // T117b: Query caching services
+    builder.Services.AddSingleton<ICacheService, MemoryCacheService>();
+    builder.Services.AddScoped<CachedCatalogService>();
+
+    // T118b: Input sanitization
+    builder.Services.AddSingleton<IInputSanitizer, InputSanitizer>();
+
     // Registrar servicios de User Story 4 - Automated Reports (US4)
     builder.Services.AddHttpClient(); // IHttpClientFactory para pruebas de conexión
     builder.Services.AddScoped<IAiConfigurationService, AiConfigurationService>();
@@ -112,6 +121,18 @@ try
     builder.Services.AddScoped<IAutomatedReportService, AutomatedReportService>();
     builder.Services.AddScoped<IAutomatedReportConfigService, AutomatedReportConfigService>();
     builder.Services.AddHostedService<AutomatedReportBackgroundService>();
+
+    // T146-T155: RO-003 Email resilience (retry, circuit breaker, queue)
+    builder.Services.AddSingleton<EmailResilienceOptions>();
+    builder.Services.AddScoped<IResilientEmailService, ResilientEmailService>();
+    builder.Services.AddHostedService<EmailQueueProcessorService>();
+
+    // T156-T165: RO-004 Service resilience (health checks, graceful degradation)
+    builder.Services.AddScoped<IServiceHealthCheck, DatabaseHealthCheck>();
+    builder.Services.AddScoped<IServiceHealthCheck, EmailHealthCheck>();
+    builder.Services.AddScoped<IServiceHealthCheck, AiServiceHealthCheck>();
+    builder.Services.AddScoped<AggregatedHealthCheckService>();
+    builder.Services.AddSingleton<GracefulDegradationService>();
 
     // Configurar HttpClient para componentes Blazor
     builder.Services.AddScoped(sp => new HttpClient
@@ -171,30 +192,25 @@ try
     // Middleware de manejo de errores (T017)
     app.UseMiddleware<ErrorHandlingMiddleware>();
 
-    // Security headers (T114a RS-005, T118)
-    app.Use(async (context, next) =>
+    // T114, T114a, T118: Comprehensive security headers middleware
+    app.UseSecurityHeaders(options =>
     {
-        // HSTS (T114a)
-        context.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-
-        // Security headers (T118)
-        context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-        context.Response.Headers.Append("X-Frame-Options", "DENY");
-        context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-
-        // CSP (T020f RS-002)
-        // Allow cdn.jsdelivr.net for Bootstrap Icons
-        context.Response.Headers.Append("Content-Security-Policy",
+        options.FrameOptions = "DENY";
+        options.ReferrerPolicy = "strict-origin-when-cross-origin";
+        options.PermissionsPolicy = "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()";
+        // CSP must allow Blazor's inline scripts and styles, plus Bootstrap Icons CDN
+        options.ContentSecurityPolicy =
             "default-src 'self'; " +
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
             "img-src 'self' data:; " +
             "font-src 'self' https://cdn.jsdelivr.net; " +
-            "connect-src 'self'; " +
-            "frame-ancestors 'none'");
-
-        await next();
+            "connect-src 'self' ws: wss:; " +  // Allow WebSocket for Blazor Server
+            "frame-ancestors 'none'";
     });
+
+    // HSTS in production (T114a)
+    app.UseStrictTransportSecurity(app.Environment);
 
     if (!app.Environment.IsDevelopment())
     {

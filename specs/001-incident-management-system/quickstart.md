@@ -224,18 +224,25 @@ dotnet ef database update --startup-project ../Ceiba.Web
 ### Backup Database
 
 ```bash
-# Manual backup
-docker exec ceiba-db pg_dump -U ceiba ceiba | gzip > backup_$(date +%Y%m%d).sql.gz
+# Manual backup (Docker)
+docker exec ceiba-db pg_dump -U ceiba -d ceiba --format=custom --compress=9 > backup_$(date +%Y%m%d).dump
 
-# Or use the backup script
-./scripts/backup/backup-db.sh
+# Or use the backup scripts
+./scripts/backup/backup-database.sh              # Linux/macOS
+.\scripts\backup\backup-database.ps1             # Windows PowerShell
+
+# Scheduled backups (add to crontab)
+./scripts/backup/scheduled-backup.sh daily       # Daily backup with retention
 ```
 
 ### Restore Database
 
 ```bash
-# Decompress and restore
-gunzip -c backup_20250118.sql.gz | docker exec -i ceiba-db psql -U ceiba ceiba
+# Using restore script (recommended)
+./scripts/backup/restore-database.sh backups/latest.dump --confirm
+
+# Or manual restore
+pg_restore -h localhost -U ceiba -d ceiba -c backup.dump
 ```
 
 ## User Roles and Access

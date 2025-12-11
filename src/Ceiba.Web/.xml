@@ -88,6 +88,16 @@
             Throws InvalidOperationException if feature is disabled.
             </summary>
         </member>
+        <member name="M:Ceiba.Web.Controllers.AccountController.GetClientIpAddress">
+            <summary>
+            Gets the client IP address, considering proxy headers.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AccountController.GetSafeReturnUrl(System.String)">
+            <summary>
+            Validates and sanitizes the return URL to prevent open redirect attacks.
+            </summary>
+        </member>
         <member name="T:Ceiba.Web.Controllers.AdminController">
             <summary>
             API controller for administration operations.
@@ -344,6 +354,54 @@
             Global exception handling middleware.
             Catches unhandled exceptions, logs them, and returns appropriate error responses.
             Implements secure error handling (no sensitive data in production).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SecurityHeadersMiddleware">
+            <summary>
+            Middleware to add security headers to all responses.
+            T114, T114a, T118: HTTPS, HSTS, and security headers
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SecurityHeadersOptions">
+            <summary>
+            Options for security headers configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.FrameOptions">
+            <summary>
+            X-Frame-Options header value. Default: DENY
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.ReferrerPolicy">
+            <summary>
+            Referrer-Policy header value. Default: strict-origin-when-cross-origin
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.PermissionsPolicy">
+            <summary>
+            Permissions-Policy header value.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.ContentSecurityPolicy">
+            <summary>
+            Content-Security-Policy header value.
+            Empty string means no CSP header (Blazor requires special handling).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SecurityHeadersMiddlewareExtensions">
+            <summary>
+            Extension methods for SecurityHeadersMiddleware.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Middleware.SecurityHeadersMiddlewareExtensions.UseSecurityHeaders(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.Action{Ceiba.Web.Middleware.SecurityHeadersOptions})">
+            <summary>
+            Add security headers middleware to the pipeline.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Middleware.SecurityHeadersMiddlewareExtensions.UseStrictTransportSecurity(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Add HSTS with recommended settings for production.
+            T114a: HSTS configuration
             </summary>
         </member>
         <member name="T:Ceiba.Web.Middleware.UserAgentValidationMiddleware">
