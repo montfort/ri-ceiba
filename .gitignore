@@ -109,3 +109,6 @@ logs/
 ## Temporary files
 *.tmp
 *.temp
+
+## Generated Reports (runtime output, not source code)
+**/generated-reports/
