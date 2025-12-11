@@ -10,12 +10,19 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Configuration - can be overridden by environment variables
+# Configuration - MUST be set via environment variables
 $DbHost = if ($env:DB_HOST) { $env:DB_HOST } else { "localhost" }
 $DbPort = if ($env:DB_PORT) { $env:DB_PORT } else { "5432" }
 $DbName = if ($env:DB_NAME) { $env:DB_NAME } else { "ceiba" }
 $DbUser = if ($env:DB_USER) { $env:DB_USER } else { "ceiba" }
-$env:PGPASSWORD = if ($env:DB_PASSWORD) { $env:DB_PASSWORD } else { "ceiba123" }
+
+# DB_PASSWORD is required - no default value for security
+if (-not $env:DB_PASSWORD) {
+    Write-Error "ERROR: DB_PASSWORD environment variable is required"
+    Write-Host "Usage: `$env:DB_PASSWORD='your_password'; .\backup-database.ps1 [-OutputDir <path>]"
+    exit 1
+}
+$env:PGPASSWORD = $env:DB_PASSWORD
 
 # Backup configuration
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"

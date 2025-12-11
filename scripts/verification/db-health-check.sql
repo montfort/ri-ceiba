@@ -1,5 +1,6 @@
 -- Database Health Check Script for Ceiba
--- Run with: PGPASSWORD=ceiba123 psql -h localhost -U ceiba -d ceiba -f scripts/verification/db-health-check.sql
+-- Run with: PGPASSWORD=$DB_PASSWORD psql -h localhost -U ceiba -d ceiba -f scripts/verification/db-health-check.sql
+-- Note: Set DB_PASSWORD environment variable before running
 
 \echo '========================================'
 \echo 'CEIBA DATABASE HEALTH CHECK'

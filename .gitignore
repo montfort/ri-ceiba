@@ -115,3 +115,12 @@ logs/
 
 ## Aspire
 .aspire/
+
+## Claude Code local settings (may contain credentials in permissions)
+.claude/settings.local.json
+
+## Environment files with secrets
+.env
+.env.local
+.env.*.local
+!.env.example

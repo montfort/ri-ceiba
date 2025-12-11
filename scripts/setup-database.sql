@@ -3,20 +3,28 @@
 --
 -- Ejecutar como superusuario de PostgreSQL (postgres):
 -- psql -U postgres -f scripts/setup-database.sql
+--
+-- IMPORTANTE: Antes de ejecutar, establezca las variables de entorno:
+--   export CEIBA_DB_PASSWORD='your_secure_password'
+-- O modifique este script con una contraseña segura antes de ejecutar.
 
 -- Crear la base de datos si no existe
 SELECT 'CREATE DATABASE ceiba'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'ceiba')\gexec
 
 -- Crear el usuario si no existe
+-- NOTA: Reemplace 'CHANGE_THIS_PASSWORD' con una contraseña segura
 DO
 $$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_catalog.pg_user WHERE usename = 'ceiba') THEN
-      CREATE USER ceiba WITH PASSWORD 'ceiba123';
+      CREATE USER ceiba WITH PASSWORD 'CHANGE_THIS_PASSWORD';
    END IF;
 END
 $$;
+
+-- Para cambiar la contraseña después de crear el usuario:
+-- ALTER USER ceiba WITH PASSWORD 'your_new_secure_password';
 
 -- Otorgar privilegios en la base de datos
 GRANT ALL PRIVILEGES ON DATABASE ceiba TO ceiba;

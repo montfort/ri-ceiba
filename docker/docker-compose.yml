@@ -1,5 +1,11 @@
 version: '3.8'
 
+# DEVELOPMENT docker-compose configuration
+# Copy .env.example to .env and configure before running:
+#   cp .env.example .env
+#   # Edit .env with your values
+#   docker compose up -d
+
 services:
   # PostgreSQL Database
   ceiba-db:
@@ -7,9 +13,9 @@ services:
     container_name: ceiba-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ceiba
-      POSTGRES_USER: ceiba
-      POSTGRES_PASSWORD: ceiba123
+      POSTGRES_DB: ${DB_NAME:-ceiba}
+      POSTGRES_USER: ${DB_USER:-ceiba}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Database password required - create .env file from .env.example}
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
@@ -36,17 +42,17 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__DefaultConnection: "Host=ceiba-db;Port=5432;Database=ceiba;Username=ceiba;Password=ceiba123;Pooling=true;"
-      # Email Configuration (Update with real SMTP settings)
-      Email__Host: smtp.example.com
-      Email__Port: 587
-      Email__Username: noreply@example.com
-      Email__Password: changeme
-      Email__From: noreply@ceiba.local
-      # AI Configuration (Update with real API keys)
-      AI__Provider: OpenAI
-      AI__ApiKey: changeme
-      AI__Model: gpt-4
+      ConnectionStrings__DefaultConnection: "Host=ceiba-db;Port=5432;Database=${DB_NAME:-ceiba};Username=${DB_USER:-ceiba};Password=${DB_PASSWORD:?Database password required};Pooling=true;"
+      # Email Configuration
+      Email__Host: ${SMTP_HOST:-localhost}
+      Email__Port: ${SMTP_PORT:-587}
+      Email__Username: ${SMTP_USER:-}
+      Email__Password: ${SMTP_PASSWORD:-}
+      Email__From: ${EMAIL_FROM:-noreply@ceiba.local}
+      # AI Configuration
+      AI__Provider: ${AI_PROVIDER:-OpenAI}
+      AI__ApiKey: ${AI_API_KEY:-}
+      AI__Model: ${AI_MODEL:-gpt-4}
       # Automated Reports
       AutomatedReports__GenerationTime: "06:00:00"
       AutomatedReports__Recipients: '["admin@ceiba.local"]'
