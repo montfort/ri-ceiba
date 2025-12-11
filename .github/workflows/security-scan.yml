@@ -36,42 +36,21 @@ jobs:
           fail-on-severity: high
           deny-licenses: GPL-2.0, GPL-3.0
 
-  # CodeQL Analysis - Requires GitHub Advanced Security (free for public repos)
-  codeql-analysis:
-    name: CodeQL Security Analysis
-    runs-on: ubuntu-latest
-    # Only run if this is a public repo or GitHub Advanced Security is enabled
-    if: github.repository_visibility == 'public' || vars.ENABLE_CODEQL == 'true'
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'csharp' ]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-extended
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Build for CodeQL
-        run: |
-          dotnet restore
-          dotnet build --no-restore --configuration Release
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
+  # CodeQL Analysis - Disabled (requires GitHub Advanced Security for private repos)
+  # To enable: Make repo public OR purchase GitHub Advanced Security
+  # Then set repository variable ENABLE_CODEQL=true
+  #
+  # codeql-analysis:
+  #   name: CodeQL Security Analysis
+  #   runs-on: ubuntu-latest
+  #   if: vars.ENABLE_CODEQL == 'true'
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: github/codeql-action/init@v3
+  #       with:
+  #         languages: csharp
+  #     - run: dotnet build
+  #     - uses: github/codeql-action/analyze@v3
 
   # Snyk Scan - Only runs if SNYK_TOKEN is configured
   snyk-scan:
@@ -194,7 +173,7 @@ jobs:
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest
-    needs: [dependency-review, codeql-analysis, snyk-scan, owasp-zap-scan]
+    needs: [dependency-review, snyk-scan, owasp-zap-scan]
     if: always()
 
     steps:
@@ -205,8 +184,8 @@ jobs:
           echo "| Scan | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Dependency Review | ${{ needs.dependency-review.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL | ${{ needs.codeql-analysis.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Snyk | ${{ needs.snyk-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| OWASP ZAP | ${{ needs.owasp-zap-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** CodeQL disabled (requires GitHub Advanced Security for private repos)." >> $GITHUB_STEP_SUMMARY
           echo "**Note:** Some scans may be skipped based on configuration or event type." >> $GITHUB_STEP_SUMMARY
