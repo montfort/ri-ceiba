@@ -60,6 +60,17 @@ El proyecto sigue una estructura de capas bien definida, inspirada en la Arquite
     ```
     La aplicación estará disponible en `https://localhost:7241` (o el puerto que se indique en la consola).
 
+## 🚢 Notas para Producción
+
+Para despliegue en producción, crear `appsettings.Production.json` con:
+
+- **Rutas absolutas** para reportes generados (ej: `/var/ceiba/reports`)
+- **Credenciales de base de datos** seguras
+- **Configuración de email** (SMTP/SendGrid/Mailgun)
+- **Claves API** para servicios de IA (si se usa generación automática)
+
+> Ver documentación completa de despliegue en `docs/` (pendiente).
+
 ## ✅ Ejecutar Pruebas
 
 Para ejecutar toda la suite de pruebas y verificar la integridad del sistema, utiliza el siguiente comando desde la raíz del proyecto:
