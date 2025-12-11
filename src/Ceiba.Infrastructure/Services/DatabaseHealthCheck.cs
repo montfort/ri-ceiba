@@ -16,7 +16,6 @@ public class DatabaseHealthCheck : IServiceHealthCheck
     private readonly ILogger<DatabaseHealthCheck> _logger;
     private const int HealthyResponseTimeMs = 1000;
     private const int DegradedResponseTimeMs = 3000;
-    private const int UnhealthyResponseTimeMs = 10000;
 
     public DatabaseHealthCheck(
         CeibaDbContext context,
@@ -59,16 +58,15 @@ public class DatabaseHealthCheck : IServiceHealthCheck
             {
                 <= HealthyResponseTimeMs => ServiceStatus.Healthy,
                 <= DegradedResponseTimeMs => ServiceStatus.Degraded,
-                <= UnhealthyResponseTimeMs => ServiceStatus.Unhealthy,
-                _ => ServiceStatus.Unhealthy
+                _ => ServiceStatus.Unhealthy // > DegradedResponseTimeMs
             };
 
+            // All ServiceStatus enum values are explicitly handled (no unreachable default case)
             var details = status switch
             {
                 ServiceStatus.Healthy => "Database responding normally",
                 ServiceStatus.Degraded => $"Database responding slowly ({responseTime}ms)",
-                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)",
-                _ => $"Database issues detected ({responseTime}ms)"
+                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)"
             };
 
             var isHealthy = status == ServiceStatus.Healthy || status == ServiceStatus.Degraded;
