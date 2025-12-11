@@ -10,7 +10,22 @@ BASE_URL="${BASE_URL:-https://localhost:5001}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_NAME="${DB_NAME:-ceiba}"
 DB_USER="${DB_USER:-ceiba}"
-DB_PASSWORD="${DB_PASSWORD:-ceiba123}"
+
+# DB_PASSWORD is required - no default for security
+if [ -z "${DB_PASSWORD:-}" ]; then
+    echo "ERROR: DB_PASSWORD environment variable is required"
+    echo "Usage: DB_PASSWORD=your_password $0"
+    exit 1
+fi
+
+# SSL certificate validation - set to "true" to skip validation (development only)
+# WARNING: Only use SKIP_SSL_VERIFY=true for localhost with self-signed certificates
+SKIP_SSL_VERIFY="${SKIP_SSL_VERIFY:-false}"
+CURL_SSL_OPTS=""
+if [ "$SKIP_SSL_VERIFY" = "true" ]; then
+    CURL_SSL_OPTS="-k"
+    echo "WARNING: SSL certificate validation is disabled (SKIP_SSL_VERIFY=true)"
+fi
 
 # Colors
 RED='\033[0;31m'
@@ -59,13 +74,14 @@ skip() {
     ((SKIPPED++))
 }
 
-# HTTP request helper (uses curl with insecure for localhost)
+# HTTP request helper
+# Uses CURL_SSL_OPTS which is set based on SKIP_SSL_VERIFY environment variable
 http_get() {
-    curl -s -k -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
+    curl -s $CURL_SSL_OPTS -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
 }
 
 http_get_body() {
-    curl -s -k --max-time 10 "$1" 2>/dev/null || echo ""
+    curl -s $CURL_SSL_OPTS --max-time 10 "$1" 2>/dev/null || echo ""
 }
 
 print_header "CEIBA - E2E Verification Script"
