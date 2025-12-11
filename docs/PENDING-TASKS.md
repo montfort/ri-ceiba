@@ -1,7 +1,7 @@
 # Tareas Pendientes - Sistema Ceiba
 
-**Última actualización**: 2025-12-11 (Sprint 1 completado)
-**Progreso total**: 143/330 tareas completadas (43.3%)
+**Última actualización**: 2025-12-11 (Sprint 2 completado)
+**Progreso total**: 148/330 tareas completadas (44.8%)
 
 ---
 
@@ -15,7 +15,7 @@
 | 4 | US2 - Revisión/Export | 14/14 | 0 | ✅ Completa |
 | 5 | US3 - Admin/Auditoría | 20/20 | 0 | ✅ Completa |
 | 6 | US4 - Reportes Automatizados | 26/26 | 0 | ✅ Completa |
-| 7 | US5 - Sugerencias | 0/5 | 5 | ⏳ Pendiente |
+| 7 | US5 - Sugerencias | 5/5 | 0 | ✅ Completa |
 | 8 | Polish & Cross-Cutting | 0/37 | 37 | ⏳ Pendiente |
 | 9 | NFR Validation | 0/45 | 45 | ⏳ Pendiente |
 
@@ -35,13 +35,16 @@
 
 ### 🟠 Prioridad ALTA (Funcionalidad de usuario)
 
+✅ **Sprint 2 COMPLETADO** - US5 Sugerencias verificado:
+- ~~T104~~ Contract test for suggestion endpoints - **26 tests pasando** (CatalogContractTests.cs)
+- ~~T105~~ Unit test for suggestion service - **32 tests pasando** (CatalogAdminServiceTests.cs)
+- ~~T106~~ CatalogAdminService for suggestions - **Ya implementado**
+- ~~T107~~ Suggestion management endpoints - **Ya implementado** (AdminController.cs)
+- ~~T108~~ SuggestionManager.razor - **CRUD completo funcionando**
+
+**Pendientes de Sprint 3:**
 | ID | Tarea | Fase | Dependencias |
 |----|-------|------|--------------|
-| T104 | Contract test for suggestion endpoints | US5 | - |
-| T105 | Unit test for suggestion service | US5 | - |
-| T106 | Extend CatalogAdminService for suggestions | US5 | T104-T105 |
-| T107 | Add suggestion management endpoints | US5 | T106 |
-| T108 | Update SuggestionManager.razor | US5 | T107 |
 | T109 | Create main navigation layout | Polish | - |
 | T110 | Create role-based menu component | Polish | T109 |
 | T113 | Create login page | Polish | - |
@@ -107,14 +110,23 @@
       tests/Ceiba.Integration.Tests/AutomatedReportJobTests.cs (19 tests)
 ```
 
-### Fase 7: User Story 5 (5 pendientes)
+### Fase 7: User Story 5 ✅ COMPLETA
 
 ```
-- [ ] T104 [P] [US5] Contract test for suggestion endpoints
-- [ ] T105 [P] [US5] Unit test for suggestion service
-- [ ] T106 [US5] Extend CatalogAdminService for suggestions
-- [ ] T107 [US5] Add suggestion management endpoints
-- [ ] T108 [US5] Update SuggestionManager.razor with full CRUD
+- [x] T104 [P] [US5] Contract test for suggestion endpoints
+      tests/Ceiba.Integration.Tests/CatalogContractTests.cs (26 tests)
+
+- [x] T105 [P] [US5] Unit test for suggestion service
+      tests/Ceiba.Infrastructure.Tests/Services/CatalogAdminServiceTests.cs (32 tests)
+
+- [x] T106 [US5] Extend CatalogAdminService for suggestions
+      src/Ceiba.Infrastructure/Services/CatalogAdminService.cs (ya implementado)
+
+- [x] T107 [US5] Add suggestion management endpoints
+      src/Ceiba.Web/Controllers/AdminController.cs (líneas 467-558)
+
+- [x] T108 [US5] Update SuggestionManager.razor with full CRUD
+      src/Ceiba.Web/Components/Pages/Admin/SuggestionManager.razor
 ```
 
 ### Fase 8: Polish & Cross-Cutting (37 pendientes)
@@ -182,13 +194,13 @@
    - T082-T084: Tests unitarios (81+ tests pasando)
    - T085: Test de integración (19 tests pasando)
 
-### Sprint 2: User Story 5 (Prioridad ALTA) - SIGUIENTE
+### Sprint 2: ✅ COMPLETADO
 
-3. **US5 - Gestión de Sugerencias**
-   - T104-T105: Tests primero (TDD)
-   - T106-T108: Implementación
+~~3. **US5 - Gestión de Sugerencias**~~ - **HECHO**
+   - T104-T105: Tests creados (58 tests totales)
+   - T106-T108: Ya implementados y verificados
 
-### Sprint 3: UI/UX y Autenticación (Prioridad ALTA/MEDIA)
+### Sprint 3: UI/UX y Autenticación (Prioridad ALTA/MEDIA) - SIGUIENTE
 
 4. **Layout y Navegación**
    - T109-T110: MainLayout y NavMenu
