@@ -5,6 +5,9 @@
 bin/
 obj/
 out/
+
+## XML Documentation files (auto-generated)
+**/.xml
 [Bb]uild/
 [Dd]ebug/
 [Rr]elease/
