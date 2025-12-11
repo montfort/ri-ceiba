@@ -27,7 +27,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task NavigationAction_FeelsInstant()
     {
         // Simulate navigation action (e.g., clicking a menu item)
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Navigation action simulation",
             async () =>
             {
@@ -36,6 +36,8 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return true;
             },
             ResponsiveThreshold);
+
+        Assert.True(result);
     }
 
     [Fact]
@@ -43,7 +45,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task FormValidation_FeelsInstant()
     {
         // Simulate form validation
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Form validation simulation",
             async () =>
             {
@@ -64,6 +66,8 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return true;
             },
             InstantThreshold);
+
+        Assert.True(result);
     }
 
     [Fact]
@@ -71,7 +75,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task AutocompleteResponse_UnderOneSecond()
     {
         // Simulate autocomplete/suggestion lookup
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Autocomplete response simulation",
             async () =>
             {
@@ -81,6 +85,9 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return suggestions;
             },
             ResponsiveThreshold);
+
+        Assert.NotNull(result);
+        Assert.NotEmpty(result);
     }
 
     [Fact]
@@ -88,7 +95,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task DropdownPopulation_UnderOneSecond()
     {
         // Simulate dropdown population (e.g., loading zones)
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Dropdown population simulation",
             async () =>
             {
@@ -100,6 +107,9 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return options;
             },
             ResponsiveThreshold);
+
+        Assert.NotNull(result);
+        Assert.Equal(100, result.Count);
     }
 
     [Fact]
@@ -107,7 +117,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task CascadingDropdown_UnderTwoSeconds()
     {
         // Simulate cascading dropdown (zone -> sector -> cuadrante)
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Cascading dropdown simulation",
             async () =>
             {
@@ -132,6 +142,10 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return (zones, sectors, cuadrantes);
             },
             TimeSpan.FromSeconds(2));
+
+        Assert.Equal(10, result.zones.Count);
+        Assert.NotEmpty(result.sectors);
+        Assert.NotEmpty(result.cuadrantes);
     }
 
     [Fact]
@@ -139,7 +153,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task FormSubmission_UnderThreeSeconds()
     {
         // Simulate complete form submission workflow
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Form submission simulation",
             async () =>
             {
@@ -166,6 +180,8 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return true;
             },
             AcceptableThreshold);
+
+        Assert.True(result);
     }
 
     [Fact]
@@ -173,7 +189,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task ReportListLoad_UnderThreeSeconds()
     {
         // Simulate loading a list of reports
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Report list load simulation",
             async () =>
             {
@@ -193,6 +209,9 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return reports;
             },
             AcceptableThreshold);
+
+        Assert.NotNull(result);
+        Assert.Equal(20, result.Count);
     }
 
     [Fact]
@@ -200,7 +219,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task DashboardLoad_UnderFiveSeconds()
     {
         // Simulate dashboard with multiple widgets loading
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Dashboard load simulation",
             async () =>
             {
@@ -221,6 +240,10 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return (recentReports, stats, chartData);
             },
             TimeSpan.FromSeconds(5));
+
+        Assert.Equal(5, result.recentReports.Count);
+        Assert.Equal(100, result.stats.Total);
+        Assert.Equal(12, result.chartData.Count);
     }
 
     [Fact]
@@ -228,7 +251,7 @@ public class UsabilityPerformanceTests : PerformanceTestBase
     public async Task SearchWithFilters_UnderThreeSeconds()
     {
         // Simulate search with multiple filters
-        await MeasureAsync(
+        var result = await MeasureAsync(
             "Search with filters simulation",
             async () =>
             {
@@ -253,6 +276,9 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                 return results;
             },
             AcceptableThreshold);
+
+        Assert.NotNull(result);
+        Assert.Equal(15, result.Count);
     }
 
     [Fact]

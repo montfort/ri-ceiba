@@ -7,7 +7,6 @@ namespace Ceiba.Web.Middleware;
 public class SecurityHeadersMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly ILogger<SecurityHeadersMiddleware> _logger;
     private readonly SecurityHeadersOptions _options;
 
     public SecurityHeadersMiddleware(
@@ -16,7 +15,8 @@ public class SecurityHeadersMiddleware
         SecurityHeadersOptions options)
     {
         _next = next;
-        _logger = logger;
+        // Logger available for future debugging if needed
+        _ = logger;
         _options = options;
     }
 

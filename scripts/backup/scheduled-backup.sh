@@ -134,6 +134,9 @@ if [ "$BACKUP_SUCCESS" = true ] && [ -n "$BACKUP_FILE" ] && [ -f "$BACKUP_FILE" 
         monthly)
             cleanup_old_backups "$BACKUP_ROOT/monthly" "$KEEP_MONTHLY"
             ;;
+        *)
+            log "Warning: Unknown backup type '$BACKUP_TYPE', skipping cleanup"
+            ;;
     esac
 
     # Send success notification if enabled

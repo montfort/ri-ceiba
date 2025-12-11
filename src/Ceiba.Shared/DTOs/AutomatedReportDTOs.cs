@@ -21,10 +21,18 @@ public class AutomatedReportConfigDto
         set => HoraGeneracion = value;
     }
 
-    public List<string> Recipients
+    /// <summary>
+    /// Gets recipients as IReadOnlyList to avoid copying the collection.
+    /// Use SetRecipients() to modify. (SonarQube S2365)
+    /// </summary>
+    public IReadOnlyList<string> Recipients => Destinatarios;
+
+    /// <summary>
+    /// Sets the recipients list.
+    /// </summary>
+    public void SetRecipients(IEnumerable<string> recipients)
     {
-        get => Destinatarios.ToList();
-        set => Destinatarios = value.ToArray();
+        Destinatarios = recipients.ToArray();
     }
 
     public bool Enabled

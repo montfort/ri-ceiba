@@ -654,7 +654,7 @@ public class AutomatedReportService : IAutomatedReportService
             GenerationTime = TimeSpan.TryParse(_configuration["AutomatedReports:GenerationTime"], out var time)
                 ? time
                 : new TimeSpan(6, 0, 0),
-            Recipients = _configuration.GetSection("AutomatedReports:Recipients").Get<List<string>>() ?? new(),
+            Destinatarios = _configuration.GetSection("AutomatedReports:Recipients").Get<string[]>() ?? [],
             Enabled = bool.TryParse(_configuration["AutomatedReports:Enabled"], out var enabled) && enabled,
             DefaultTemplateId = int.TryParse(_configuration["AutomatedReports:DefaultTemplateId"], out var templateId)
                 ? templateId
