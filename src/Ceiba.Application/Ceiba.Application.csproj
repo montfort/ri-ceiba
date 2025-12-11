@@ -9,6 +9,8 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageReference Include="Hangfire.Core" Version="1.8.20" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.0" />
+    <!-- Override vulnerable Newtonsoft.Json 11.0.1 from Hangfire.Core -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="QuestPDF" Version="2025.7.4" />
   </ItemGroup>
 
