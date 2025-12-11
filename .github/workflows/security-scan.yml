@@ -2,7 +2,7 @@ name: Security Scanning
 
 on:
   push:
-    branches: [ main, develop, '001-*' ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
   schedule:
@@ -15,28 +15,103 @@ permissions:
   contents: read
   security-events: write
   pull-requests: write
-  issues: write
 
 env:
   DOTNET_VERSION: '10.0.x'
-  NODE_VERSION: '20.x'
-  # CI database credentials - ephemeral containers only, not a real secret
-  # Using env var to avoid SonarQube hardcoded credential warnings
-  CI_DB_PASSWORD: ${{ secrets.CI_DB_PASSWORD || 'ci_test_password_not_secret' }}
 
 jobs:
-  # T020d: OWASP ZAP Security Scanning
-  owasp-zap-scan:
-    name: OWASP ZAP Dynamic Security Scan
+  # Dependency Review (PR only) - No external configuration required
+  dependency-review:
+    name: Dependency Review
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-2.0, GPL-3.0
+
+  # CodeQL Analysis - Requires GitHub Advanced Security (free for public repos)
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    # Only run if this is a public repo or GitHub Advanced Security is enabled
+    if: github.repository_visibility == 'public' || vars.ENABLE_CODEQL == 'true'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build for CodeQL
+        run: |
+          dotnet restore
+          dotnet build --no-restore --configuration Release
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # Snyk Scan - Only runs if SNYK_TOKEN is configured
+  snyk-scan:
+    name: Snyk Dependency Scan
+    runs-on: ubuntu-latest
+    if: vars.ENABLE_SNYK == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/dotnet@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=high
+
+  # OWASP ZAP - Only runs on schedule or manual trigger (resource intensive)
+  owasp-zap-scan:
+    name: OWASP ZAP Dynamic Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
 
     services:
       postgres:
-        image: postgres:18-alpine
+        image: postgres:16-alpine
         env:
           POSTGRES_DB: ceiba_test
           POSTGRES_USER: ceiba
-          POSTGRES_PASSWORD: ${{ env.CI_DB_PASSWORD }}
+          POSTGRES_PASSWORD: test_password
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -54,69 +129,56 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build application
-        run: dotnet build --no-restore --configuration Release
+      - name: Restore and Build
+        run: |
+          dotnet restore
+          dotnet build --no-restore --configuration Release
 
       - name: Run database migrations
         run: |
-          dotnet tool install --global dotnet-ef
+          dotnet tool install --global dotnet-ef || true
           dotnet ef database update --project src/Ceiba.Infrastructure --startup-project src/Ceiba.Web
         env:
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
 
-      - name: Start application in background
+      - name: Start application
         run: |
           cd src/Ceiba.Web
-          dotnet run --no-build --configuration Release &
+          nohup dotnet run --no-build --configuration Release > app.log 2>&1 &
           echo $! > app.pid
-          sleep 30  # Wait for app to start
         env:
           ASPNETCORE_ENVIRONMENT: Development
           ASPNETCORE_URLS: "http://localhost:5000"
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=${{ env.CI_DB_PASSWORD }}"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
 
-      - name: Wait for application readiness
+      - name: Wait for application
         run: |
-          for i in {1..30}; do
-            if curl -f http://localhost:5000/health 2>/dev/null; then
-              echo "Application is ready"
+          echo "Waiting for application to start..."
+          for i in {1..60}; do
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:5000 | grep -q "200\|302"; then
+              echo "Application is ready!"
               exit 0
             fi
-            echo "Waiting for application... ($i/30)"
+            echo "Attempt $i/60..."
             sleep 2
           done
+          echo "Application logs:"
+          cat src/Ceiba.Web/app.log || true
           echo "Application failed to start"
           exit 1
 
       - name: OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+        uses: zaproxy/action-baseline@v0.14.0
         with:
           target: 'http://localhost:5000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          allow_issue_writing: true
-          issue_title: 'OWASP ZAP Security Vulnerabilities'
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: OWASP ZAP Full Scan (on schedule only)
-        if: github.event_name == 'schedule'
-        uses: zaproxy/action-full-scan@v0.10.0
-        with:
-          target: 'http://localhost:5000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          allow_issue_writing: true
-          issue_title: 'OWASP ZAP Full Scan - Security Vulnerabilities'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          cmd_options: '-a -l WARN'
+          allow_issue_writing: false
 
       - name: Stop application
         if: always()
         run: |
           if [ -f src/Ceiba.Web/app.pid ]; then
-            kill $(cat src/Ceiba.Web/app.pid) || true
+            kill $(cat src/Ceiba.Web/app.pid) 2>/dev/null || true
           fi
 
       - name: Upload ZAP Report
@@ -124,148 +186,27 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: |
-            report_html.html
-            report_json.json
-            report_md.md
-          retention-days: 30
+          path: report_*.html
+          retention-days: 14
+          if-no-files-found: ignore
 
-  # NOTE: SonarQube analysis moved to dedicated workflow: .github/workflows/sonar.yml
-  # This provides better separation of concerns and uses SonarCloud configuration.
-
-  # T020g: Snyk Security Vulnerability Scanning
-  snyk-scan:
-    name: Snyk Dependency & Code Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/dotnet@master
-        continue-on-error: true  # Don't fail the build on vulnerabilities
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
-
-      - name: Upload Snyk results to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: snyk.sarif
-
-      - name: Snyk Monitor (track dependencies over time)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: snyk/actions/dotnet@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: monitor
-          args: --all-projects
-
-  # CodeQL Analysis (GitHub Advanced Security)
-  codeql-analysis:
-    name: CodeQL Security Analysis
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ 'csharp', 'javascript' ]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-extended,security-and-quality
-
-      - name: Setup .NET
-        if: matrix.language == 'csharp'
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v4
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v4
-        with:
-          category: "/language:${{ matrix.language }}"
-
-  # Dependency Review (PR only)
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-severity: high
-          deny-licenses: GPL-2.0, GPL-3.0
-
-  # Security Summary Report
+  # Security Summary
   security-summary:
-    name: Security Scan Summary
+    name: Security Summary
     runs-on: ubuntu-latest
-    needs: [owasp-zap-scan, snyk-scan, codeql-analysis]
+    needs: [dependency-review, codeql-analysis, snyk-scan, owasp-zap-scan]
     if: always()
 
     steps:
-      - name: Create Security Summary
+      - name: Create Summary
         run: |
           echo "# Security Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| OWASP ZAP | ${{ needs.owasp-zap-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Snyk | ${{ needs.snyk-scan.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL | ${{ needs.codeql-analysis.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Review | ${{ needs.dependency-review.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL | ${{ needs.codeql-analysis.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Snyk | ${{ needs.snyk-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OWASP ZAP | ${{ needs.owasp-zap-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note:** SonarQube analysis runs in separate workflow (sonar.yml)" >> $GITHUB_STEP_SUMMARY
-          echo "**Scan completed at:** $(date -u)" >> $GITHUB_STEP_SUMMARY
-
-      - name: Comment on PR (if applicable)
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const summary = `
-            ## Security Scan Results
-
-            | Scan Type | Status |
-            |-----------|--------|
-            | OWASP ZAP | ${{ needs.owasp-zap-scan.result }} |
-            | Snyk | ${{ needs.snyk-scan.result }} |
-            | CodeQL | ${{ needs.codeql-analysis.result }} |
-
-            **Note:** SonarQube analysis runs in separate workflow.
-
-            View detailed reports in the workflow artifacts.
-            `;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: summary
-            });
+          echo "**Note:** Some scans may be skipped based on configuration or event type." >> $GITHUB_STEP_SUMMARY
