@@ -112,13 +112,51 @@ public class ReportService : IReportService
         bool isRevisor = false)
     {
         // Get existing report
-        var report = await _reportRepository.GetByIdAsync(reportId);
-        if (report == null)
-        {
-            throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
-        }
+        var report = await _reportRepository.GetByIdAsync(reportId)
+            ?? throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
 
         // Authorization check
+        ValidateUpdateAuthorization(report, usuarioId, isRevisor);
+
+        // Apply field updates
+        ApplyBasicFieldUpdates(report, updateDto);
+
+        // Handle geographic hierarchy updates
+        await ApplyGeographicUpdatesAsync(report, updateDto);
+
+        // Apply remaining field updates
+        ApplyAdditionalFieldUpdates(report, updateDto);
+
+        report.UpdatedAt = DateTime.UtcNow;
+
+        // Validate entity
+        var validationResult = report.Validate();
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(string.Join(", ", validationResult.Errors));
+        }
+
+        // Save changes
+        await _reportRepository.UpdateAsync(report);
+
+        // Audit log
+        await _auditService.LogAsync(
+            "REPORT_UPDATE",
+            reportId,
+            "REPORTE_INCIDENCIA",
+            System.Text.Json.JsonSerializer.Serialize(new { reportId, usuarioId, updatedFields = GetUpdatedFields(updateDto) }),
+            null
+        );
+
+        // Reload with relations for DTO mapping
+        var reportWithRelations = await _reportRepository.GetByIdWithRelationsAsync(reportId)
+            ?? throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
+
+        return await MapToDto(reportWithRelations);
+    }
+
+    private static void ValidateUpdateAuthorization(ReporteIncidencia report, Guid usuarioId, bool isRevisor)
+    {
         if (!isRevisor && !report.CanBeEditedByCreador(usuarioId))
         {
             throw new ForbiddenException(
@@ -126,8 +164,10 @@ public class ReportService : IReportService
                 "Solo puede editar sus propios reportes mientras estén en estado Borrador."
             );
         }
+    }
 
-        // Apply updates (only non-null fields)
+    private static void ApplyBasicFieldUpdates(ReporteIncidencia report, UpdateReportDto updateDto)
+    {
         if (updateDto.DatetimeHechos.HasValue)
             report.DatetimeHechos = updateDto.DatetimeHechos.Value.ToUniversalTime();
 
@@ -136,8 +176,7 @@ public class ReportService : IReportService
 
         if (updateDto.Edad.HasValue)
         {
-            if (updateDto.Edad.Value < 1 || updateDto.Edad.Value > 149)
-                throw new ValidationException("La edad debe estar entre 1 y 149.");
+            ValidateAge(updateDto.Edad.Value);
             report.Edad = updateDto.Edad.Value;
         }
 
@@ -155,30 +194,36 @@ public class ReportService : IReportService
 
         if (updateDto.Delito != null)
             report.Delito = updateDto.Delito;
+    }
 
-        // Validate and update geographic hierarchy if any field changed
-        if (updateDto.ZonaId.HasValue || updateDto.SectorId.HasValue || updateDto.CuadranteId.HasValue)
+    private static void ValidateAge(int age)
+    {
+        if (age < 1 || age > 149)
+            throw new ValidationException("La edad debe estar entre 1 y 149.");
+    }
+
+    private async Task ApplyGeographicUpdatesAsync(ReporteIncidencia report, UpdateReportDto updateDto)
+    {
+        if (!updateDto.ZonaId.HasValue && !updateDto.SectorId.HasValue && !updateDto.CuadranteId.HasValue)
+            return;
+
+        var newZonaId = updateDto.ZonaId ?? report.ZonaId;
+        var newSectorId = updateDto.SectorId ?? report.SectorId;
+        var newCuadranteId = updateDto.CuadranteId ?? report.CuadranteId;
+
+        var isValidHierarchy = await _catalogService.ValidateHierarchyAsync(newZonaId, newSectorId, newCuadranteId);
+        if (!isValidHierarchy)
         {
-            var newZonaId = updateDto.ZonaId ?? report.ZonaId;
-            var newSectorId = updateDto.SectorId ?? report.SectorId;
-            var newCuadranteId = updateDto.CuadranteId ?? report.CuadranteId;
-
-            var isValidHierarchy = await _catalogService.ValidateHierarchyAsync(
-                newZonaId,
-                newSectorId,
-                newCuadranteId
-            );
-
-            if (!isValidHierarchy)
-            {
-                throw new ValidationException("La jerarquía geográfica no es válida.");
-            }
-
-            report.ZonaId = newZonaId;
-            report.SectorId = newSectorId;
-            report.CuadranteId = newCuadranteId;
+            throw new ValidationException("La jerarquía geográfica no es válida.");
         }
 
+        report.ZonaId = newZonaId;
+        report.SectorId = newSectorId;
+        report.CuadranteId = newCuadranteId;
+    }
+
+    private static void ApplyAdditionalFieldUpdates(ReporteIncidencia report, UpdateReportDto updateDto)
+    {
         if (updateDto.TurnoCeiba.HasValue)
             report.TurnoCeiba = updateDto.TurnoCeiba.Value;
 
@@ -199,33 +244,6 @@ public class ReportService : IReportService
 
         if (updateDto.Observaciones != null)
             report.Observaciones = updateDto.Observaciones;
-
-        report.UpdatedAt = DateTime.UtcNow;
-
-        // Validate entity
-        var validationResult = report.Validate();
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(string.Join(", ", validationResult.Errors));
-        }
-
-        // Save changes
-        var updatedReport = await _reportRepository.UpdateAsync(report);
-
-        // Audit log
-        await _auditService.LogAsync(
-            "REPORT_UPDATE",
-            reportId,
-            "REPORTE_INCIDENCIA",
-            System.Text.Json.JsonSerializer.Serialize(new { reportId, usuarioId, updatedFields = GetUpdatedFields(updateDto) }),
-            null
-        );
-
-        // Reload with relations for DTO mapping
-        var reportWithRelations = await _reportRepository.GetByIdWithRelationsAsync(reportId)
-            ?? throw new NotFoundException($"Reporte con ID {reportId} no encontrado.");
-
-        return await MapToDto(reportWithRelations);
     }
 
     public async Task<ReportDto> SubmitReportAsync(int reportId, Guid usuarioId)
@@ -423,28 +441,32 @@ public class ReportService : IReportService
         return dto;
     }
 
-    private List<string> GetUpdatedFields(UpdateReportDto updateDto)
+    private static List<string> GetUpdatedFields(UpdateReportDto updateDto)
     {
-        var fields = new List<string>();
-        if (updateDto.DatetimeHechos.HasValue) fields.Add("DatetimeHechos");
-        if (updateDto.Sexo != null) fields.Add("Sexo");
-        if (updateDto.Edad.HasValue) fields.Add("Edad");
-        if (updateDto.LgbtttiqPlus.HasValue) fields.Add("LgbtttiqPlus");
-        if (updateDto.SituacionCalle.HasValue) fields.Add("SituacionCalle");
-        if (updateDto.Migrante.HasValue) fields.Add("Migrante");
-        if (updateDto.Discapacidad.HasValue) fields.Add("Discapacidad");
-        if (updateDto.Delito != null) fields.Add("Delito");
-        if (updateDto.ZonaId.HasValue) fields.Add("ZonaId");
-        if (updateDto.SectorId.HasValue) fields.Add("SectorId");
-        if (updateDto.CuadranteId.HasValue) fields.Add("CuadranteId");
-        if (updateDto.TurnoCeiba.HasValue) fields.Add("TurnoCeiba");
-        if (updateDto.TipoDeAtencion != null) fields.Add("TipoDeAtencion");
-        if (updateDto.TipoDeAccion.HasValue) fields.Add("TipoDeAccion");
-        if (updateDto.HechosReportados != null) fields.Add("HechosReportados");
-        if (updateDto.AccionesRealizadas != null) fields.Add("AccionesRealizadas");
-        if (updateDto.Traslados.HasValue) fields.Add("Traslados");
-        if (updateDto.Observaciones != null) fields.Add("Observaciones");
-        return fields;
+        // Using a dictionary-based approach to reduce cognitive complexity
+        var fieldChecks = new (bool hasValue, string fieldName)[]
+        {
+            (updateDto.DatetimeHechos.HasValue, "DatetimeHechos"),
+            (updateDto.Sexo != null, "Sexo"),
+            (updateDto.Edad.HasValue, "Edad"),
+            (updateDto.LgbtttiqPlus.HasValue, "LgbtttiqPlus"),
+            (updateDto.SituacionCalle.HasValue, "SituacionCalle"),
+            (updateDto.Migrante.HasValue, "Migrante"),
+            (updateDto.Discapacidad.HasValue, "Discapacidad"),
+            (updateDto.Delito != null, "Delito"),
+            (updateDto.ZonaId.HasValue, "ZonaId"),
+            (updateDto.SectorId.HasValue, "SectorId"),
+            (updateDto.CuadranteId.HasValue, "CuadranteId"),
+            (updateDto.TurnoCeiba.HasValue, "TurnoCeiba"),
+            (updateDto.TipoDeAtencion != null, "TipoDeAtencion"),
+            (updateDto.TipoDeAccion.HasValue, "TipoDeAccion"),
+            (updateDto.HechosReportados != null, "HechosReportados"),
+            (updateDto.AccionesRealizadas != null, "AccionesRealizadas"),
+            (updateDto.Traslados.HasValue, "Traslados"),
+            (updateDto.Observaciones != null, "Observaciones")
+        };
+
+        return fieldChecks.Where(f => f.hasValue).Select(f => f.fieldName).ToList();
     }
 
     #endregion

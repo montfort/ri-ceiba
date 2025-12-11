@@ -60,26 +60,26 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
         optionsBuilder.AddInterceptors(new AuditSaveChangesInterceptor(this));
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
         // Apply entity configurations from separate files
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(CeibaDbContext).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(CeibaDbContext).Assembly);
 
         // Configure Identity table names to match our conventions
-        ConfigureIdentityTables(modelBuilder);
+        ConfigureIdentityTables(builder);
     }
 
-    private static void ConfigureIdentityTables(ModelBuilder modelBuilder)
+    private static void ConfigureIdentityTables(ModelBuilder builder)
     {
         // Use UPPER_SNAKE_CASE for Identity tables to match project conventions
-        modelBuilder.Entity<IdentityUser<Guid>>().ToTable("USUARIO");
-        modelBuilder.Entity<IdentityRole<Guid>>().ToTable("ROL");
-        modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("USUARIO_ROL");
-        modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("USUARIO_CLAIM");
-        modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("USUARIO_LOGIN");
-        modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("USUARIO_TOKEN");
-        modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("ROL_CLAIM");
+        builder.Entity<IdentityUser<Guid>>().ToTable("USUARIO");
+        builder.Entity<IdentityRole<Guid>>().ToTable("ROL");
+        builder.Entity<IdentityUserRole<Guid>>().ToTable("USUARIO_ROL");
+        builder.Entity<IdentityUserClaim<Guid>>().ToTable("USUARIO_CLAIM");
+        builder.Entity<IdentityUserLogin<Guid>>().ToTable("USUARIO_LOGIN");
+        builder.Entity<IdentityUserToken<Guid>>().ToTable("USUARIO_TOKEN");
+        builder.Entity<IdentityRoleClaim<Guid>>().ToTable("ROL_CLAIM");
     }
 }

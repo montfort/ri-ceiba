@@ -23,7 +23,6 @@ namespace Ceiba.Infrastructure.Services;
 public class EmailService : IEmailService
 {
     private readonly CeibaDbContext _context;
-    private readonly IConfiguration _configuration;
     private readonly ILogger<EmailService> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -34,7 +33,9 @@ public class EmailService : IEmailService
         IHttpClientFactory httpClientFactory)
     {
         _context = context;
-        _configuration = configuration;
+        // Note: configuration parameter is kept for DI compatibility but currently unused
+        // as email settings are loaded from database (ConfiguracionEmail table)
+        _ = configuration; // Suppress unused parameter warning
         _logger = logger;
         _httpClientFactory = httpClientFactory;
     }
