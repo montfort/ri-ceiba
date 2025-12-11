@@ -296,16 +296,28 @@ public class DocumentConversionService : IDocumentConversionService
 
     /// <summary>
     /// Creates a secure temporary directory for file operations.
-    /// This mitigates security risks from using publicly writable directories directly.
+    /// Uses application-specific directory instead of system temp to avoid publicly writable directory risks.
+    /// Mitigations for CWE-377/CWE-379:
+    /// - Uses unpredictable GUID-based directory names (prevents race conditions)
+    /// - Creates under user-specific AppData folder (not publicly writable)
+    /// - Directory is cleaned up immediately after use
     /// </summary>
     private static string CreateSecureTempDirectory()
     {
-        // Create a unique subdirectory under the system temp path
-        // Using a GUID ensures no collision and unpredictable names
-        var baseTempPath = Path.GetTempPath();
-        var secureTempDir = Path.Combine(baseTempPath, "ceiba_pandoc", Guid.NewGuid().ToString("N"));
+        // Use application data folder instead of system temp (CWE-377, CWE-379 mitigation)
+        // AppData/Local is user-specific and not publicly writable
+        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-        // Create directory with default permissions (inherited from parent, user-only on most systems)
+        // Fallback to CommonApplicationData if LocalApplicationData is not available (e.g., service accounts)
+        if (string.IsNullOrEmpty(appDataPath))
+        {
+            appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+        }
+
+        // Create unique subdirectory with unpredictable GUID name (race condition mitigation)
+        var secureTempDir = Path.Combine(appDataPath, "Ceiba", "pandoc-temp", Guid.NewGuid().ToString("N"));
+
+        // Create directory - inherits permissions from parent (user-only for LocalApplicationData)
         Directory.CreateDirectory(secureTempDir);
 
         return secureTempDir;
