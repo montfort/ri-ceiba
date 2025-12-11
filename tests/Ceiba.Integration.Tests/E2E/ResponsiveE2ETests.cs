@@ -21,7 +21,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(MobilePortrait.Width, MobilePortrait.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Form should be visible and properly sized
@@ -42,7 +42,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(Tablet.Width, Tablet.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Form should be centered and properly sized
@@ -62,7 +62,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(Desktop.Width, Desktop.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Form should be centered with appropriate max-width
@@ -88,7 +88,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(width, height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - No horizontal scrollbar
@@ -106,12 +106,12 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(MobilePortrait.Width, MobilePortrait.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Inputs should have sufficient touch target size (minimum 44x44 px recommended)
-        var emailInput = Page.Locator("input[type='email'], input[name='Input.Email'], input#Input_Email").First;
-        var passwordInput = Page.Locator("input[type='password'], input[name='Input.Password'], input#Input_Password").First;
+        var emailInput = Page.Locator("input[type='email'], input[name='email'], input#email").First;
+        var passwordInput = Page.Locator("input[type='password'], input[name='password'], input#password").First;
 
         var emailBox = await emailInput.BoundingBoxAsync();
         var passwordBox = await passwordInput.BoundingBoxAsync();
@@ -131,7 +131,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(MobilePortrait.Width, MobilePortrait.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Submit button should have minimum touch target size
@@ -150,7 +150,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(MobilePortrait.Width, MobilePortrait.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Check font size is readable (minimum 16px recommended for mobile)
@@ -166,7 +166,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
     {
         // Portrait
         await Page.SetViewportSizeAsync(MobilePortrait.Width, MobilePortrait.Height);
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         var formPortrait = Page.Locator("form").First;
@@ -199,7 +199,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(width, height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Login form should be visible without scrolling
@@ -218,7 +218,7 @@ public class ResponsiveE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(MobilePortrait.Width, MobilePortrait.Height);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Any images should not overflow

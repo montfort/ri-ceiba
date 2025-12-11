@@ -13,7 +13,7 @@ public class LoginE2ETests : PlaywrightTestBase
     public async Task LoginPage_ShouldBeAccessible()
     {
         // Arrange & Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Page should load successfully
@@ -24,12 +24,12 @@ public class LoginE2ETests : PlaywrightTestBase
     public async Task LoginPage_ShouldDisplayLoginForm()
     {
         // Arrange
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Login form elements should be visible
-        var emailInput = Page.Locator("input[type='email'], input[name='Input.Email'], input#Input_Email");
-        var passwordInput = Page.Locator("input[type='password'], input[name='Input.Password'], input#Input_Password");
+        var emailInput = Page.Locator("input[type='email'], input[name='email'], input#email");
+        var passwordInput = Page.Locator("input[type='password'], input[name='password'], input#password");
         var submitButton = Page.Locator("button[type='submit'], input[type='submit']");
 
         await Expect(emailInput).ToBeVisibleAsync();
@@ -41,7 +41,7 @@ public class LoginE2ETests : PlaywrightTestBase
     public async Task LoginPage_ShouldShowValidationErrors_WhenEmptySubmit()
     {
         // Arrange
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Act - Submit empty form
@@ -50,19 +50,19 @@ public class LoginE2ETests : PlaywrightTestBase
 
         // Assert - Should show validation errors or remain on login page
         // (HTML5 validation or server-side validation)
-        await Expect(Page).ToHaveURLAsync(new Regex(".*/Account/Login.*|.*/login.*", RegexOptions.IgnoreCase));
+        await Expect(Page).ToHaveURLAsync(new Regex(".*/login.*", RegexOptions.IgnoreCase));
     }
 
     [Fact]
     public async Task LoginPage_ShouldShowError_WhenInvalidCredentials()
     {
         // Arrange
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Act - Submit with invalid credentials
-        await Page.FillAsync("input[type='email'], input[name='Input.Email'], input#Input_Email", "invalid@test.com");
-        await Page.FillAsync("input[type='password'], input[name='Input.Password'], input#Input_Password", "WrongPassword123!");
+        await Page.FillAsync("input[type='email'], input[name='email'], input#email", "invalid@test.com");
+        await Page.FillAsync("input[type='password'], input[name='password'], input#password", "WrongPassword123!");
 
         var submitButton = Page.Locator("button[type='submit'], input[type='submit']").First;
         await submitButton.ClickAsync();
@@ -71,7 +71,7 @@ public class LoginE2ETests : PlaywrightTestBase
 
         // Assert - Should show error message or remain on login page
         var hasError = await Page.Locator(".validation-summary-errors, .alert-danger, [role='alert']").CountAsync() > 0;
-        var stillOnLogin = Page.Url.Contains("Login", StringComparison.OrdinalIgnoreCase);
+        var stillOnLogin = Page.Url.Contains("login", StringComparison.OrdinalIgnoreCase);
 
         Assert.True(hasError || stillOnLogin, "Should show error or remain on login page");
     }
@@ -80,13 +80,13 @@ public class LoginE2ETests : PlaywrightTestBase
     public async Task LoginPage_ShouldHaveProperAccessibility()
     {
         // Arrange
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Assert - Check for accessibility features
         // 1. Form should have proper labels
-        var emailLabel = Page.Locator("label[for='Input_Email'], label:has-text('Email'), label:has-text('Correo')");
-        var passwordLabel = Page.Locator("label[for='Input_Password'], label:has-text('Password'), label:has-text('Contraseña')");
+        var emailLabel = Page.Locator("label[for='email'], label:has-text('Email'), label:has-text('Correo')");
+        var passwordLabel = Page.Locator("label[for='password'], label:has-text('Password'), label:has-text('Contraseña')");
 
         // 2. Skip link should exist (WCAG 2.4.1)
         var skipLink = Page.Locator("a[href='#main-content'], a.skip-link, [class*='skip']");
@@ -104,7 +104,7 @@ public class LoginE2ETests : PlaywrightTestBase
     public async Task LoginPage_ShouldBeKeyboardNavigable()
     {
         // Arrange
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Act - Navigate with Tab key

@@ -28,7 +28,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(1280, 720);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
         await HideDynamicContentAsync();
 
@@ -52,7 +52,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(375, 667);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
         await HideDynamicContentAsync();
 
@@ -76,7 +76,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(768, 1024);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
         await HideDynamicContentAsync();
 
@@ -95,11 +95,11 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
     {
         // Arrange
         await Page.SetViewportSizeAsync(1280, 720);
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Act - Focus on email input
-        var emailInput = Page.Locator("input[type='email'], input[name='Input.Email'], input#Input_Email").First;
+        var emailInput = Page.Locator("input[type='email'], input[name='email'], input#email").First;
         await emailInput.FocusAsync();
 
         await HideDynamicContentAsync();
@@ -118,7 +118,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
     {
         // Arrange
         await Page.SetViewportSizeAsync(1280, 720);
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Act - Submit empty form to trigger validation
@@ -142,7 +142,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
     {
         // Arrange
         await Page.SetViewportSizeAsync(1280, 720);
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Act
@@ -163,7 +163,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
     {
         // Arrange
         await Page.SetViewportSizeAsync(1280, 720);
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
 
         // Capture before hover
@@ -213,7 +213,7 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
         await Page.SetViewportSizeAsync(1280, 720);
 
         // Act
-        await NavigateToAsync("/Account/Login");
+        await NavigateToAsync("/login");
         await WaitForPageLoadAsync();
         await HideDynamicContentAsync();
 
