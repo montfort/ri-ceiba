@@ -4,7 +4,8 @@
     <DataCollectors>
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
-          <Format>cobertura</Format>
+          <!-- Generate both formats: OpenCover for SonarQube, Cobertura for other tools -->
+          <Format>opencover,cobertura</Format>
           <Exclude>[*]*.Migrations.*,[*]*Tests*,[*]*.Program,[*]*.Startup</Exclude>
           <ExcludeByFile>**/Migrations/**/*.cs</ExcludeByFile>
           <Include>[Ceiba.*]*</Include>

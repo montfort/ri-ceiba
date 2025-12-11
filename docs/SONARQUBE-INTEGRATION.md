@@ -295,9 +295,100 @@ To analyze SonarQube issues with Claude Code:
    - "What are the critical security issues in the SonarQube report?"
    - "Help me fix the CODE_SMELL issues in DocumentConversionService.cs"
 
+## Test Coverage Integration
+
+SonarQube Cloud can display test coverage metrics when coverage reports are provided during analysis.
+
+### Supported Coverage Tools
+
+| Tool | Parameter | Format |
+|------|-----------|--------|
+| Coverlet (OpenCover) | `sonar.cs.opencover.reportsPaths` | `coverage.opencover.xml` |
+| Visual Studio | `sonar.cs.vscoveragexml.reportsPaths` | `coverage.xml` |
+| dotCover | `sonar.cs.dotcover.reportsPaths` | `dotCover.Output.html` |
+| Cobertura | N/A (not directly supported) | Convert to OpenCover |
+
+### Our Implementation
+
+We use **Coverlet with OpenCover format** because:
+1. Already integrated via `coverlet.collector` NuGet package
+2. Cross-platform (works on Linux CI runners)
+3. Native SonarQube support via `sonar.cs.opencover.reportsPaths`
+
+### Configuration Files
+
+#### coverlet.runsettings
+```xml
+<Configuration>
+  <Format>opencover,cobertura</Format>
+  <!-- Generates both formats for maximum compatibility -->
+</Configuration>
+```
+
+#### GitHub Actions Workflow (.github/workflows/sonar.yml)
+```yaml
+- name: Begin SonarQube analysis
+  run: |
+    dotnet sonarscanner begin \
+      /k:"montfort_ri-ceiba" \
+      /o:"montfort" \
+      /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+
+- name: Run tests with coverage
+  run: |
+    dotnet test --collect:"XPlat Code Coverage" \
+      --settings coverlet.runsettings
+
+- name: End SonarQube analysis
+  run: dotnet sonarscanner end
+```
+
+### GitHub Secrets Required
+
+Add these secrets in your GitHub repository settings:
+
+| Secret Name | Description | How to Get |
+|-------------|-------------|------------|
+| `SONAR_TOKEN` | SonarCloud authentication token | [Generate token](https://sonarcloud.io/account/security) |
+
+### Local Testing
+
+To test coverage locally before pushing:
+
+```bash
+# Run tests with coverage
+dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings
+
+# View coverage report (optional)
+dotnet tool install -g dotnet-reportgenerator-globaltool
+reportgenerator -reports:"**/coverage.opencover.xml" -targetdir:"coveragereport" -reporttypes:Html
+```
+
+### Coverage Exclusions
+
+The following are excluded from coverage analysis:
+- `**/Migrations/**` - EF Core migrations
+- `**/Tests/**` - Test projects
+- `**/Program.cs` - Entry point
+- `**/Startup.cs` - Configuration
+
+Configure in SonarScanner:
+```
+/d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/Program.cs"
+```
+
+### Viewing Coverage in SonarCloud
+
+After a successful analysis:
+1. Go to [SonarCloud Dashboard](https://sonarcloud.io/project/overview?id=montfort_ri-ceiba)
+2. Click on "Coverage" metric
+3. Drill down into packages/files to see line coverage
+4. New code coverage is shown separately for quality gate evaluation
+
 ## References
 
 - [SonarQube Cloud Web API Documentation](https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/web-api)
 - [SonarQube Cloud API Explorer](https://sonarcloud.io/web_api)
+- [.NET Test Coverage](https://docs.sonarsource.com/sonarqube-cloud/enriching/test-coverage/dotnet-test-coverage)
 - [GitHub Integration](https://docs.sonarsource.com/sonarqube-cloud/managing-your-projects/administering-your-projects/devops-platform-integration/github)
 - [Issues in GitHub](https://docs.sonarsource.com/sonarqube-cloud/managing-your-projects/issues/in-devops-platform/github)
