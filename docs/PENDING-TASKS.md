@@ -1,7 +1,7 @@
 # Tareas Pendientes - Sistema Ceiba
 
-**Última actualización**: 2025-12-11 (Sprint 3 completado)
-**Progreso total**: 152/330 tareas completadas (46.1%)
+**Última actualización**: 2025-12-11 (Sprint 4 completado)
+**Progreso total**: 162/330 tareas completadas (49.1%)
 
 ---
 
@@ -16,7 +16,7 @@
 | 5 | US3 - Admin/Auditoría | 20/20 | 0 | ✅ Completa |
 | 6 | US4 - Reportes Automatizados | 26/26 | 0 | ✅ Completa |
 | 7 | US5 - Sugerencias | 5/5 | 0 | ✅ Completa |
-| 8 | Polish & Cross-Cutting | 4/37 | 33 | ⏳ En progreso |
+| 8 | Polish & Cross-Cutting | 14/37 | 23 | ⏳ En progreso |
 | 9 | NFR Validation | 0/45 | 45 | ⏳ Pendiente |
 
 ---
@@ -48,14 +48,24 @@
 - ~~T111~~ Responsive/mobile-first CSS - **Completamente reescrito**
 - ~~T113~~ Login page - **Ya implementado y funcionando**
 
-**Pendientes de Sprint 4:**
+✅ **Sprint 4 COMPLETADO** - Accesibilidad y Seguridad de Login:
+- ~~T112~~ WCAG AA - Semantic HTML and ARIA labels - **Implementado**
+- ~~T112a~~ WCAG AA - Keyboard navigation (Skip Link) - **Implementado**
+- ~~T112b~~ WCAG AA - Color contrast validation - **CSS mejorado**
+- ~~T112c~~ WCAG AA - Screen reader support (LiveAnnouncer) - **Implementado**
+- ~~T112d~~ WCAG AA - Focus management - **Estilos focus-visible**
+- ~~T113a~~ Login security - Rate limiting (IP-based) - **Implementado**
+- ~~T113b~~ Login security - Progressive delays - **Implementado**
+- ~~T113c~~ Login security - Failed attempt monitoring - **Implementado**
+- ~~T113d~~ Login security - Open redirect fix - **Implementado**
+- ~~T113e~~ Login security - 17 unit tests - **Pasando**
 
-### 🟡 Prioridad MEDIA (Seguridad y UX)
+**Pendientes de Sprint 5:**
+
+### 🟡 Prioridad MEDIA (Infraestructura y CI/CD)
 
 | ID | Tarea | Fase | Dependencias |
 |----|-------|------|--------------|
-| T112-T112d | WCAG AA accessibility | Polish | T109-T110 |
-| T113a-T113e | Login security (reCAPTCHA, rate limit) | Polish | T113 |
 | T114 | HTTPS configuration | Polish | - |
 | T114a | HSTS headers | Polish | T114 |
 | T118-T118b | Security hardening | Polish | - |
@@ -246,8 +256,9 @@
 
 3. **Dependencias**: Verificar que las tareas prerequisito estén completas antes de iniciar.
 
-4. **Tests Actuales**: 374+ tests pasando, 6 omitidos (integración con servicios externos).
+4. **Tests Actuales**: 391+ tests pasando, 6 omitidos (integración con servicios externos).
    - Sprint 1 verificó: 115 tests específicos de US2/US4
    - Sprint 2 añadió: 32 tests de CatalogAdminService
+   - Sprint 4 añadió: 17 tests de LoginSecurityService
 
-5. **Build Status**: 36 advertencias menores (SonarAnalyzer en Razor), sin errores.
+5. **Build Status**: ~128 advertencias menores (SonarAnalyzer en Razor), sin errores.
