@@ -4,31 +4,5 @@
         <name>Ceiba.ServiceDefaults</name>
     </assembly>
     <members>
-        <member name="T:Ceiba.ServiceDefaults.Extensions">
-            <summary>
-            Extension methods for configuring common .NET Aspire services.
-            </summary>
-        </member>
-        <member name="M:Ceiba.ServiceDefaults.Extensions.AddServiceDefaults(Microsoft.Extensions.Hosting.IHostApplicationBuilder)">
-            <summary>
-            Adds service defaults to the application including health checks,
-            OpenTelemetry, and service discovery.
-            </summary>
-        </member>
-        <member name="M:Ceiba.ServiceDefaults.Extensions.ConfigureOpenTelemetry(Microsoft.Extensions.Hosting.IHostApplicationBuilder)">
-            <summary>
-            Configures OpenTelemetry for metrics and tracing.
-            </summary>
-        </member>
-        <member name="M:Ceiba.ServiceDefaults.Extensions.AddDefaultHealthChecks(Microsoft.Extensions.Hosting.IHostApplicationBuilder)">
-            <summary>
-            Adds default health checks for the application.
-            </summary>
-        </member>
-        <member name="M:Ceiba.ServiceDefaults.Extensions.MapDefaultEndpoints(Microsoft.AspNetCore.Builder.WebApplication)">
-            <summary>
-            Maps default health check endpoints (/health and /alive).
-            </summary>
-        </member>
     </members>
 </doc>

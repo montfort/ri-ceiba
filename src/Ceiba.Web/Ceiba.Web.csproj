@@ -10,7 +10,7 @@
 
   <!-- Aspire PostgreSQL EF Core integration -->
   <ItemGroup>
-    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.0.2" />
   </ItemGroup>
 
   <ItemGroup>

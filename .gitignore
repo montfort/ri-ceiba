@@ -112,3 +112,6 @@ logs/
 
 ## Generated Reports (runtime output, not source code)
 **/generated-reports/
+
+## Aspire
+.aspire/

@@ -6,7 +6,6 @@ using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Repositories;
 using Ceiba.Infrastructure.Services;
-using Ceiba.ServiceDefaults;
 using Ceiba.Web.Components;
 using Ceiba.Web.Configuration;
 using Ceiba.Web.Middleware;
