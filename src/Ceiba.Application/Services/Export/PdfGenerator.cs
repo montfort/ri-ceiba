@@ -134,89 +134,149 @@ public class PdfGenerator : IPdfGenerator
     {
         container.PaddingTop(10).Column(column =>
         {
-            // Demographic Data Section
-            column.Item().PaddingBottom(10).Column(section =>
+            column.Item().PaddingBottom(10).Element(c => ComposeDemographicSection(c, report));
+            column.Item().PaddingBottom(10).Element(c => ComposeClassificationSection(c, report));
+            column.Item().PaddingBottom(10).Element(c => ComposeGeographicSection(c, report));
+            column.Item().PaddingBottom(10).Element(c => ComposeIncidentDetailsSection(c, report));
+            column.Item().PaddingTop(10).Element(c => ComposeAuditSection(c, report));
+        });
+    }
+
+    /// <summary>
+    /// Composes the demographic data section
+    /// </summary>
+    private static void ComposeDemographicSection(IContainer container, ReportExportDto report)
+    {
+        container.Column(section =>
+        {
+            section.Item().Text("DATOS DEMOGRÁFICOS").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
+            section.Item().PaddingTop(5).Row(row =>
             {
-                section.Item().Text("DATOS DEMOGRÁFICOS").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
-                section.Item().PaddingTop(5).Row(row =>
-                {
-                    row.RelativeItem().Text($"Sexo: {report.Sexo}").FontSize(9);
-                    row.RelativeItem().Text($"Edad: {report.Edad} años").FontSize(9);
-                });
-                section.Item().PaddingTop(3).Row(row =>
-                {
-                    row.RelativeItem().Text($"LGBTTTIQ+: {(report.LgbtttiqPlus ? "Sí" : "No")}").FontSize(9);
-                    row.RelativeItem().Text($"Situación de calle: {(report.SituacionCalle ? "Sí" : "No")}").FontSize(9);
-                });
-                section.Item().PaddingTop(3).Row(row =>
-                {
-                    row.RelativeItem().Text($"Migrante: {(report.Migrante ? "Sí" : "No")}").FontSize(9);
-                    row.RelativeItem().Text($"Discapacidad: {(report.Discapacidad ? "Sí" : "No")}").FontSize(9);
-                });
+                row.RelativeItem().Text($"Sexo: {report.Sexo}").FontSize(9);
+                row.RelativeItem().Text($"Edad: {report.Edad} años").FontSize(9);
             });
-
-            // Classification Section
-            column.Item().PaddingBottom(10).Column(section =>
+            section.Item().PaddingTop(3).Row(row =>
             {
-                section.Item().Text("CLASIFICACIÓN").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
-                section.Item().PaddingTop(5).Text($"Delito: {report.Delito}").FontSize(9);
-                section.Item().PaddingTop(3).Text($"Tipo de Atención: {report.TipoDeAtencion}").FontSize(9);
-                section.Item().PaddingTop(3).Text($"Tipo de Acción: {report.TipoDeAccion}").FontSize(9);
+                row.RelativeItem().Text($"LGBTTTIQ+: {FormatBoolean(report.LgbtttiqPlus)}").FontSize(9);
+                row.RelativeItem().Text($"Situación de calle: {FormatBoolean(report.SituacionCalle)}").FontSize(9);
             });
-
-            // Geographic Location Section
-            column.Item().PaddingBottom(10).Column(section =>
+            section.Item().PaddingTop(3).Row(row =>
             {
-                section.Item().Text("UBICACIÓN GEOGRÁFICA").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
-                section.Item().PaddingTop(5).Row(row =>
-                {
-                    row.RelativeItem().Text($"Zona: {report.Zona}").FontSize(9);
-                    row.RelativeItem().Text($"Sector: {report.Sector}").FontSize(9);
-                });
-                section.Item().PaddingTop(3).Row(row =>
-                {
-                    row.RelativeItem().Text($"Cuadrante: {report.Cuadrante}").FontSize(9);
-                    row.RelativeItem().Text($"Turno CEIBA: {report.TurnoCeiba}").FontSize(9);
-                });
-            });
-
-            // Incident Details Section
-            column.Item().PaddingBottom(10).Column(section =>
-            {
-                section.Item().Text("DETALLES DEL INCIDENTE").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
-
-                section.Item().PaddingTop(5).Text("Hechos Reportados:").FontSize(9).Bold();
-                section.Item().PaddingTop(3).Text(report.HechosReportados).FontSize(9);
-
-                section.Item().PaddingTop(5).Text("Acciones Realizadas:").FontSize(9).Bold();
-                section.Item().PaddingTop(3).Text(report.AccionesRealizadas).FontSize(9);
-
-                section.Item().PaddingTop(5).Text("Traslados:").FontSize(9).Bold();
-                section.Item().PaddingTop(3).Text(report.Traslados).FontSize(9);
-
-                if (!string.IsNullOrWhiteSpace(report.Observaciones))
-                {
-                    section.Item().PaddingTop(5).Text("Observaciones:").FontSize(9).Bold();
-                    section.Item().PaddingTop(3).Text(report.Observaciones).FontSize(9);
-                }
-            });
-
-            // Audit Information Section (uses technical IDs for traceability)
-            column.Item().PaddingTop(10).Column(section =>
-            {
-                section.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
-                section.Item().PaddingTop(5).Text("INFORMACIÓN DE AUDITORÍA").FontSize(10).Bold().FontColor(Colors.Grey.Darken2);
-                // Show user ID (GUID) for audit purposes
-                if (!string.IsNullOrWhiteSpace(report.UsuarioCreadorId))
-                {
-                    section.Item().PaddingTop(3).Text($"ID Usuario Creador: {report.UsuarioCreadorId}").FontSize(8);
-                }
-                if (report.FechaUltimaModificacion.HasValue)
-                {
-                    section.Item().PaddingTop(2).Text($"Última modificación: {report.FechaUltimaModificacion.Value:dd/MM/yyyy HH:mm}").FontSize(8);
-                }
+                row.RelativeItem().Text($"Migrante: {FormatBoolean(report.Migrante)}").FontSize(9);
+                row.RelativeItem().Text($"Discapacidad: {FormatBoolean(report.Discapacidad)}").FontSize(9);
             });
         });
+    }
+
+    /// <summary>
+    /// Composes the classification section
+    /// </summary>
+    private static void ComposeClassificationSection(IContainer container, ReportExportDto report)
+    {
+        container.Column(section =>
+        {
+            section.Item().Text("CLASIFICACIÓN").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
+            section.Item().PaddingTop(5).Text($"Delito: {report.Delito}").FontSize(9);
+            section.Item().PaddingTop(3).Text($"Tipo de Atención: {report.TipoDeAtencion}").FontSize(9);
+            section.Item().PaddingTop(3).Text($"Tipo de Acción: {report.TipoDeAccion}").FontSize(9);
+        });
+    }
+
+    /// <summary>
+    /// Composes the geographic location section
+    /// </summary>
+    private static void ComposeGeographicSection(IContainer container, ReportExportDto report)
+    {
+        container.Column(section =>
+        {
+            section.Item().Text("UBICACIÓN GEOGRÁFICA").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
+            section.Item().PaddingTop(5).Row(row =>
+            {
+                row.RelativeItem().Text($"Zona: {report.Zona}").FontSize(9);
+                row.RelativeItem().Text($"Sector: {report.Sector}").FontSize(9);
+            });
+            section.Item().PaddingTop(3).Row(row =>
+            {
+                row.RelativeItem().Text($"Cuadrante: {report.Cuadrante}").FontSize(9);
+                row.RelativeItem().Text($"Turno CEIBA: {report.TurnoCeiba}").FontSize(9);
+            });
+        });
+    }
+
+    /// <summary>
+    /// Composes the incident details section
+    /// </summary>
+    private static void ComposeIncidentDetailsSection(IContainer container, ReportExportDto report)
+    {
+        container.Column(section =>
+        {
+            section.Item().Text("DETALLES DEL INCIDENTE").FontSize(12).Bold().FontColor(Colors.Blue.Darken2);
+
+            section.Item().PaddingTop(5).Text("Hechos Reportados:").FontSize(9).Bold();
+            section.Item().PaddingTop(3).Text(report.HechosReportados).FontSize(9);
+
+            section.Item().PaddingTop(5).Text("Acciones Realizadas:").FontSize(9).Bold();
+            section.Item().PaddingTop(3).Text(report.AccionesRealizadas).FontSize(9);
+
+            section.Item().PaddingTop(5).Text("Traslados:").FontSize(9).Bold();
+            section.Item().PaddingTop(3).Text(report.Traslados).FontSize(9);
+
+            AddOptionalField(section, "Observaciones:", report.Observaciones);
+        });
+    }
+
+    /// <summary>
+    /// Composes the audit information section
+    /// </summary>
+    private static void ComposeAuditSection(IContainer container, ReportExportDto report)
+    {
+        container.Column(section =>
+        {
+            section.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
+            section.Item().PaddingTop(5).Text("INFORMACIÓN DE AUDITORÍA").FontSize(10).Bold().FontColor(Colors.Grey.Darken2);
+
+            AddOptionalAuditField(section, "ID Usuario Creador:", report.UsuarioCreadorId);
+            AddOptionalDateField(section, "Última modificación:", report.FechaUltimaModificacion);
+        });
+    }
+
+    /// <summary>
+    /// Formats a boolean value as "Sí" or "No"
+    /// </summary>
+    private static string FormatBoolean(bool value) => value ? "Sí" : "No";
+
+    /// <summary>
+    /// Adds an optional text field if value is not empty
+    /// </summary>
+    private static void AddOptionalField(ColumnDescriptor section, string label, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            section.Item().PaddingTop(5).Text(label).FontSize(9).Bold();
+            section.Item().PaddingTop(3).Text(value).FontSize(9);
+        }
+    }
+
+    /// <summary>
+    /// Adds an optional audit field if value is not empty
+    /// </summary>
+    private static void AddOptionalAuditField(ColumnDescriptor section, string label, string? value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            section.Item().PaddingTop(3).Text($"{label} {value}").FontSize(8);
+        }
+    }
+
+    /// <summary>
+    /// Adds an optional date field if value has a value
+    /// </summary>
+    private static void AddOptionalDateField(ColumnDescriptor section, string label, DateTime? value)
+    {
+        if (value.HasValue)
+        {
+            section.Item().PaddingTop(2).Text($"{label} {value.Value:dd/MM/yyyy HH:mm}").FontSize(8);
+        }
     }
 
     /// <summary>

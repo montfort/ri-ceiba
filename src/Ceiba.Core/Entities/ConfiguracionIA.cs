@@ -86,42 +86,96 @@ public class ConfiguracionIA : BaseEntity
     {
         var errors = new List<string>();
 
+        ValidateRequiredFields(errors);
+        ValidateProviderSpecificFields(errors);
+        ValidateNumericRanges(errors);
+
+        return (errors.Count == 0, errors);
+    }
+
+    /// <summary>
+    /// Validates required fields common to all providers.
+    /// </summary>
+    private void ValidateRequiredFields(List<string> errors)
+    {
         if (string.IsNullOrWhiteSpace(Proveedor))
-            errors.Add("El proveedor es requerido.");
-
-        switch (Proveedor.ToLower())
         {
-            case "openai":
-                if (string.IsNullOrWhiteSpace(ApiKey))
-                    errors.Add("La API Key es requerida para OpenAI.");
-                break;
-
-            case "azureopenai":
-                if (string.IsNullOrWhiteSpace(ApiKey))
-                    errors.Add("La API Key es requerida para Azure OpenAI.");
-                if (string.IsNullOrWhiteSpace(AzureEndpoint))
-                    errors.Add("El endpoint de Azure es requerido.");
-                break;
-
-            case "local":
-            case "ollama":
-                if (string.IsNullOrWhiteSpace(LocalEndpoint))
-                    errors.Add("El endpoint local es requerido.");
-                break;
+            errors.Add("El proveedor es requerido.");
         }
 
         if (string.IsNullOrWhiteSpace(Modelo))
+        {
             errors.Add("El modelo es requerido.");
+        }
+    }
 
+    /// <summary>
+    /// Validates provider-specific fields based on the selected provider.
+    /// </summary>
+    private void ValidateProviderSpecificFields(List<string> errors)
+    {
+        switch (Proveedor?.ToLower())
+        {
+            case "openai":
+                ValidateOpenAiFields(errors);
+                break;
+            case "azureopenai":
+                ValidateAzureOpenAiFields(errors);
+                break;
+            case "local":
+            case "ollama":
+                ValidateLocalFields(errors);
+                break;
+        }
+    }
+
+    private void ValidateOpenAiFields(List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            errors.Add("La API Key es requerida para OpenAI.");
+        }
+    }
+
+    private void ValidateAzureOpenAiFields(List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(ApiKey))
+        {
+            errors.Add("La API Key es requerida para Azure OpenAI.");
+        }
+
+        if (string.IsNullOrWhiteSpace(AzureEndpoint))
+        {
+            errors.Add("El endpoint de Azure es requerido.");
+        }
+    }
+
+    private void ValidateLocalFields(List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(LocalEndpoint))
+        {
+            errors.Add("El endpoint local es requerido.");
+        }
+    }
+
+    /// <summary>
+    /// Validates numeric parameters are within acceptable ranges.
+    /// </summary>
+    private void ValidateNumericRanges(List<string> errors)
+    {
         if (MaxTokens < 500 || MaxTokens > 128000)
+        {
             errors.Add("MaxTokens debe estar entre 500 y 128000.");
+        }
 
         if (Temperature < 0 || Temperature > 2)
+        {
             errors.Add("Temperature debe estar entre 0 y 2.");
+        }
 
         if (MaxReportesParaNarrativa < 0 || MaxReportesParaNarrativa > 1000)
+        {
             errors.Add("MaxReportesParaNarrativa debe estar entre 0 y 1000.");
-
-        return (errors.Count == 0, errors);
+        }
     }
 }

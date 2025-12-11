@@ -127,68 +127,104 @@ public class ResilientEmailService : IResilientEmailService
         while (processedCount < maxToProcess && !cancellationToken.IsCancellationRequested)
         {
             if (!_emailQueue.TryDequeue(out var queuedEmail))
+            {
                 break;
-
-            // Check if email has exceeded max queue time
-            if (DateTime.UtcNow - queuedEmail.QueuedAt > _options.MaxQueueTime)
-            {
-                _logger.LogWarning(
-                    "Discarding queued email (exceeded max queue time). Subject: {Subject}",
-                    queuedEmail.Request.Subject);
-                continue;
             }
 
-            // Check if max retries exceeded
-            if (queuedEmail.Attempts >= _options.MaxQueueRetries)
+            var processResult = await ProcessSingleQueuedEmailAsync(queuedEmail, cancellationToken);
+            if (processResult)
             {
-                _logger.LogWarning(
-                    "Discarding queued email (exceeded max retries). Subject: {Subject}",
-                    queuedEmail.Request.Subject);
-                continue;
+                processedCount++;
             }
 
-            try
-            {
-                var result = await _innerEmailService.SendAsync(
-                    queuedEmail.Request, cancellationToken);
-
-                if (result.Success)
-                {
-                    RecordSuccess();
-                    processedCount++;
-                    _logger.LogInformation(
-                        "Successfully sent queued email. Subject: {Subject}",
-                        queuedEmail.Request.Subject);
-                }
-                else
-                {
-                    // Re-queue with incremented attempt count
-                    queuedEmail.Attempts++;
-                    _emailQueue.Enqueue(queuedEmail);
-                    RecordFailure();
-
-                    _logger.LogWarning(
-                        "Failed to send queued email. Attempt {Attempt}. Re-queuing.",
-                        queuedEmail.Attempts);
-                }
-            }
-            catch (Exception ex)
-            {
-                queuedEmail.Attempts++;
-                _emailQueue.Enqueue(queuedEmail);
-                RecordFailure();
-
-                _logger.LogError(ex,
-                    "Exception sending queued email. Attempt {Attempt}. Re-queuing.",
-                    queuedEmail.Attempts);
-            }
-
-            // If circuit opened, stop processing
             if (_circuitState == CircuitState.Open)
+            {
                 break;
+            }
         }
 
         return processedCount;
+    }
+
+    /// <summary>
+    /// Processes a single queued email, returning true if successfully sent.
+    /// </summary>
+    private async Task<bool> ProcessSingleQueuedEmailAsync(QueuedEmail queuedEmail, CancellationToken cancellationToken)
+    {
+        if (ShouldDiscardQueuedEmail(queuedEmail))
+        {
+            return false;
+        }
+
+        return await TrySendQueuedEmailAsync(queuedEmail, cancellationToken);
+    }
+
+    /// <summary>
+    /// Checks if a queued email should be discarded due to age or retry limits.
+    /// </summary>
+    private bool ShouldDiscardQueuedEmail(QueuedEmail queuedEmail)
+    {
+        if (DateTime.UtcNow - queuedEmail.QueuedAt > _options.MaxQueueTime)
+        {
+            _logger.LogWarning(
+                "Discarding queued email (exceeded max queue time). Subject: {Subject}",
+                queuedEmail.Request.Subject);
+            return true;
+        }
+
+        if (queuedEmail.Attempts >= _options.MaxQueueRetries)
+        {
+            _logger.LogWarning(
+                "Discarding queued email (exceeded max retries). Subject: {Subject}",
+                queuedEmail.Request.Subject);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Attempts to send a queued email, handling success and failure.
+    /// </summary>
+    private async Task<bool> TrySendQueuedEmailAsync(QueuedEmail queuedEmail, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var result = await _innerEmailService.SendAsync(queuedEmail.Request, cancellationToken);
+
+            if (result.Success)
+            {
+                RecordSuccess();
+                _logger.LogInformation(
+                    "Successfully sent queued email. Subject: {Subject}",
+                    queuedEmail.Request.Subject);
+                return true;
+            }
+
+            RequeueEmailAfterFailure(queuedEmail, "Failed to send queued email");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception sending queued email. Attempt {Attempt}. Re-queuing.", queuedEmail.Attempts + 1);
+            RequeueEmailAfterFailure(queuedEmail, null);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Re-queues an email after a failed send attempt.
+    /// </summary>
+    private void RequeueEmailAfterFailure(QueuedEmail queuedEmail, string? warningMessage)
+    {
+        queuedEmail.Attempts++;
+        _emailQueue.Enqueue(queuedEmail);
+        RecordFailure();
+
+        if (warningMessage != null)
+        {
+            _logger.LogWarning("{Message}. Attempt {Attempt}. Re-queuing.", warningMessage, queuedEmail.Attempts);
+        }
     }
 
     public EmailServiceHealth GetHealth()

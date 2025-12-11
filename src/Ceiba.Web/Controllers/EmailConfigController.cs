@@ -59,30 +59,10 @@ public class EmailConfigController : ControllerBase
             _logger.LogInformation("Updating email configuration. Provider: {Provider}, Enabled: {Enabled}",
                 dto.Proveedor, dto.Habilitado);
 
-            // Validate input based on provider
-            if (dto.Habilitado)
+            var validationError = await ValidateEmailConfigAsync(dto, cancellationToken);
+            if (validationError != null)
             {
-                if (string.IsNullOrWhiteSpace(dto.FromEmail) || string.IsNullOrWhiteSpace(dto.FromName))
-                {
-                    return BadRequest(new { error = "El email y nombre del remitente son obligatorios" });
-                }
-
-                if (dto.Proveedor == "SMTP")
-                {
-                    if (string.IsNullOrWhiteSpace(dto.SmtpHost) || !dto.SmtpPort.HasValue)
-                    {
-                        return BadRequest(new { error = "El host y puerto SMTP son obligatorios" });
-                    }
-                }
-                else if (dto.Proveedor == "SendGrid")
-                {
-                    // For new configurations, API key is required
-                    var existingConfig = await _configService.GetConfigurationAsync(cancellationToken);
-                    if (existingConfig == null && string.IsNullOrWhiteSpace(dto.SendGridApiKey))
-                    {
-                        return BadRequest(new { error = "La API Key de SendGrid es obligatoria" });
-                    }
-                }
+                return BadRequest(new { error = validationError });
             }
 
             var config = await _configService.UpdateConfigurationAsync(dto, cancellationToken);
@@ -100,6 +80,49 @@ public class EmailConfigController : ControllerBase
             _logger.LogError(ex, "Error updating email configuration");
             return StatusCode(500, new { error = $"Error al actualizar la configuración: {ex.Message}" });
         }
+    }
+
+    /// <summary>
+    /// Validates email configuration input based on provider.
+    /// </summary>
+    /// <returns>Error message if validation fails, null if valid.</returns>
+    private async Task<string?> ValidateEmailConfigAsync(EmailConfigUpdateDto dto, CancellationToken cancellationToken)
+    {
+        if (!dto.Habilitado)
+        {
+            return null;
+        }
+
+        if (string.IsNullOrWhiteSpace(dto.FromEmail) || string.IsNullOrWhiteSpace(dto.FromName))
+        {
+            return "El email y nombre del remitente son obligatorios";
+        }
+
+        return dto.Proveedor switch
+        {
+            "SMTP" => ValidateSmtpConfig(dto),
+            "SendGrid" => await ValidateSendGridConfigAsync(dto, cancellationToken),
+            _ => null
+        };
+    }
+
+    private static string? ValidateSmtpConfig(EmailConfigUpdateDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.SmtpHost) || !dto.SmtpPort.HasValue)
+        {
+            return "El host y puerto SMTP son obligatorios";
+        }
+        return null;
+    }
+
+    private async Task<string?> ValidateSendGridConfigAsync(EmailConfigUpdateDto dto, CancellationToken cancellationToken)
+    {
+        var existingConfig = await _configService.GetConfigurationAsync(cancellationToken);
+        if (existingConfig == null && string.IsNullOrWhiteSpace(dto.SendGridApiKey))
+        {
+            return "La API Key de SendGrid es obligatoria";
+        }
+        return null;
     }
 
     /// <summary>
