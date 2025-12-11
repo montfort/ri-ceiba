@@ -1,7 +1,7 @@
 # Tareas Pendientes - Sistema Ceiba
 
-**Última actualización**: 2025-12-11 (Sprint 2 completado)
-**Progreso total**: 148/330 tareas completadas (44.8%)
+**Última actualización**: 2025-12-11 (Sprint 3 completado)
+**Progreso total**: 152/330 tareas completadas (46.1%)
 
 ---
 
@@ -16,7 +16,7 @@
 | 5 | US3 - Admin/Auditoría | 20/20 | 0 | ✅ Completa |
 | 6 | US4 - Reportes Automatizados | 26/26 | 0 | ✅ Completa |
 | 7 | US5 - Sugerencias | 5/5 | 0 | ✅ Completa |
-| 8 | Polish & Cross-Cutting | 0/37 | 37 | ⏳ Pendiente |
+| 8 | Polish & Cross-Cutting | 4/37 | 33 | ⏳ En progreso |
 | 9 | NFR Validation | 0/45 | 45 | ⏳ Pendiente |
 
 ---
@@ -42,12 +42,13 @@
 - ~~T107~~ Suggestion management endpoints - **Ya implementado** (AdminController.cs)
 - ~~T108~~ SuggestionManager.razor - **CRUD completo funcionando**
 
-**Pendientes de Sprint 3:**
-| ID | Tarea | Fase | Dependencias |
-|----|-------|------|--------------|
-| T109 | Create main navigation layout | Polish | - |
-| T110 | Create role-based menu component | Polish | T109 |
-| T113 | Create login page | Polish | - |
+✅ **Sprint 3 COMPLETADO** - UI/UX y Layout verificado:
+- ~~T109~~ MainLayout.razor - **Mejorado con footer, fecha, badge de usuario**
+- ~~T110~~ NavMenu.razor (role-based) - **Ya implementado y funcionando**
+- ~~T111~~ Responsive/mobile-first CSS - **Completamente reescrito**
+- ~~T113~~ Login page - **Ya implementado y funcionando**
+
+**Pendientes de Sprint 4:**
 
 ### 🟡 Prioridad MEDIA (Seguridad y UX)
 
@@ -64,7 +65,6 @@
 
 | ID | Tarea | Fase | Dependencias |
 |----|-------|------|--------------|
-| T111 | Responsive/mobile-first CSS | Polish | - |
 | T115-T115b | Backup scripts | Polish | - |
 | T116a-T116e | Playwright E2E tests | Polish | T116 |
 | T117-T117e | Performance optimization (indexes) | Polish | - |
@@ -129,16 +129,16 @@
       src/Ceiba.Web/Components/Pages/Admin/SuggestionManager.razor
 ```
 
-### Fase 8: Polish & Cross-Cutting (37 pendientes)
+### Fase 8: Polish & Cross-Cutting (33 pendientes)
 
-**UI/UX (8 tareas)**:
-- T109: MainLayout.razor
-- T110: NavMenu.razor (role-based)
-- T111: Responsive CSS
+**UI/UX (4 tareas completadas + 5 pendientes)**:
+- [x] T109: MainLayout.razor - **Completado**
+- [x] T110: NavMenu.razor (role-based) - **Completado**
+- [x] T111: Responsive CSS - **Completado**
 - T112-T112d: WCAG AA accessibility (5 tareas)
 
-**Autenticación (6 tareas)**:
-- T113: Login page
+**Autenticación (1 completada + 5 pendientes)**:
+- [x] T113: Login page - **Completado**
 - T113a-T113e: Security enhancements (reCAPTCHA, rate limit, delays, monitoring, alerts)
 
 **Infraestructura (6 tareas)**:
@@ -200,26 +200,28 @@
    - T104-T105: Tests creados (58 tests totales)
    - T106-T108: Ya implementados y verificados
 
-### Sprint 3: UI/UX y Autenticación (Prioridad ALTA/MEDIA) - SIGUIENTE
+### Sprint 3: ✅ COMPLETADO
 
-4. **Layout y Navegación**
-   - T109-T110: MainLayout y NavMenu
-   - T113: Login page
-   - T111: CSS responsivo
+~~4. **Layout y Navegación**~~ - **HECHO**
+   - T109-T110: MainLayout y NavMenu (verificados y mejorados)
+   - T113: Login page (ya implementado)
+   - T111: CSS responsivo (completamente reescrito)
+
+### Sprint 4: Accesibilidad y Seguridad (Prioridad MEDIA) - SIGUIENTE
 
 5. **Seguridad de Login**
    - T113a-T113e: reCAPTCHA, rate limiting, delays
 
-### Sprint 4: Accesibilidad y Testing (Prioridad MEDIA)
-
 6. **WCAG AA Compliance**
    - T112-T112d: Todas las tareas de accesibilidad
+
+### Sprint 5: CI/CD y Testing (Prioridad MEDIA)
 
 7. **CI/CD y E2E**
    - T116: GitHub Actions
    - T116a-T116e: Playwright tests
 
-### Sprint 5: Performance y Seguridad (Prioridad NORMAL)
+### Sprint 6: Performance y Seguridad (Prioridad NORMAL)
 
 8. **Performance**
    - T117-T117e: Índices y optimizaciones
@@ -228,7 +230,7 @@
    - T114, T114a: HTTPS/HSTS
    - T118-T118b: Headers y sanitización
 
-### Sprint 6+: NFR y Operaciones (Prioridad BAJA)
+### Sprint 7+: NFR y Operaciones (Prioridad BAJA)
 
 10. **Validación y Operaciones**
     - T119-T120: Coverage y validación
@@ -244,7 +246,8 @@
 
 3. **Dependencias**: Verificar que las tareas prerequisito estén completas antes de iniciar.
 
-4. **Tests Actuales**: 312+ tests pasando, 6 omitidos (integración con servicios externos).
-   - Sprint 1 verificó: 115 tests específicos de US2/US4 pasando correctamente.
+4. **Tests Actuales**: 374+ tests pasando, 6 omitidos (integración con servicios externos).
+   - Sprint 1 verificó: 115 tests específicos de US2/US4
+   - Sprint 2 añadió: 32 tests de CatalogAdminService
 
-5. **Build Status**: 38 advertencias menores (SonarAnalyzer en Razor), sin errores.
+5. **Build Status**: 36 advertencias menores (SonarAnalyzer en Razor), sin errores.
