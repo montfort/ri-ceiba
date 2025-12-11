@@ -116,9 +116,11 @@ jobs:
       - name: Run database migrations
         run: |
           dotnet tool install --global dotnet-ef || true
-          dotnet ef database update --project src/Ceiba.Infrastructure --startup-project src/Ceiba.Web
-        env:
-          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef database update \
+            --project src/Ceiba.Infrastructure \
+            --startup-project src/Ceiba.Web \
+            --connection "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
 
       - name: Start application
         run: |
