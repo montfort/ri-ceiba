@@ -26,6 +26,15 @@ public class AutomatedReportServiceTests : IDisposable
     private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly Mock<ILogger<AutomatedReportService>> _mockLogger;
 
+    /// <summary>
+    /// JSON options matching those used in AutomatedReportService for consistent serialization.
+    /// </summary>
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
     public AutomatedReportServiceTests()
     {
         var options = new DbContextOptionsBuilder<CeibaDbContext>()
@@ -87,6 +96,35 @@ public class AutomatedReportServiceTests : IDisposable
             _mockAuditService.Object,
             _mockConfiguration.Object,
             _mockLogger.Object);
+    }
+
+    /// <summary>
+    /// Creates a mock IConfigurationSection that simulates a list of strings.
+    /// This is needed because Moq cannot mock extension methods like Get&lt;T&gt;().
+    /// The Get&lt;List&lt;string&gt;&gt;() extension method works by iterating GetChildren().
+    /// </summary>
+    private static Mock<IConfigurationSection> CreateMockListSection(List<string>? values)
+    {
+        var mockSection = new Mock<IConfigurationSection>();
+
+        if (values == null || values.Count == 0)
+        {
+            mockSection.Setup(s => s.GetChildren()).Returns(Array.Empty<IConfigurationSection>());
+            return mockSection;
+        }
+
+        var children = values.Select((value, index) =>
+        {
+            var childMock = new Mock<IConfigurationSection>();
+            childMock.Setup(c => c.Key).Returns(index.ToString());
+            childMock.Setup(c => c.Value).Returns(value);
+            childMock.Setup(c => c.Path).Returns($"AutomatedReports:Recipients:{index}");
+            return childMock.Object;
+        }).ToList();
+
+        mockSection.Setup(s => s.GetChildren()).Returns(children);
+
+        return mockSection;
     }
 
     private async Task<Zona> CreateTestZona(string nombre = "Zona Test")
@@ -299,12 +337,13 @@ public class AutomatedReportServiceTests : IDisposable
     public async Task GetReportByIdAsync_Found_ReturnsDetail()
     {
         // Arrange
+        // Use JsonOptions to match the service's serialization format (camelCase)
         var report = new ReporteAutomatizado
         {
             FechaInicio = DateTime.UtcNow.AddDays(-1),
             FechaFin = DateTime.UtcNow,
             ContenidoMarkdown = "# Test Report",
-            Estadisticas = JsonSerializer.Serialize(new ReportStatisticsDto { TotalReportes = 10 })
+            Estadisticas = JsonSerializer.Serialize(new ReportStatisticsDto { TotalReportes = 10 }, JsonOptions)
         };
         _context.ReportesAutomatizados.Add(report);
         await _context.SaveChangesAsync();
@@ -950,8 +989,8 @@ public class AutomatedReportServiceTests : IDisposable
         _mockConfiguration.Setup(c => c["AutomatedReports:GenerationTime"]).Returns("08:00:00");
         _mockConfiguration.Setup(c => c["AutomatedReports:Enabled"]).Returns("true");
 
-        var mockSection = new Mock<IConfigurationSection>();
-        mockSection.Setup(s => s.Get<List<string>>()).Returns(new List<string> { "test@test.com" });
+        // Use helper to properly mock IConfigurationSection for Get<List<string>>()
+        var mockSection = CreateMockListSection(new List<string> { "test@test.com" });
         _mockConfiguration.Setup(c => c.GetSection("AutomatedReports:Recipients")).Returns(mockSection.Object);
 
         var service = CreateService();
@@ -962,6 +1001,7 @@ public class AutomatedReportServiceTests : IDisposable
         // Assert
         result.GenerationTime.Should().Be(new TimeSpan(8, 0, 0));
         result.Enabled.Should().BeTrue();
+        result.Recipients.Should().ContainSingle().Which.Should().Be("test@test.com");
     }
 
     [Fact(DisplayName = "T084: GetConfigurationAsync should return defaults when not configured")]
@@ -971,8 +1011,8 @@ public class AutomatedReportServiceTests : IDisposable
         _mockConfiguration.Setup(c => c["AutomatedReports:GenerationTime"]).Returns((string?)null);
         _mockConfiguration.Setup(c => c["AutomatedReports:Enabled"]).Returns((string?)null);
 
-        var mockSection = new Mock<IConfigurationSection>();
-        mockSection.Setup(s => s.Get<List<string>>()).Returns((List<string>?)null);
+        // Use helper to properly mock empty IConfigurationSection
+        var mockSection = CreateMockListSection(null);
         _mockConfiguration.Setup(c => c.GetSection("AutomatedReports:Recipients")).Returns(mockSection.Object);
 
         var service = CreateService();

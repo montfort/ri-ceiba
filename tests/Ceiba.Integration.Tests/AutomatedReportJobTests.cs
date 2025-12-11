@@ -21,6 +21,15 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
     private readonly CeibaWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
+    /// <summary>
+    /// JSON options matching those used in AutomatedReportService for consistent serialization.
+    /// </summary>
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true
+    };
+
     public AutomatedReportJobTests(CeibaWebApplicationFactory factory)
     {
         _factory = factory;
@@ -323,7 +332,7 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 FechaInicio = DateTime.UtcNow.AddDays(-i - 1),
                 FechaFin = DateTime.UtcNow.AddDays(-i),
                 ContenidoMarkdown = $"# Report {i}",
-                Estadisticas = JsonSerializer.Serialize(new ReportStatisticsDto { TotalReportes = i }),
+                Estadisticas = JsonSerializer.Serialize(new ReportStatisticsDto { TotalReportes = i }, JsonOptions),
                 CreatedAt = DateTime.UtcNow.AddMinutes(-i)
             });
         }
@@ -396,7 +405,7 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
             FechaInicio = DateTime.UtcNow.AddDays(-1),
             FechaFin = DateTime.UtcNow,
             ContenidoMarkdown = "# Test Report\n\nContent here",
-            Estadisticas = JsonSerializer.Serialize(stats),
+            Estadisticas = JsonSerializer.Serialize(stats, JsonOptions),
             Enviado = false
         };
 
