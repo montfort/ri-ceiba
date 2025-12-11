@@ -21,9 +21,7 @@ fi
 # SSL certificate validation - set to "true" to skip validation (development only)
 # WARNING: Only use SKIP_SSL_VERIFY=true for localhost with self-signed certificates
 SKIP_SSL_VERIFY="${SKIP_SSL_VERIFY:-false}"
-CURL_SSL_OPTS=""
 if [ "$SKIP_SSL_VERIFY" = "true" ]; then
-    CURL_SSL_OPTS="-k"
     echo "WARNING: SSL certificate validation is disabled (SKIP_SSL_VERIFY=true)"
 fi
 
@@ -74,14 +72,25 @@ skip() {
     ((SKIPPED++))
 }
 
-# HTTP request helper
-# Uses CURL_SSL_OPTS which is set based on SKIP_SSL_VERIFY environment variable
+# HTTP request helpers
+# SSL validation is controlled by SKIP_SSL_VERIFY environment variable
+# When SKIP_SSL_VERIFY=true, uses --insecure flag (development only with self-signed certs)
 http_get() {
-    curl -s $CURL_SSL_OPTS -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
+    if [ "$SKIP_SSL_VERIFY" = "true" ]; then
+        # SECURITY: --insecure used only when explicitly opted-in via SKIP_SSL_VERIFY=true
+        curl -s --insecure -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
+    else
+        curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$1" 2>/dev/null || echo "000"
+    fi
 }
 
 http_get_body() {
-    curl -s $CURL_SSL_OPTS --max-time 10 "$1" 2>/dev/null || echo ""
+    if [ "$SKIP_SSL_VERIFY" = "true" ]; then
+        # SECURITY: --insecure used only when explicitly opted-in via SKIP_SSL_VERIFY=true
+        curl -s --insecure --max-time 10 "$1" 2>/dev/null || echo ""
+    else
+        curl -s --max-time 10 "$1" 2>/dev/null || echo ""
+    fi
 }
 
 print_header "CEIBA - E2E Verification Script"
