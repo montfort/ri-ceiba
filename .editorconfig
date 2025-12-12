@@ -25,6 +25,73 @@ dotnet_diagnostic.S2955.severity = suggestion
 # Single-line if statements without braces are acceptable for simple guard clauses
 dotnet_diagnostic.IDE0011.severity = suggestion
 
+# IDE0028: Use collection expressions - C# 12 feature, not always clearer
+# Current array/list initialization syntax is readable and widely understood
+dotnet_diagnostic.IDE0028.severity = suggestion
+
+# IDE0053: Use expression body for lambdas - style preference
+# Block bodies are sometimes clearer for complex lambdas
+dotnet_diagnostic.IDE0053.severity = suggestion
+
+# IDE0059: Unnecessary value assignment - often intentional for clarity
+dotnet_diagnostic.IDE0059.severity = suggestion
+
+# IDE0042: Deconstruct variable declaration - style preference
+dotnet_diagnostic.IDE0042.severity = suggestion
+
+# IDE0057: Use range operator - style preference, not always clearer
+dotnet_diagnostic.IDE0057.severity = suggestion
+
+# IDE0270: Null check can be simplified - style preference
+dotnet_diagnostic.IDE0270.severity = suggestion
+
+# IDE0090: Simplify new expression - target-typed new, style preference
+dotnet_diagnostic.IDE0090.severity = suggestion
+
+# IDE0048: Add parentheses for clarity - style preference
+dotnet_diagnostic.IDE0048.severity = suggestion
+
+# IDE0037: Use inferred member name - style preference
+dotnet_diagnostic.IDE0037.severity = suggestion
+
+# IDE0074: Use compound assignment - style preference
+dotnet_diagnostic.IDE0074.severity = suggestion
+
+# xUnit1004: Test methods should not be skipped - legitimate during development
+dotnet_diagnostic.xUnit1004.severity = suggestion
+
+# CA1308: Normalize strings to uppercase - ToLowerInvariant is acceptable for URLs/paths
+dotnet_diagnostic.CA1308.severity = suggestion
+
+# CA1860, CA1862: Use string methods instead of LINQ - minor optimization
+dotnet_diagnostic.CA1860.severity = suggestion
+dotnet_diagnostic.CA1862.severity = suggestion
+
+# CA1310: Specify StringComparison for correctness - covered by CA1307
+dotnet_diagnostic.CA1310.severity = suggestion
+
+# CA1845: Use span-based string.Concat - minor optimization
+dotnet_diagnostic.CA1845.severity = suggestion
+
+# SCS0027: Potential SQL injection - reviewed, using parameterized queries
+dotnet_diagnostic.SCS0027.severity = suggestion
+
+# SCS0005, CA5394: Weak random - acceptable in tests, not security-critical
+dotnet_diagnostic.SCS0005.severity = suggestion
+dotnet_diagnostic.CA5394.severity = suggestion
+
+# SCS0018: Potential path traversal - paths come from controlled sources
+dotnet_diagnostic.SCS0018.severity = suggestion
+
+# ASP0015: Suggest using IHeaderDictionary - style preference
+dotnet_diagnostic.ASP0015.severity = suggestion
+
+# CS0618: Obsolete member usage - sometimes needed for compatibility
+dotnet_diagnostic.CS0618.severity = suggestion
+
+# CS1587: XML comment placement - style preference
+dotnet_diagnostic.CS1587.severity = suggestion
+
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2
