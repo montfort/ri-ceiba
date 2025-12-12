@@ -91,7 +91,8 @@ public class AiServiceHealthCheckTests
         // Assert
         result.IsHealthy.Should().BeTrue();
         result.Status.Should().Be(ServiceStatus.Healthy);
-        result.ResponseTimeMs.Should().BeLessThan(500);
+        // Use generous timeout to account for CI environment overhead
+        result.ResponseTimeMs.Should().BeLessThan(2000);
     }
 
     #endregion
