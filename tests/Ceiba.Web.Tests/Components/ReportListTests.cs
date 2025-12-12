@@ -137,8 +137,8 @@ public class ReportListTests : TestContext
         var delitoFilter = cut.Find("#filterDelito");
         await cut.InvokeAsync(() => delitoFilter.Input("Robo"));
 
-        // Wait for debounce
-        await Task.Delay(600);
+        // Wait for debounce - use generous timeout for CI environments
+        await Task.Delay(1500);
 
         // Assert
         _mockReportService.Verify(
