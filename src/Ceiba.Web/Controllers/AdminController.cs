@@ -13,7 +13,7 @@ namespace Ceiba.Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [AuthorizeBeforeModelBinding("ADMIN")]
-[IgnoreAntiforgeryToken]
+[AutoValidateAntiforgeryToken]
 public class AdminController : ControllerBase
 {
     private readonly IUserManagementService _userService;

@@ -179,6 +179,7 @@ public class AccountController : Controller
     }
 
     [HttpPost("logout")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         try

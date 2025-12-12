@@ -15,7 +15,7 @@ namespace Ceiba.Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [AuthorizeBeforeModelBinding("REVISOR")] // Only REVISOR can access export
-[IgnoreAntiforgeryToken] // APIs REST don't use antiforgery tokens
+[AutoValidateAntiforgeryToken]
 public class ExportController : ControllerBase
 {
     private readonly IExportService _exportService;

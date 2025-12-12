@@ -2,7 +2,6 @@ using Ceiba.Core.Exceptions;
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs;
 using Ceiba.Web.Filters;
-using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,7 +15,7 @@ namespace Ceiba.Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [AuthorizeBeforeModelBinding] // Custom filter to check auth before model binding (OWASP best practice)
-[IgnoreAntiforgeryToken] // APIs REST don't use antiforgery tokens
+[AutoValidateAntiforgeryToken]
 public class ReportsController : ControllerBase
 {
     private readonly IReportService _reportService;

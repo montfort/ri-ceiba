@@ -12,6 +12,7 @@ namespace Ceiba.Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
+[AutoValidateAntiforgeryToken]
 public class CatalogsController : ControllerBase
 {
     private readonly ICatalogService _catalogService;

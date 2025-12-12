@@ -8,6 +8,7 @@ namespace Ceiba.Web.Controllers;
 [ApiController]
 [Route("api/automated-report-config")]
 [Authorize(Roles = "ADMIN")]
+[AutoValidateAntiforgeryToken]
 public class AutomatedReportConfigController : ControllerBase
 {
     private readonly IAutomatedReportConfigService _configService;

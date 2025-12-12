@@ -8,6 +8,7 @@ namespace Ceiba.Web.Controllers;
 [ApiController]
 [Route("api/email-config")]
 [Authorize(Roles = "ADMIN")]
+[AutoValidateAntiforgeryToken]
 public class EmailConfigController : ControllerBase
 {
     private readonly IEmailConfigService _configService;
