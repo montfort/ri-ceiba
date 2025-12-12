@@ -69,7 +69,7 @@ jobs:
             /o:"montfort" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/Program.cs,**/*.Designer.cs" \
             /d:sonar.cpd.exclusions="**/Migrations/**" \
@@ -91,11 +91,37 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-      - name: List coverage files (debug)
-        if: always()
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      - name: Merge coverage reports
         run: |
           echo "=== Coverage files generated ==="
-          find . -name "coverage.opencover.xml" -o -name "*.trx" | head -50
+          find . -name "coverage.opencover.xml" -type f
+          echo ""
+
+          # Count coverage files
+          COVERAGE_COUNT=$(find ./TestResults -name "coverage.opencover.xml" -type f | wc -l)
+          echo "Found $COVERAGE_COUNT coverage file(s)"
+
+          if [ "$COVERAGE_COUNT" -gt 0 ]; then
+            # Merge all coverage files into one
+            reportgenerator \
+              "-reports:./TestResults/**/coverage.opencover.xml" \
+              "-targetdir:./coverage" \
+              "-reporttypes:OpenCover"
+
+            echo ""
+            echo "=== Merged coverage report ==="
+            if [ -f ./coverage/OpenCover.xml ]; then
+              # Rename to expected name
+              mv ./coverage/OpenCover.xml ./coverage/coverage.opencover.xml
+              echo "Coverage file ready at ./coverage/coverage.opencover.xml"
+              head -30 ./coverage/coverage.opencover.xml
+            fi
+          else
+            echo "WARNING: No coverage files found!"
+          fi
 
       - name: End SonarQube analysis
         env:
@@ -108,6 +134,7 @@ jobs:
         with:
           name: coverage-reports
           path: |
-            **/TestResults/**/coverage.opencover.xml
-            **/TestResults/**/*.trx
+            ./coverage/coverage.opencover.xml
+            ./TestResults/**/coverage.opencover.xml
+            ./TestResults/**/*.trx
           retention-days: 7
