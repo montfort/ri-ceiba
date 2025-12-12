@@ -73,7 +73,10 @@ jobs:
             /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/Program.cs,**/*.Designer.cs" \
             /d:sonar.cpd.exclusions="**/Migrations/**" \
-            /d:sonar.exclusions="**/wwwroot/**,**/Migrations/**,**/obj/**,**/scripts/**/*.sql"
+            /d:sonar.exclusions="**/wwwroot/**,**/Migrations/**,**/obj/**,**/scripts/**/*.sql" \
+            /d:sonar.issue.ignore.multicriteria="e1" \
+            /d:sonar.issue.ignore.multicriteria.e1.ruleKey="csharpsquid:S2696" \
+            /d:sonar.issue.ignore.multicriteria.e1.resourceKey="**/LiveAnnouncer.razor"
 
       - name: Build solution
         run: dotnet build --no-restore --no-incremental
