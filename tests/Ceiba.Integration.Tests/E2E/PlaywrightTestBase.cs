@@ -27,12 +27,24 @@ public class WithTestNameAttribute : BeforeAfterTestAttribute
 /// <summary>
 /// Base class for Playwright E2E tests.
 /// Provides common configuration and trace-on-failure support.
+/// Uses E2ETestServerFixture to automatically start the application server.
 /// </summary>
 [WithTestName]
 [Trait("Category", "E2E")]
+[Collection("E2E")]
 public abstract class PlaywrightTestBase : PageTest
 {
-    protected static string BaseUrl => Environment.GetEnvironmentVariable("BASE_URL") ?? "http://localhost:5000";
+    protected readonly E2ETestServerFixture ServerFixture;
+
+    protected PlaywrightTestBase(E2ETestServerFixture serverFixture)
+    {
+        ServerFixture = serverFixture;
+    }
+
+    /// <summary>
+    /// Base URL from the test server fixture, or environment variable override.
+    /// </summary>
+    protected string BaseUrl => Environment.GetEnvironmentVariable("BASE_URL") ?? ServerFixture.BaseUrl;
 
     public override async Task InitializeAsync()
     {

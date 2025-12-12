@@ -8,6 +8,8 @@ namespace Ceiba.Integration.Tests.E2E;
 /// </summary>
 public class ResponsiveE2ETests : PlaywrightTestBase
 {
+    public ResponsiveE2ETests(E2ETestServerFixture serverFixture) : base(serverFixture) { }
+
     // Common device viewports
     private static readonly ViewportSize MobilePortrait = new() { Width = 375, Height = 667 };   // iPhone SE
     private static readonly ViewportSize MobileLandscape = new() { Width = 667, Height = 375 };

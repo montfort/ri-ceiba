@@ -8,6 +8,8 @@ namespace Ceiba.Integration.Tests.E2E;
 /// </summary>
 public class AccessibilityE2ETests : PlaywrightTestBase
 {
+    public AccessibilityE2ETests(E2ETestServerFixture serverFixture) : base(serverFixture) { }
+
     #region WCAG 2.4.1 - Bypass Blocks
 
     [Fact]

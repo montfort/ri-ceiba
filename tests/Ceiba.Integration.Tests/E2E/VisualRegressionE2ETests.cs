@@ -10,6 +10,8 @@ namespace Ceiba.Integration.Tests.E2E;
 /// </summary>
 public class VisualRegressionE2ETests : PlaywrightTestBase
 {
+    public VisualRegressionE2ETests(E2ETestServerFixture serverFixture) : base(serverFixture) { }
+
     private static readonly string SnapshotDir = Path.Combine(
         Environment.CurrentDirectory, "playwright-snapshots");
 

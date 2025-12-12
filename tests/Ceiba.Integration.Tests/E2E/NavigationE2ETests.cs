@@ -9,6 +9,8 @@ namespace Ceiba.Integration.Tests.E2E;
 /// </summary>
 public class NavigationE2ETests : PlaywrightTestBase
 {
+    public NavigationE2ETests(E2ETestServerFixture serverFixture) : base(serverFixture) { }
+
     [Fact]
     public async Task HomePage_ShouldRedirectToLogin_WhenUnauthenticated()
     {
@@ -40,8 +42,8 @@ public class NavigationE2ETests : PlaywrightTestBase
 
         foreach (var route in protectedRoutes)
         {
-            // Act
-            await NavigateToAsync(route);
+            // Act - Use GotoAsync directly to capture response status
+            var response = await Page.GotoAsync(route);
             await WaitForPageLoadAsync();
 
             // Assert - Should redirect to login, show login form, show access denied, 404, or error
@@ -52,10 +54,14 @@ public class NavigationE2ETests : PlaywrightTestBase
                                     currentUrl.Contains("account");
             var hasLoginForm = await Page.Locator("input[type='password']").CountAsync() > 0;
 
-            // Check for various 404/error indicators
+            // Check HTTP status code directly (404 means route doesn't exist or is protected)
+            var httpStatus404 = response?.Status == 404;
+
+            // Check for various 404/error indicators in content
             var pageContent = await Page.ContentAsync();
             var contentLower = pageContent.ToLowerInvariant();
-            var is404OrError = contentLower.Contains("404") ||
+            var is404OrError = httpStatus404 ||
+                              contentLower.Contains("404") ||
                               contentLower.Contains("not found") ||
                               contentLower.Contains("no encontrado") ||
                               contentLower.Contains("error") ||

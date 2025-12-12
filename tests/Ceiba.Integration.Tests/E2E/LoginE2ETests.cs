@@ -9,6 +9,8 @@ namespace Ceiba.Integration.Tests.E2E;
 /// </summary>
 public class LoginE2ETests : PlaywrightTestBase
 {
+    public LoginE2ETests(E2ETestServerFixture serverFixture) : base(serverFixture) { }
+
     [Fact]
     public async Task LoginPage_ShouldBeAccessible()
     {
