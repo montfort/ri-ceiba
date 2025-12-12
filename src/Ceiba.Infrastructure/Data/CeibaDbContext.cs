@@ -52,13 +52,8 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
     // Email Configuration (US4 Enhancement)
     public DbSet<ConfiguracionEmail> ConfiguracionesEmail => Set<ConfiguracionEmail>();
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        // Add audit logging interceptor
-        optionsBuilder.AddInterceptors(new AuditSaveChangesInterceptor(this));
-    }
+    // Note: OnConfiguring removed - interceptors are added via DI in Program.cs
+    // This is required for DbContext pooling compatibility with Aspire
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

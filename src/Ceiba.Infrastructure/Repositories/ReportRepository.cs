@@ -205,7 +205,15 @@ public class ReportRepository : IReportRepository
 
     public async Task<ReporteIncidencia> UpdateAsync(ReporteIncidencia report)
     {
-        _context.ReportesIncidencia.Update(report);
+        // Check if entity is already being tracked
+        var entry = _context.Entry(report);
+        if (entry.State == EntityState.Detached)
+        {
+            // Only call Update if not already tracked
+            _context.ReportesIncidencia.Update(report);
+        }
+        // If already tracked, just save - EF will detect changes automatically
+
         await _context.SaveChangesAsync();
         return report;
     }

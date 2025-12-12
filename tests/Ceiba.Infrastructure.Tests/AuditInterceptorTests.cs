@@ -17,8 +17,10 @@ public class AuditInterceptorTests
     public async Task SaveChangesAsync_WithAddedEntity_ShouldCreateAuditLog()
     {
         // Arrange
+        var interceptor = new AuditSaveChangesInterceptor();
         var options = new DbContextOptionsBuilder<CeibaDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .AddInterceptors(interceptor)
             .Options;
 
         await using var context = new CeibaDbContext(options, userId: Guid.NewGuid());
@@ -45,8 +47,10 @@ public class AuditInterceptorTests
     public async Task SaveChangesAsync_WithModifiedEntity_ShouldCreateAuditLog()
     {
         // Arrange
+        var interceptor = new AuditSaveChangesInterceptor();
         var options = new DbContextOptionsBuilder<CeibaDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .AddInterceptors(interceptor)
             .Options;
 
         var userId = Guid.NewGuid();
@@ -76,8 +80,10 @@ public class AuditInterceptorTests
     public async Task SaveChangesAsync_WithoutUserId_ShouldCreateAuditWithNullUser()
     {
         // Arrange
+        var interceptor = new AuditSaveChangesInterceptor();
         var options = new DbContextOptionsBuilder<CeibaDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .AddInterceptors(interceptor)
             .Options;
 
         await using var context = new CeibaDbContext(options, userId: null);
@@ -103,8 +109,10 @@ public class AuditInterceptorTests
     public async Task SaveChangesAsync_WithMultipleChanges_ShouldCreateMultipleAuditLogs()
     {
         // Arrange
+        var interceptor = new AuditSaveChangesInterceptor();
         var options = new DbContextOptionsBuilder<CeibaDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .AddInterceptors(interceptor)
             .Options;
 
         var userId = Guid.NewGuid();

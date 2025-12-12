@@ -1,7 +1,9 @@
 using Ceiba.Core.Entities;
 using Ceiba.Core.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Security.Claims;
 
 namespace Ceiba.Infrastructure.Data;
 
@@ -12,11 +14,24 @@ namespace Ceiba.Infrastructure.Data;
 /// </summary>
 public class AuditSaveChangesInterceptor : SaveChangesInterceptor
 {
-    private readonly CeibaDbContext _context;
+    private readonly IHttpContextAccessor? _httpContextAccessor;
 
-    public AuditSaveChangesInterceptor(CeibaDbContext context)
+    /// <summary>
+    /// Creates an interceptor that gets the current user from HttpContext.
+    /// </summary>
+    public AuditSaveChangesInterceptor(IHttpContextAccessor? httpContextAccessor = null)
     {
-        _context = context;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    private Guid? GetCurrentUserId()
+    {
+        var user = _httpContextAccessor?.HttpContext?.User;
+        if (user?.Identity?.IsAuthenticated != true)
+            return null;
+
+        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
     }
 
     public override InterceptionResult<int> SavingChanges(
@@ -48,6 +63,9 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
             .Where(e => e.Entity is not RegistroAuditoria) // Don't audit the audit logs themselves
             .ToList();
 
+        // Get userId from HttpContext first, fallback to CeibaDbContext.CurrentUserId
+        var userId = GetCurrentUserId() ?? (context as CeibaDbContext)?.CurrentUserId;
+
         foreach (var entry in entries)
         {
             var auditCode = DetermineAuditCode(entry);
@@ -59,7 +77,7 @@ public class AuditSaveChangesInterceptor : SaveChangesInterceptor
                 Codigo = auditCode,
                 IdRelacionado = GetEntityId(entry.Entity),
                 TablaRelacionada = entry.Metadata.GetTableName(),
-                UsuarioId = _context.CurrentUserId,
+                UsuarioId = userId,
                 Ip = null, // Will be set by middleware in Phase 8 (T017)
                 Detalles = BuildAuditDetails(entry)
             };

@@ -496,8 +496,19 @@ namespace Ceiba.Infrastructure.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("idx_auditoria_fecha");
 
+                    b.HasIndex("Ip")
+                        .HasDatabaseName("idx_auditoria_ip");
+
                     b.HasIndex("UsuarioId")
                         .HasDatabaseName("idx_auditoria_usuario");
+
+                    b.HasIndex("Codigo", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_auditoria_codigo_fecha");
+
+                    b.HasIndex("CreatedAt", "UsuarioId")
+                        .IsDescending(true, false)
+                        .HasDatabaseName("idx_auditoria_fecha_usuario");
 
                     b.HasIndex("TablaRelacionada", "IdRelacionado")
                         .HasDatabaseName("idx_auditoria_entidad");
@@ -723,7 +734,8 @@ namespace Ceiba.Infrastructure.Migrations
                         .IsDescending()
                         .HasDatabaseName("idx_reporte_fecha");
 
-                    b.HasIndex("CuadranteId");
+                    b.HasIndex("DatetimeHechos")
+                        .HasDatabaseName("idx_reporte_datetime_hechos");
 
                     b.HasIndex("Delito")
                         .HasDatabaseName("idx_reporte_delito");
@@ -731,13 +743,19 @@ namespace Ceiba.Infrastructure.Migrations
                     b.HasIndex("Estado")
                         .HasDatabaseName("idx_reporte_estado");
 
-                    b.HasIndex("SectorId");
-
                     b.HasIndex("UsuarioId")
                         .HasDatabaseName("idx_reporte_usuario");
 
                     b.HasIndex("ZonaId")
                         .HasDatabaseName("idx_reporte_zona");
+
+                    b.HasIndex("CuadranteId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_reporte_cuadrante_fecha");
+
+                    b.HasIndex("SectorId", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("idx_reporte_sector_fecha");
 
                     b.HasIndex("CreatedAt", "Estado", "Delito")
                         .IsDescending(true, false, false)
@@ -746,6 +764,10 @@ namespace Ceiba.Infrastructure.Migrations
                     b.HasIndex("Estado", "ZonaId", "CreatedAt")
                         .IsDescending(false, false, true)
                         .HasDatabaseName("idx_reporte_composite_search");
+
+                    b.HasIndex("UsuarioId", "Estado", "CreatedAt")
+                        .IsDescending(false, false, true)
+                        .HasDatabaseName("idx_reporte_usuario_estado");
 
                     b.ToTable("REPORTE_INCIDENCIA", null, t =>
                         {

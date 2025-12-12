@@ -34,15 +34,24 @@ try
     // Usar Serilog como logger
     builder.Host.UseSerilog();
 
+    // Register IHttpContextAccessor first (needed by AuditSaveChangesInterceptor)
+    builder.Services.AddHttpContextAccessor();
+
+    // Register AuditSaveChangesInterceptor as singleton (interceptors must be singletons for pooling)
+    builder.Services.AddSingleton<AuditSaveChangesInterceptor>();
+
     // Configurar DbContext con PostgreSQL
     // Detecta si está corriendo con Aspire (connection string "ceiba") o standalone ("DefaultConnection")
     var aspireConnectionString = builder.Configuration.GetConnectionString("ceiba");
     if (!string.IsNullOrEmpty(aspireConnectionString))
     {
         // Aspire está orquestando - usar integración Aspire para PostgreSQL
-        builder.AddNpgsqlDbContext<CeibaDbContext>("ceiba", settings =>
+        builder.AddNpgsqlDbContext<CeibaDbContext>("ceiba", configureDbContextOptions: options =>
         {
-            settings.DisableRetry = false;
+            // Add audit interceptor via DI (required for DbContext pooling)
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var interceptor = serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>();
+            options.AddInterceptors(interceptor);
         });
         Log.Information("Using Aspire-orchestrated PostgreSQL connection");
     }
@@ -58,6 +67,10 @@ try
                 npgsqlOptions.CommandTimeout(30);
             });
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+
+            // Add audit interceptor
+            var interceptor = serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>();
+            options.AddInterceptors(interceptor);
         });
         Log.Information("Using standalone PostgreSQL connection");
     }
@@ -85,7 +98,7 @@ try
     // Registrar servicios de aplicación (T016)
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<SeedDataService>(); // T020
-    builder.Services.AddHttpContextAccessor(); // Para obtener UserId en DbContext
+    // Note: AddHttpContextAccessor already called above for AuditSaveChangesInterceptor
 
     // Registrar servicios de User Story 1 (T045)
     builder.Services.AddScoped<IReportService, ReportService>();
