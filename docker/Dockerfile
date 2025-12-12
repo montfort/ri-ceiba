@@ -9,12 +9,15 @@ COPY ["src/Ceiba.Core/Ceiba.Core.csproj", "src/Ceiba.Core/"]
 COPY ["src/Ceiba.Application/Ceiba.Application.csproj", "src/Ceiba.Application/"]
 COPY ["src/Ceiba.Infrastructure/Ceiba.Infrastructure.csproj", "src/Ceiba.Infrastructure/"]
 COPY ["src/Ceiba.Shared/Ceiba.Shared.csproj", "src/Ceiba.Shared/"]
+COPY ["Ceiba.ServiceDefaults/Ceiba.ServiceDefaults.csproj", "Ceiba.ServiceDefaults/"]
 
 # Restore dependencies
 RUN dotnet restore "Ceiba.sln"
 
-# Copy all source code
-COPY . .
+# Copy only source directories (exclude sensitive files via .dockerignore)
+# Note: .dockerignore must exclude: .git, .env*, secrets, **/bin, **/obj, etc.
+COPY ["src/", "src/"]
+COPY ["Ceiba.ServiceDefaults/", "Ceiba.ServiceDefaults/"]
 
 # Build and publish
 WORKDIR "/src/src/Ceiba.Web"
@@ -26,8 +29,9 @@ WORKDIR /app
 
 # Install Pandoc for document conversion (RT-006 Mitigation)
 # Using Ubuntu noble base image, so use apt instead of dnf
+# --no-install-recommends avoids installing unnecessary packages
 RUN apt-get update && \
-    apt-get install -y pandoc && \
+    apt-get install -y --no-install-recommends pandoc && \
     pandoc --version && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

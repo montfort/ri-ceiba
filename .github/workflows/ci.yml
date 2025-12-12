@@ -62,7 +62,7 @@ jobs:
         run: dotnet test tests/Ceiba.Web.Tests/Ceiba.Web.Tests.csproj --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=web-tests.trx" --results-directory ./TestResults
 
       - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
         if: always()
         with:
           files: ./TestResults/*.trx
@@ -127,7 +127,7 @@ jobs:
           ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=ceiba_test_password"
 
       - name: Publish Integration Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
         if: always()
         with:
           files: ./TestResults/*.trx
@@ -312,7 +312,7 @@ jobs:
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
 
       - name: Generate coverage report
-        uses: danielpalme/ReportGenerator-GitHub-Action@v5
+        uses: danielpalme/ReportGenerator-GitHub-Action@ee0ae774f6d3afedcbd1683c1ab21b83670bdf8e # v5.5.1
         with:
           reports: 'coverage/**/coverage.cobertura.xml'
           targetdir: 'coveragereport'
