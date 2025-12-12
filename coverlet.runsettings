@@ -13,7 +13,9 @@
           <!-- Include only Ceiba assemblies -->
           <Include>[Ceiba.Core]*,[Ceiba.Application]*,[Ceiba.Infrastructure]*,[Ceiba.Web]*,[Ceiba.Shared]*</Include>
           <SingleHit>false</SingleHit>
-          <UseSourceLink>true</UseSourceLink>
+          <!-- Disable SourceLink to use local file paths instead of GitHub URLs -->
+          <!-- This is required for private repositories where raw.githubusercontent.com returns 404 -->
+          <UseSourceLink>false</UseSourceLink>
           <IncludeTestAssembly>false</IncludeTestAssembly>
           <SkipAutoProps>true</SkipAutoProps>
           <DeterministicReport>false</DeterministicReport>
