@@ -70,7 +70,6 @@ jobs:
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="./coverage/coverage.opencover.xml,./TestResults/**/coverage.opencover.xml" \
-            /d:sonar.coverageReportPaths="./coverage/coverage.cobertura.xml" \
             /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/Program.cs,**/*.Designer.cs" \
             /d:sonar.cpd.exclusions="**/Migrations/**" \
@@ -113,12 +112,11 @@ jobs:
             FIRST_FILE=$(find ./TestResults -name "coverage.opencover.xml" -type f | head -1)
             head -50 "$FIRST_FILE" | grep -E "(fullPath|SequencePoint)" | head -10 || true
 
-            # Merge all coverage files into one
-            # Use Cobertura format as fallback since it's more reliable with SonarCloud
+            # Merge all coverage files into one OpenCover format
             reportgenerator \
               "-reports:./TestResults/**/coverage.opencover.xml" \
               "-targetdir:./coverage" \
-              "-reporttypes:OpenCover;Cobertura" \
+              "-reporttypes:OpenCover" \
               "-verbosity:Warning"
 
             echo ""
@@ -138,20 +136,13 @@ jobs:
               grep -oP 'fullPath="[^"]*"' ./coverage/coverage.opencover.xml | head -5 || true
             fi
 
-            # Also show cobertura as backup
-            if [ -f ./coverage/Cobertura.xml ]; then
-              mv ./coverage/Cobertura.xml ./coverage/coverage.cobertura.xml
-              echo ""
-              echo "=== Cobertura coverage also available at ./coverage/coverage.cobertura.xml ==="
-              ls -la ./coverage/coverage.cobertura.xml
-            fi
           else
             echo "WARNING: No coverage files found!"
           fi
 
           echo ""
           echo "=== All coverage files for SonarCloud ==="
-          find . -name "coverage.opencover.xml" -o -name "coverage.cobertura.xml" | head -20
+          find . -name "coverage.opencover.xml" | head -20
 
       - name: End SonarQube analysis
         env:
