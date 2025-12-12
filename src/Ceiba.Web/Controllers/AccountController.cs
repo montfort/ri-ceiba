@@ -236,6 +236,12 @@ public class AccountController : Controller
     /// <summary>
     /// Gets the client IP address, considering proxy headers.
     /// </summary>
+    /// <remarks>
+    /// S6932 is suppressed because this method intentionally reads raw request headers
+    /// to extract client IP from proxy headers (X-Forwarded-For, X-Real-IP).
+    /// Model binding is not applicable for this infrastructure-level operation.
+    /// </remarks>
+#pragma warning disable S6932 // Use model binding instead of accessing the raw request data
     private string GetClientIpAddress()
     {
         // Check for forwarded IP (behind proxy/load balancer)
@@ -260,6 +266,7 @@ public class AccountController : Controller
         // Fall back to connection remote IP
         return HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     }
+#pragma warning restore S6932
 
     /// <summary>
     /// Validates and sanitizes the return URL to prevent open redirect attacks.

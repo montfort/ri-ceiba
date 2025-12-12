@@ -312,9 +312,9 @@
     private string? SuccessMessage { get; set; }
     private Guid CurrentUserId { get; set; }
     private bool IsRevisor { get; set; }
-    private bool CanEdit => IsRevisor || (Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId);
-    private bool CanSubmit => Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId;
-    private bool CanDelete => Report?.Estado == 0 && Report?.UsuarioId == CurrentUserId;
+    private bool CanEdit => IsRevisor || (Report != null && Report.Estado == 0 && Report.UsuarioId == CurrentUserId);
+    private bool CanSubmit => Report != null && Report.Estado == 0 && Report.UsuarioId == CurrentUserId;
+    private bool CanDelete => Report != null && Report.Estado == 0 && Report.UsuarioId == CurrentUserId;
 
     protected override async Task OnInitializedAsync()
     {

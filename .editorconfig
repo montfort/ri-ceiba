@@ -21,6 +21,10 @@ dotnet_diagnostic.S3400.severity = suggestion
 dotnet_diagnostic.S3260.severity = suggestion
 dotnet_diagnostic.S2955.severity = suggestion
 
+# IDE0011: Add braces - suppress for SonarCloud (we use csharp_prefer_braces = true:warning locally)
+# Single-line if statements without braces are acceptable for simple guard clauses
+dotnet_diagnostic.IDE0011.severity = suggestion
+
 # XML project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2

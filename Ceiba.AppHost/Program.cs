@@ -14,4 +14,4 @@ var web = builder.AddProject<Projects.Ceiba_Web>("ceiba-web")
     .WaitFor(database)
     .WithExternalHttpEndpoints();
 
-builder.Build().Run();
+await builder.Build().RunAsync();

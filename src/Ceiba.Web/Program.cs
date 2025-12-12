@@ -313,7 +313,7 @@ try
     }
 
     Log.Information("Ceiba application starting...");
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
