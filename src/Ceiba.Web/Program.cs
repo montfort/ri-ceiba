@@ -140,20 +140,8 @@ try
         BaseAddress = new Uri(sp.GetRequiredService<NavigationManager>().BaseUri)
     });
 
-    // Configurar factory para DbContext con UserId del request actual
-    builder.Services.AddScoped(provider =>
-    {
-        var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-        var userId = httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true
-            ? Guid.Parse(httpContextAccessor.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? Guid.Empty.ToString())
-            : (Guid?)null;
-
-        var optionsBuilder = new DbContextOptionsBuilder<CeibaDbContext>();
-        var connectionString = provider.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection");
-        optionsBuilder.UseNpgsql(connectionString);
-
-        return new CeibaDbContext(optionsBuilder.Options, userId);
-    });
+    // Note: CeibaDbContext is registered above via AddNpgsqlDbContext (Aspire) or AddDbContext (standalone)
+    // The DbContext already supports UserId injection through the interceptor pattern
 
     // Configurar autorización (T020a)
     builder.Services.AddAuthorizationBuilder()
