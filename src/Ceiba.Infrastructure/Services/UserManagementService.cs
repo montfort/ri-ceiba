@@ -324,7 +324,7 @@ public class UserManagementService : IUserManagementService
             Roles = roles,
             Activo = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
             CreatedAt = DateTime.UtcNow, // Identity doesn't track this by default
-            LastLogin = user.LockoutEnd == null ? null : null // Would need custom tracking
+            LastLogin = null // Would need custom tracking - Identity doesn't store last login by default
         };
     }
 }

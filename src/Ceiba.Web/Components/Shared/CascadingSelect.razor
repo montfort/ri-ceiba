@@ -59,7 +59,8 @@
     private int GetIntValue()
     {
         if (Value is int intVal) return intVal;
-        if (Value != null && int.TryParse(Value.ToString(), out var parsed)) return parsed;
+        // Use EqualityComparer to handle both reference and value types correctly
+        if (!EqualityComparer<TValue>.Default.Equals(Value, default) && int.TryParse(Value?.ToString(), out var parsed)) return parsed;
         return 0;
     }
 

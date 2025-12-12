@@ -58,9 +58,9 @@ public static class AiProviders
     public const string Local = "Local";
     public const string Ollama = "Ollama";
 
-    public static readonly List<AiProviderInfo> All = new()
+    public static IReadOnlyList<AiProviderInfo> All { get; } = new AiProviderInfo[]
     {
-        new AiProviderInfo
+        new()
         {
             Id = OpenAI,
             Name = "OpenAI",
@@ -69,7 +69,7 @@ public static class AiProviders
             DefaultEndpoint = "https://api.openai.com/v1/chat/completions",
             DefaultModels = new[] { "gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-3.5-turbo" }
         },
-        new AiProviderInfo
+        new()
         {
             Id = Gemini,
             Name = "Google Gemini",
@@ -78,7 +78,7 @@ public static class AiProviders
             DefaultEndpoint = "https://generativelanguage.googleapis.com/v1beta/models",
             DefaultModels = new[] { "gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-pro" }
         },
-        new AiProviderInfo
+        new()
         {
             Id = DeepSeek,
             Name = "DeepSeek",
@@ -87,7 +87,7 @@ public static class AiProviders
             DefaultEndpoint = "https://api.deepseek.com/chat/completions",
             DefaultModels = new[] { "deepseek-chat", "deepseek-reasoner" }
         },
-        new AiProviderInfo
+        new()
         {
             Id = AzureOpenAI,
             Name = "Azure OpenAI",
@@ -96,7 +96,7 @@ public static class AiProviders
             RequiresAzureConfig = true,
             DefaultModels = new[] { "gpt-4o", "gpt-4o-mini", "gpt-35-turbo" }
         },
-        new AiProviderInfo
+        new()
         {
             Id = Ollama,
             Name = "Ollama (Local)",
@@ -106,7 +106,7 @@ public static class AiProviders
             DefaultEndpoint = "http://localhost:11434/api/generate",
             DefaultModels = new[] { "llama3.2", "llama3.1", "mistral", "qwen2.5", "phi3" }
         },
-        new AiProviderInfo
+        new()
         {
             Id = Local,
             Name = "LLM Local Personalizado",
