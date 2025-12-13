@@ -32,4 +32,11 @@
     <UserSecretsId>14d69f7d-df47-4fc1-ab2a-4dbfb6a170dd</UserSecretsId>
   </PropertyGroup>
 
+  <!-- Seed data files - copied to output for deployment -->
+  <ItemGroup>
+    <None Include="SeedData\regiones.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

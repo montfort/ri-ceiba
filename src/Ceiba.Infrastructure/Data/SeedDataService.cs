@@ -6,7 +6,7 @@ namespace Ceiba.Infrastructure.Data;
 
 /// <summary>
 /// Service to seed initial data into the database.
-/// Creates default roles, admin user, and sample catalogs.
+/// Creates default roles, admin user, and geographic catalogs from regiones.json.
 /// </summary>
 public class SeedDataService
 {
@@ -14,6 +14,38 @@ public class SeedDataService
     private readonly UserManager<IdentityUser<Guid>> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<SeedDataService> _logger;
+    private readonly RegionDataLoader _regionDataLoader;
+
+    /// <summary>
+    /// Path to the regiones.json file. Can be overridden via environment variable.
+    /// </summary>
+    public static string GetRegionesJsonPath()
+    {
+        // Allow override via environment variable for deployment flexibility
+        var envPath = Environment.GetEnvironmentVariable("CEIBA_REGIONES_JSON_PATH");
+        if (!string.IsNullOrEmpty(envPath) && File.Exists(envPath))
+            return envPath;
+
+        // Default locations to search (in order of priority)
+        var searchPaths = new[]
+        {
+            Path.Combine(AppContext.BaseDirectory, "SeedData", "regiones.json"),
+            Path.Combine(AppContext.BaseDirectory, "regiones.json"),
+            Path.Combine(Directory.GetCurrentDirectory(), "docs", "regiones.json"),
+            Path.Combine(Directory.GetCurrentDirectory(), "SeedData", "regiones.json"),
+            // Development fallback
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "docs", "regiones.json"))
+        };
+
+        foreach (var path in searchPaths)
+        {
+            if (File.Exists(path))
+                return path;
+        }
+
+        throw new FileNotFoundException(
+            "regiones.json not found. Set CEIBA_REGIONES_JSON_PATH environment variable or place file in SeedData folder.");
+    }
 
     public SeedDataService(
         CeibaDbContext context,
@@ -25,6 +57,21 @@ public class SeedDataService
         _userManager = userManager;
         _roleManager = roleManager;
         _logger = logger;
+        _regionDataLoader = new RegionDataLoader(context, new Logger<RegionDataLoader>(new LoggerFactory()));
+    }
+
+    public SeedDataService(
+        CeibaDbContext context,
+        UserManager<IdentityUser<Guid>> userManager,
+        RoleManager<IdentityRole<Guid>> roleManager,
+        ILogger<SeedDataService> logger,
+        RegionDataLoader regionDataLoader)
+    {
+        _context = context;
+        _userManager = userManager;
+        _roleManager = roleManager;
+        _logger = logger;
+        _regionDataLoader = regionDataLoader;
     }
 
     /// <summary>
@@ -147,81 +194,69 @@ public class SeedDataService
 
     private async Task SeedSampleCatalogsAsync()
     {
-        // Check if catalogs already seeded
-        if (await _context.Zonas.AnyAsync())
-        {
-            _logger.LogInformation("Sample catalogs already exist");
-            return;
-        }
-
         var adminUserId = (await _userManager.FindByEmailAsync("admin@ceiba.local"))?.Id
             ?? Guid.NewGuid();
 
-        // Seed Zonas
-        var zonas = new[]
+        // Seed geographic catalogs from regiones.json
+        await SeedGeographicCatalogsFromJsonAsync(adminUserId);
+
+        // Seed Sugerencias (only if not already seeded)
+        await SeedSugerenciasAsync(adminUserId);
+    }
+
+    private async Task SeedGeographicCatalogsFromJsonAsync(Guid adminUserId)
+    {
+        // Check if catalogs already seeded
+        if (await _context.Zonas.AnyAsync())
         {
-            new Core.Entities.Zona { Nombre = "Zona Norte", Activo = true, UsuarioId = adminUserId },
-            new Core.Entities.Zona { Nombre = "Zona Sur", Activo = true, UsuarioId = adminUserId },
-            new Core.Entities.Zona { Nombre = "Zona Centro", Activo = true, UsuarioId = adminUserId },
-            new Core.Entities.Zona { Nombre = "Zona Oriente", Activo = true, UsuarioId = adminUserId },
-            new Core.Entities.Zona { Nombre = "Zona Poniente", Activo = true, UsuarioId = adminUserId }
-        };
-
-        _context.Zonas.AddRange(zonas);
-        await _context.SaveChangesAsync();
-        _logger.LogInformation("Seeded {Count} zonas", zonas.Length);
-
-        // Seed Sectores (3-4 per zona con nombres realistas)
-        var sectores = new List<Core.Entities.Sector>();
-        var sectorNames = new[] { "Sector Centro", "Sector Este", "Sector Oeste", "Sector Residencial" };
-
-        for (int i = 0; i < zonas.Length; i++)
-        {
-            var zona = zonas[i];
-            var numSectores = i % 2 == 0 ? 3 : 4; // Alternar entre 3 y 4 sectores
-
-            for (int j = 0; j < numSectores; j++)
-            {
-                sectores.Add(new Core.Entities.Sector
-                {
-                    Nombre = sectorNames[j % sectorNames.Length],
-                    ZonaId = zona.Id,
-                    Activo = true,
-                    UsuarioId = adminUserId
-                });
-            }
+            _logger.LogInformation("Geographic catalogs already exist. Skipping seed.");
+            return;
         }
 
-        _context.Sectores.AddRange(sectores);
-        await _context.SaveChangesAsync();
-        _logger.LogInformation("Seeded {Count} sectores", sectores.Count);
-
-        // Seed Cuadrantes (3-5 per sector con nombres realistas)
-        var cuadrantes = new List<Core.Entities.Cuadrante>();
-        var cuadranteNames = new[] { "Cuadrante A", "Cuadrante B", "Cuadrante C", "Cuadrante D", "Cuadrante E" };
-
-        for (int i = 0; i < sectores.Count; i++)
+        try
         {
-            var sector = sectores[i];
-            var numCuadrantes = (i % 3) + 3; // Alternar entre 3, 4 y 5 cuadrantes
+            var jsonPath = GetRegionesJsonPath();
+            _logger.LogInformation("Loading geographic data from: {Path}", jsonPath);
 
-            for (int j = 0; j < numCuadrantes; j++)
-            {
-                cuadrantes.Add(new Core.Entities.Cuadrante
-                {
-                    Nombre = cuadranteNames[j],
-                    SectorId = sector.Id,
-                    Activo = true,
-                    UsuarioId = adminUserId
-                });
-            }
+            var zonaData = await _regionDataLoader.LoadFromJsonAsync(jsonPath);
+            await _regionDataLoader.SeedGeographicCatalogsAsync(zonaData, adminUserId, clearExisting: false);
+        }
+        catch (FileNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "regiones.json not found. Geographic catalogs will not be seeded.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to seed geographic catalogs from regiones.json");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Reloads geographic catalogs from regiones.json, replacing existing data.
+    /// This is useful for updating the database with new catalog data.
+    /// </summary>
+    public async Task ReloadGeographicCatalogsAsync()
+    {
+        var adminUserId = (await _userManager.FindByEmailAsync("admin@ceiba.local"))?.Id
+            ?? Guid.NewGuid();
+
+        var jsonPath = GetRegionesJsonPath();
+        _logger.LogInformation("Reloading geographic data from: {Path}", jsonPath);
+
+        var zonaData = await _regionDataLoader.LoadFromJsonAsync(jsonPath);
+        await _regionDataLoader.SeedGeographicCatalogsAsync(zonaData, adminUserId, clearExisting: true);
+    }
+
+    private async Task SeedSugerenciasAsync(Guid adminUserId)
+    {
+        // Check if sugerencias already seeded
+        if (await _context.CatalogosSugerencia.AnyAsync())
+        {
+            _logger.LogInformation("Sugerencias already exist. Skipping seed.");
+            return;
         }
 
-        _context.Cuadrantes.AddRange(cuadrantes);
-        await _context.SaveChangesAsync();
-        _logger.LogInformation("Seeded {Count} cuadrantes", cuadrantes.Count);
-
-        // Seed Sugerencias
         var sugerencias = new[]
         {
             // Sexo

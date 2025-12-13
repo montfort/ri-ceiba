@@ -1,4 +1,5 @@
 using Ceiba.Core.Interfaces;
+using Ceiba.Infrastructure.Data;
 using Ceiba.Shared.DTOs;
 using Ceiba.Web.Filters;
 using Microsoft.AspNetCore.Mvc;
@@ -18,15 +19,18 @@ public class AdminController : ControllerBase
 {
     private readonly IUserManagementService _userService;
     private readonly ICatalogAdminService _catalogService;
+    private readonly SeedDataService _seedDataService;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         IUserManagementService userService,
         ICatalogAdminService catalogService,
+        SeedDataService seedDataService,
         ILogger<AdminController> logger)
     {
         _userService = userService;
         _catalogService = catalogService;
+        _seedDataService = seedDataService;
         _logger = logger;
     }
 
@@ -234,6 +238,73 @@ public class AdminController : ControllerBase
 
     #region Catalog Management (FR-027 to FR-030)
 
+    /// <summary>
+    /// Gets current geographic catalog statistics.
+    /// </summary>
+    [HttpGet("catalogs/geographic-stats")]
+    [ProducesResponseType(typeof(GeographicCatalogStatsDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<GeographicCatalogStatsDto>> GetGeographicCatalogStats()
+    {
+        try
+        {
+            var regionLoader = HttpContext.RequestServices.GetRequiredService<RegionDataLoader>();
+            var stats = await regionLoader.GetCurrentStatsAsync();
+
+            return Ok(new GeographicCatalogStatsDto
+            {
+                Message = "Estadísticas actuales de catálogos geográficos",
+                ZonasCount = stats.Zonas,
+                RegionesCount = stats.Regiones,
+                SectoresCount = stats.Sectores,
+                CuadrantesCount = stats.Cuadrantes
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting geographic catalog stats");
+            return StatusCode(500, new { message = "Error al obtener estadísticas" });
+        }
+    }
+
+    /// <summary>
+    /// Reloads geographic catalogs (Zonas, Regiones, Sectores, Cuadrantes) from regiones.json.
+    /// WARNING: This will clear existing geographic data and replace it with data from the JSON file.
+    /// </summary>
+    [HttpPost("catalogs/reload-geographic")]
+    [ProducesResponseType(typeof(GeographicCatalogStatsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<GeographicCatalogStatsDto>> ReloadGeographicCatalogs()
+    {
+        try
+        {
+            _logger.LogWarning("Admin {AdminId} initiated geographic catalog reload", GetAdminId());
+            await _seedDataService.ReloadGeographicCatalogsAsync();
+
+            // Get the new stats
+            var regionLoader = HttpContext.RequestServices.GetRequiredService<RegionDataLoader>();
+            var stats = await regionLoader.GetCurrentStatsAsync();
+
+            return Ok(new GeographicCatalogStatsDto
+            {
+                Message = "Catálogos geográficos recargados exitosamente desde regiones.json",
+                ZonasCount = stats.Zonas,
+                RegionesCount = stats.Regiones,
+                SectoresCount = stats.Sectores,
+                CuadrantesCount = stats.Cuadrantes
+            });
+        }
+        catch (FileNotFoundException ex)
+        {
+            _logger.LogError(ex, "regiones.json not found during reload");
+            return StatusCode(500, new { message = "Archivo regiones.json no encontrado" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reloading geographic catalogs");
+            return StatusCode(500, new { message = "Error al recargar catálogos geográficos", error = ex.Message });
+        }
+    }
+
     // Zonas
 
     [HttpGet("catalogs/zonas")]
@@ -308,12 +379,90 @@ public class AdminController : ControllerBase
         }
     }
 
+    // Regiones
+
+    [HttpGet("catalogs/regiones")]
+    public async Task<ActionResult<List<RegionDto>>> GetRegiones([FromQuery] int? zonaId = null, [FromQuery] bool? activo = null)
+    {
+        var regiones = await _catalogService.GetRegionesAsync(zonaId, activo);
+        return Ok(regiones);
+    }
+
+    [HttpGet("catalogs/regiones/{id:int}")]
+    public async Task<ActionResult<RegionDto>> GetRegion(int id)
+    {
+        var region = await _catalogService.GetRegionByIdAsync(id);
+        if (region == null)
+            return NotFound(new { message = $"Región con ID {id} no encontrada" });
+        return Ok(region);
+    }
+
+    [HttpPost("catalogs/regiones")]
+    public async Task<ActionResult<RegionDto>> CreateRegion([FromBody] CreateRegionDto createDto)
+    {
+        try
+        {
+            var adminId = GetAdminId();
+            var region = await _catalogService.CreateRegionAsync(createDto, adminId);
+            return CreatedAtAction(nameof(GetRegion), new { id = region.Id }, region);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating region");
+            return StatusCode(500, new { message = "Error al crear región" });
+        }
+    }
+
+    [HttpPut("catalogs/regiones/{id:int}")]
+    public async Task<ActionResult<RegionDto>> UpdateRegion(int id, [FromBody] CreateRegionDto updateDto)
+    {
+        try
+        {
+            var adminId = GetAdminId();
+            var region = await _catalogService.UpdateRegionAsync(id, updateDto, adminId);
+            return Ok(region);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating region {RegionId}", id);
+            return StatusCode(500, new { message = "Error al actualizar región" });
+        }
+    }
+
+    [HttpPost("catalogs/regiones/{id:int}/toggle")]
+    public async Task<ActionResult<RegionDto>> ToggleRegion(int id)
+    {
+        try
+        {
+            var adminId = GetAdminId();
+            var region = await _catalogService.ToggleRegionActivoAsync(id, adminId);
+            return Ok(region);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling region {RegionId}", id);
+            return StatusCode(500, new { message = "Error al cambiar estado de región" });
+        }
+    }
+
     // Sectores
 
     [HttpGet("catalogs/sectores")]
-    public async Task<ActionResult<List<SectorDto>>> GetSectores([FromQuery] int? zonaId = null, [FromQuery] bool? activo = null)
+    public async Task<ActionResult<List<SectorDto>>> GetSectores([FromQuery] int? regionId = null, [FromQuery] bool? activo = null)
     {
-        var sectores = await _catalogService.GetSectoresAsync(zonaId, activo);
+        var sectores = await _catalogService.GetSectoresAsync(regionId, activo);
         return Ok(sectores);
     }
 

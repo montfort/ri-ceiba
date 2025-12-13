@@ -97,6 +97,7 @@ try
 
     // Registrar servicios de aplicación (T016)
     builder.Services.AddScoped<IAuditService, AuditService>();
+    builder.Services.AddScoped<RegionDataLoader>(); // Geographic catalog loader
     builder.Services.AddScoped<SeedDataService>(); // T020
     // Note: AddHttpContextAccessor already called above for AuditSaveChangesInterceptor
 

@@ -95,7 +95,8 @@ public record UserFilterDto
 #region Catalog Management DTOs
 
 /// <summary>
-/// DTO for Zona (geographic zone)
+/// DTO for Zona (geographic zone - top level)
+/// Hierarchy: Zona → Región → Sector → Cuadrante
 /// </summary>
 public record ZonaDto
 {
@@ -106,7 +107,7 @@ public record ZonaDto
     public string Nombre { get; init; } = string.Empty;
 
     public bool Activo { get; init; } = true;
-    public int SectoresCount { get; init; }
+    public int RegionesCount { get; init; }
 }
 
 /// <summary>
@@ -122,7 +123,42 @@ public record CreateZonaDto
 }
 
 /// <summary>
-/// DTO for Sector (linked to Zona)
+/// DTO for Región (linked to Zona)
+/// Hierarchy: Zona → Región → Sector → Cuadrante
+/// </summary>
+public record RegionDto
+{
+    public int Id { get; init; }
+
+    [Required(ErrorMessage = "El nombre es requerido")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
+    public string Nombre { get; init; } = string.Empty;
+
+    public int ZonaId { get; init; }
+    public string? ZonaNombre { get; init; }
+    public bool Activo { get; init; } = true;
+    public int SectoresCount { get; init; }
+}
+
+/// <summary>
+/// DTO for creating/updating a Región
+/// </summary>
+public record CreateRegionDto
+{
+    [Required(ErrorMessage = "El nombre es requerido")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
+    public string Nombre { get; init; } = string.Empty;
+
+    [Required(ErrorMessage = "La zona es requerida")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una zona válida")]
+    public int ZonaId { get; init; }
+
+    public bool Activo { get; init; } = true;
+}
+
+/// <summary>
+/// DTO for Sector (linked to Región)
+/// Hierarchy: Zona → Región → Sector → Cuadrante
 /// </summary>
 public record SectorDto
 {
@@ -132,6 +168,8 @@ public record SectorDto
     [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
     public string Nombre { get; init; } = string.Empty;
 
+    public int RegionId { get; init; }
+    public string? RegionNombre { get; init; }
     public int ZonaId { get; init; }
     public string? ZonaNombre { get; init; }
     public bool Activo { get; init; } = true;
@@ -147,15 +185,16 @@ public record CreateSectorDto
     [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
     public string Nombre { get; init; } = string.Empty;
 
-    [Required(ErrorMessage = "La zona es requerida")]
-    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una zona válida")]
-    public int ZonaId { get; init; }
+    [Required(ErrorMessage = "La región es requerida")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una región válida")]
+    public int RegionId { get; init; }
 
     public bool Activo { get; init; } = true;
 }
 
 /// <summary>
 /// DTO for Cuadrante (linked to Sector)
+/// Hierarchy: Zona → Región → Sector → Cuadrante
 /// </summary>
 public record CuadranteDto
 {
@@ -167,7 +206,9 @@ public record CuadranteDto
 
     public int SectorId { get; init; }
     public string? SectorNombre { get; init; }
-    public int? ZonaId { get; init; }
+    public int RegionId { get; init; }
+    public string? RegionNombre { get; init; }
+    public int ZonaId { get; init; }
     public string? ZonaNombre { get; init; }
     public bool Activo { get; init; } = true;
 }
@@ -374,6 +415,22 @@ public static class AuditCodes
         AUTO_REPORT_FAIL => "Error en reporte automatizado",
         _ => code
     };
+}
+
+#endregion
+
+#region Geographic Catalog DTOs
+
+/// <summary>
+/// DTO for geographic catalog reload statistics
+/// </summary>
+public record GeographicCatalogStatsDto
+{
+    public string Message { get; init; } = string.Empty;
+    public int ZonasCount { get; init; }
+    public int RegionesCount { get; init; }
+    public int SectoresCount { get; init; }
+    public int CuadrantesCount { get; init; }
 }
 
 #endregion

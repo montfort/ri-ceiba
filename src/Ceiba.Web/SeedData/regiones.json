@@ -1,0 +1,395 @@
+[
+  {
+    "nombre_zona": "Sur",
+    "regiones": [
+      {
+        "numero_region": 1,
+        "sectores": [
+          {
+            "nombre_sector": "Portales",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          },
+          {
+            "nombre_sector": "Nativitas",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          },
+          {
+            "nombre_sector": "Narvarte - Alamo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+          },
+          {
+            "nombre_sector": "Napoles",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14]
+          },
+          {
+            "nombre_sector": "Del Valle",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16]
+          }
+        ]
+      },
+      {
+        "numero_region": 2,
+        "sectores": [
+          {
+            "nombre_sector": "Xotepingo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          },
+          {
+            "nombre_sector": "Universidad",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          },
+          {
+            "nombre_sector": "Taxqueña",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+          },
+          {
+            "nombre_sector": "Culhuacan",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+          },
+          {
+            "nombre_sector": "Coyoacan",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]
+          }
+        ]
+      },
+      {
+        "numero_region": 3,
+        "sectores": [
+          {
+            "nombre_sector": "San Jeronimo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+          },
+          {
+            "nombre_sector": "Dinamo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          }
+        ]
+      },
+      {
+        "numero_region": 4,
+        "sectores": [
+          {
+            "nombre_sector": "Coapa",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+          },
+          {
+            "nombre_sector": "Fuente",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          },
+          {
+            "nombre_sector": "Huipulco-Hospitales",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          },
+          {
+            "nombre_sector": "Padierna",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          },
+          {
+            "nombre_sector": "Topilejo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nombre_zona": "Norte",
+    "regiones": [
+      {
+        "numero_region": 1,
+        "sectores": [
+          {
+            "nombre_sector": "Aragón",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          },
+          {
+            "nombre_sector": "Cuautepec",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+          },
+          {
+            "nombre_sector": "Cuchilla",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          },
+          {
+            "nombre_sector": "Lindavista",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+          },
+          {
+            "nombre_sector": "Pradera",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          },
+          {
+            "nombre_sector": "Quiroga",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          },
+          {
+            "nombre_sector": "Tepeyac",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          },
+          {
+            "nombre_sector": "Ticoman",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+          }
+        ]
+      },
+      {
+        "numero_region": 2,
+        "sectores": [
+          {
+            "nombre_sector": "Iztaccihuatl",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          },
+          {
+            "nombre_sector": "Pantitlan",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+          },
+          {
+            "nombre_sector": "Tlacotal",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          }
+        ]
+      },
+      {
+        "numero_region": 3,
+        "sectores": [
+          {
+            "nombre_sector": "Arenal",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7]
+          },
+          {
+            "nombre_sector": "Congreso",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7]
+          },
+          {
+            "nombre_sector": "Consulado",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          },
+          {
+            "nombre_sector": "Merced - Balbuena",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+          },
+          {
+            "nombre_sector": "Moctezuma",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+          },
+          {
+            "nombre_sector": "Zaragoza",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nombre_zona": "Centro",
+    "regiones": [
+      {
+        "numero_region": 1,
+        "sectores": [
+          {
+            "nombre_sector": "Alameda",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          },
+          {
+            "nombre_sector": "Angel",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+          },
+          {
+            "nombre_sector": "Asturias",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+          },
+          {
+            "nombre_sector": "Buenavista",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+          },
+          {
+            "nombre_sector": "Centro",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          },
+          {
+            "nombre_sector": "Morelos",
+            "cuadrantes": [1, 2, 3, 4, 5]
+          },
+          {
+            "nombre_sector": "Roma",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+          },
+          {
+            "nombre_sector": "Tlatelolco",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nombre_zona": "Oriente",
+    "regiones": [
+      {
+        "numero_region": 1,
+        "sectores": [
+          {
+            "nombre_sector": "Abasto - Reforma",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+          },
+          {
+            "nombre_sector": "Churubusco",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+          },
+          {
+            "nombre_sector": "Estrella",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          },
+          {
+            "nombre_sector": "Granjas",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+          },
+          {
+            "nombre_sector": "Oasis",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29]
+          },
+          {
+            "nombre_sector": "Quetzal",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+          },
+          {
+            "nombre_sector": "Santa Cruz",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+          },
+          {
+            "nombre_sector": "Teotongo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+          },
+          {
+            "nombre_sector": "Tezonco",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          }
+        ]
+      },
+      {
+        "numero_region": 2,
+        "sectores": [
+          {
+            "nombre_sector": "Milpa Alta",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          },
+          {
+            "nombre_sector": "Tecomitl",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8]
+          }
+        ]
+      },
+      {
+        "numero_region": 3,
+        "sectores": [
+          {
+            "nombre_sector": "Mixquic",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+          },
+          {
+            "nombre_sector": "Zapotitla",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+          }
+        ]
+      },
+      {
+        "numero_region": 4,
+        "sectores": [
+          {
+            "nombre_sector": "La Noria",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          },
+          {
+            "nombre_sector": "Tepepan",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "nombre_zona": "Poniente",
+    "regiones": [
+      {
+        "numero_region": 1,
+        "sectores": [
+          {
+            "nombre_sector": "Alpes",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          },
+          {
+            "nombre_sector": "Plateros",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          },
+          {
+            "nombre_sector": "San Angel",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+          },
+          {
+            "nombre_sector": "Santa Fe",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          }
+        ]
+      },
+      {
+        "numero_region": 2,
+        "sectores": [
+          {
+            "nombre_sector": "Claveria",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+          },
+          {
+            "nombre_sector": "Cuitlahuac",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          },
+          {
+            "nombre_sector": "Hormiga",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          },
+          {
+            "nombre_sector": "La Raza",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          }
+        ]
+      },
+      {
+        "numero_region": 3,
+        "sectores": [
+          {
+            "nombre_sector": "Cuajimalpa",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          },
+          {
+            "nombre_sector": "El Yaqui",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9]
+          }
+        ]
+      },
+      {
+        "numero_region": 4,
+        "sectores": [
+          {
+            "nombre_sector": "Chapultepec",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          },
+          {
+            "nombre_sector": "Polanco - Castillo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+          },
+          {
+            "nombre_sector": "Sotelo",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+          },
+          {
+            "nombre_sector": "Tacuba",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+          },
+          {
+            "nombre_sector": "Tacubaya",
+            "cuadrantes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+          }
+        ]
+      }
+    ]
+  }
+]
