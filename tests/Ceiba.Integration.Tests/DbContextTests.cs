@@ -86,10 +86,14 @@ public class DbContextTests : IAsyncLifetime
         context.Zonas.Add(zona);
         await context.SaveChangesAsync();
 
+        var region = new Region { Nombre = "Región Norte", ZonaId = zona.Id, Activo = true, UsuarioId = userId };
+        context.Regiones.Add(region);
+        await context.SaveChangesAsync();
+
         var sector = new Sector
         {
             Nombre = "Sector 1",
-            ZonaId = zona.Id,
+            RegionId = region.Id,
             Activo = true,
             UsuarioId = userId
         };
@@ -100,11 +104,11 @@ public class DbContextTests : IAsyncLifetime
 
         // Assert
         var savedSector = await context.Sectores
-            .Include(s => s.Zona)
+            .Include(s => s.Region)
             .FirstAsync();
 
-        savedSector.Zona.Should().NotBeNull();
-        savedSector.Zona.Nombre.Should().Be("Norte");
+        savedSector.Region.Should().NotBeNull();
+        savedSector.Region.Nombre.Should().Be("Región Norte");
     }
 
     [Fact]
@@ -118,10 +122,14 @@ public class DbContextTests : IAsyncLifetime
         context.Zonas.Add(zona);
         await context.SaveChangesAsync();
 
+        var region = new Region { Nombre = "Región Sur", ZonaId = zona.Id, Activo = true, UsuarioId = userId };
+        context.Regiones.Add(region);
+        await context.SaveChangesAsync();
+
         var sector = new Sector
         {
             Nombre = "Sector A",
-            ZonaId = zona.Id,
+            RegionId = region.Id,
             Activo = true,
             UsuarioId = userId
         };
@@ -143,12 +151,12 @@ public class DbContextTests : IAsyncLifetime
         // Assert
         var savedCuadrante = await context.Cuadrantes
             .Include(c => c.Sector)
-            .ThenInclude(s => s.Zona)
+            .ThenInclude(s => s.Region)
             .FirstAsync();
 
         savedCuadrante.Sector.Should().NotBeNull();
         savedCuadrante.Sector.Nombre.Should().Be("Sector A");
-        savedCuadrante.Sector.Zona.Nombre.Should().Be("Sur");
+        savedCuadrante.Sector.Region.Nombre.Should().Be("Región Sur");
     }
 
     [Fact]

@@ -91,9 +91,14 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
         var zona2 = new Ceiba.Core.Entities.Zona { Id = 2, Nombre = "Zona Norte", Activo = true };
         context.Zonas.AddRange(zona1, zona2);
 
-        var sector1 = new Ceiba.Core.Entities.Sector { Id = 1, Nombre = "Sector A", ZonaId = 1, Activo = true };
-        var sector2 = new Ceiba.Core.Entities.Sector { Id = 2, Nombre = "Sector B", ZonaId = 1, Activo = true };
-        var sector3 = new Ceiba.Core.Entities.Sector { Id = 3, Nombre = "Sector C", ZonaId = 2, Activo = true };
+        // Add regions
+        var region1 = new Ceiba.Core.Entities.Region { Id = 1, Nombre = "Región Centro", ZonaId = 1, Activo = true };
+        var region2 = new Ceiba.Core.Entities.Region { Id = 2, Nombre = "Región Norte", ZonaId = 2, Activo = true };
+        context.Regiones.AddRange(region1, region2);
+
+        var sector1 = new Ceiba.Core.Entities.Sector { Id = 1, Nombre = "Sector Centro", RegionId = 1, Activo = true };
+        var sector2 = new Ceiba.Core.Entities.Sector { Id = 2, Nombre = "Sector Sur", RegionId = 1, Activo = true };
+        var sector3 = new Ceiba.Core.Entities.Sector { Id = 3, Nombre = "Sector Norte", RegionId = 2, Activo = true };
         context.Sectores.AddRange(sector1, sector2, sector3);
 
         var cuadrante1 = new Ceiba.Core.Entities.Cuadrante { Id = 1, Nombre = "Cuadrante 1", SectorId = 1, Activo = true };

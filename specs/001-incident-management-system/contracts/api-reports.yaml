@@ -23,6 +23,10 @@ paths:
           in: query
           schema:
             type: integer
+        - name: regionId
+          in: query
+          schema:
+            type: integer
         - name: delito
           in: query
           schema:
@@ -229,6 +233,7 @@ components:
         - edad
         - delito
         - zonaId
+        - regionId
         - sectorId
         - cuadranteId
         - turnoCeiba
@@ -261,6 +266,8 @@ components:
         delito:
           type: string
         zonaId:
+          type: integer
+        regionId:
           type: integer
         sectorId:
           type: integer
@@ -304,6 +311,8 @@ components:
         delito:
           type: string
         zonaId:
+          type: integer
+        regionId:
           type: integer
         sectorId:
           type: integer
@@ -357,6 +366,8 @@ components:
         delito:
           type: string
         zona:
+          $ref: '#/components/schemas/CatalogItem'
+        region:
           $ref: '#/components/schemas/CatalogItem'
         sector:
           $ref: '#/components/schemas/CatalogItem'

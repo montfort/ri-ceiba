@@ -55,13 +55,57 @@ public interface ICatalogAdminService
 
     #endregion
 
+    #region Region Management
+
+    /// <summary>
+    /// Gets regions, optionally filtered by zone.
+    /// </summary>
+    Task<List<RegionDto>> GetRegionesAsync(
+        int? zonaId = null,
+        bool? activo = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a region by ID.
+    /// </summary>
+    Task<RegionDto?> GetRegionByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Creates a new region linked to a zone.
+    /// </summary>
+    Task<RegionDto> CreateRegionAsync(
+        CreateRegionDto createDto,
+        Guid adminUserId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing region.
+    /// </summary>
+    Task<RegionDto> UpdateRegionAsync(
+        int id,
+        CreateRegionDto updateDto,
+        Guid adminUserId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Toggles region active status.
+    /// </summary>
+    Task<RegionDto> ToggleRegionActivoAsync(
+        int id,
+        Guid adminUserId,
+        CancellationToken cancellationToken = default);
+
+    #endregion
+
     #region Sector Management (FR-028)
 
     /// <summary>
-    /// Gets sectors, optionally filtered by zone.
+    /// Gets sectors, optionally filtered by region.
     /// </summary>
     Task<List<SectorDto>> GetSectoresAsync(
-        int? zonaId = null,
+        int? regionId = null,
         bool? activo = null,
         CancellationToken cancellationToken = default);
 
@@ -73,8 +117,8 @@ public interface ICatalogAdminService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Creates a new sector linked to a zone.
-    /// FR-028: Configure sectors associated to zones
+    /// Creates a new sector linked to a region.
+    /// FR-028: Configure sectors associated to regions
     /// </summary>
     Task<SectorDto> CreateSectorAsync(
         CreateSectorDto createDto,

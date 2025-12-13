@@ -32,6 +32,7 @@ public class ReportRepository : IReportRepository
         // T117d: Use AsNoTracking and AsSplitQuery for multiple includes
         return await _context.ReportesIncidencia
             .Include(r => r.Zona)
+            .Include(r => r.Region)
             .Include(r => r.Sector)
             .Include(r => r.Cuadrante)
             .AsSplitQuery() // T117d: Avoid cartesian explosion
@@ -44,6 +45,7 @@ public class ReportRepository : IReportRepository
         // T117d: Optimized query with split and no tracking
         return await _context.ReportesIncidencia
             .Include(r => r.Zona)
+            .Include(r => r.Region)
             .Include(r => r.Sector)
             .Include(r => r.Cuadrante)
             .AsSplitQuery()
@@ -120,6 +122,7 @@ public class ReportRepository : IReportRepository
         // T117d: Add includes AFTER pagination with AsSplitQuery
         var items = await paginatedQuery
             .Include(r => r.Zona)
+            .Include(r => r.Region)
             .Include(r => r.Sector)
             .Include(r => r.Cuadrante)
             .AsSplitQuery()
@@ -166,6 +169,7 @@ public class ReportRepository : IReportRepository
             .ThenByDescending(r => r.Id)
             .Take(pageSize)
             .Include(r => r.Zona)
+            .Include(r => r.Region)
             .Include(r => r.Sector)
             .Include(r => r.Cuadrante)
             .AsSplitQuery()

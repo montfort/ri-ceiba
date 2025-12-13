@@ -445,6 +445,56 @@ namespace Ceiba.Infrastructure.Migrations
                     b.ToTable("MODELO_REPORTE", (string)null);
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.Region", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("activo");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamptz")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nombre");
+
+                    b.Property<Guid>("UsuarioId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("usuario_id");
+
+                    b.Property<int>("ZonaId")
+                        .HasColumnType("integer")
+                        .HasColumnName("zona_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Activo")
+                        .HasDatabaseName("idx_region_activo");
+
+                    b.HasIndex("ZonaId")
+                        .HasDatabaseName("idx_region_zona");
+
+                    b.HasIndex("ZonaId", "Nombre")
+                        .IsUnique()
+                        .HasDatabaseName("idx_region_zona_nombre_unique");
+
+                    b.ToTable("REGION", (string)null);
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.RegistroAuditoria", b =>
                 {
                     b.Property<long>("Id")
@@ -666,6 +716,10 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("observaciones");
 
+                    b.Property<int>("RegionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("region_id");
+
                     b.Property<string>("SchemaVersion")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -743,6 +797,9 @@ namespace Ceiba.Infrastructure.Migrations
                     b.HasIndex("Estado")
                         .HasDatabaseName("idx_reporte_estado");
 
+                    b.HasIndex("RegionId")
+                        .HasDatabaseName("idx_reporte_region");
+
                     b.HasIndex("UsuarioId")
                         .HasDatabaseName("idx_reporte_usuario");
 
@@ -808,22 +865,25 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("nombre");
 
+                    b.Property<int>("RegionId")
+                        .HasColumnType("integer")
+                        .HasColumnName("region_id");
+
                     b.Property<Guid>("UsuarioId")
                         .HasColumnType("uuid")
                         .HasColumnName("usuario_id");
-
-                    b.Property<int>("ZonaId")
-                        .HasColumnType("integer")
-                        .HasColumnName("zona_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Activo")
                         .HasDatabaseName("idx_sector_activo");
 
-                    b.HasIndex("ZonaId", "Nombre")
+                    b.HasIndex("RegionId")
+                        .HasDatabaseName("idx_sector_region");
+
+                    b.HasIndex("RegionId", "Nombre")
                         .IsUnique()
-                        .HasDatabaseName("idx_sector_zona_nombre_unique");
+                        .HasDatabaseName("idx_sector_region_nombre_unique");
 
                     b.ToTable("SECTOR", (string)null);
                 });
@@ -1096,6 +1156,18 @@ namespace Ceiba.Infrastructure.Migrations
                     b.Navigation("Sector");
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.Region", b =>
+                {
+                    b.HasOne("Ceiba.Core.Entities.Zona", "Zona")
+                        .WithMany("Regiones")
+                        .HasForeignKey("ZonaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("zona_id_FK");
+
+                    b.Navigation("Zona");
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.ReporteAutomatizado", b =>
                 {
                     b.HasOne("Ceiba.Core.Entities.ModeloReporte", "ModeloReporte")
@@ -1116,6 +1188,13 @@ namespace Ceiba.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_REPORTE_CUADRANTE");
 
+                    b.HasOne("Ceiba.Core.Entities.Region", "Region")
+                        .WithMany("Reportes")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_REPORTE_REGION");
+
                     b.HasOne("Ceiba.Core.Entities.Sector", "Sector")
                         .WithMany("Reportes")
                         .HasForeignKey("SectorId")
@@ -1132,6 +1211,8 @@ namespace Ceiba.Infrastructure.Migrations
 
                     b.Navigation("Cuadrante");
 
+                    b.Navigation("Region");
+
                     b.Navigation("Sector");
 
                     b.Navigation("Zona");
@@ -1139,14 +1220,14 @@ namespace Ceiba.Infrastructure.Migrations
 
             modelBuilder.Entity("Ceiba.Core.Entities.Sector", b =>
                 {
-                    b.HasOne("Ceiba.Core.Entities.Zona", "Zona")
+                    b.HasOne("Ceiba.Core.Entities.Region", "Region")
                         .WithMany("Sectores")
-                        .HasForeignKey("ZonaId")
+                        .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
-                        .HasConstraintName("zona_id_FK");
+                        .HasConstraintName("sector_region_id_FK");
 
-                    b.Navigation("Zona");
+                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -1210,6 +1291,13 @@ namespace Ceiba.Infrastructure.Migrations
                     b.Navigation("ReportesGenerados");
                 });
 
+            modelBuilder.Entity("Ceiba.Core.Entities.Region", b =>
+                {
+                    b.Navigation("Reportes");
+
+                    b.Navigation("Sectores");
+                });
+
             modelBuilder.Entity("Ceiba.Core.Entities.Sector", b =>
                 {
                     b.Navigation("Cuadrantes");
@@ -1219,9 +1307,9 @@ namespace Ceiba.Infrastructure.Migrations
 
             modelBuilder.Entity("Ceiba.Core.Entities.Zona", b =>
                 {
-                    b.Navigation("Reportes");
+                    b.Navigation("Regiones");
 
-                    b.Navigation("Sectores");
+                    b.Navigation("Reportes");
                 });
 #pragma warning restore 612, 618
         }

@@ -50,6 +50,43 @@ public class CachedCatalogService
 
     #endregion
 
+    #region Regiones
+
+    public async Task<List<Region>> GetAllRegionesAsync()
+    {
+        return await _cache.GetOrCreateAsync(
+            CacheKeys.AllRegiones,
+            async () => await _context.Regiones
+                .Where(r => r.Activo)
+                .OrderBy(r => r.ZonaId)
+                .ThenBy(r => r.Nombre)
+                .AsNoTracking()
+                .ToListAsync(),
+            CatalogCacheDuration) ?? new List<Region>();
+    }
+
+    public async Task<List<Region>> GetRegionesByZonaAsync(int zonaId)
+    {
+        var cacheKey = CacheKeys.Format(CacheKeys.RegionesByZona, zonaId);
+
+        return await _cache.GetOrCreateAsync(
+            cacheKey,
+            async () => await _context.Regiones
+                .Where(r => r.ZonaId == zonaId && r.Activo)
+                .OrderBy(r => r.Nombre)
+                .AsNoTracking()
+                .ToListAsync(),
+            CatalogCacheDuration) ?? new List<Region>();
+    }
+
+    public async Task<Region?> GetRegionByIdAsync(int id)
+    {
+        var regiones = await GetAllRegionesAsync();
+        return regiones.FirstOrDefault(r => r.Id == id);
+    }
+
+    #endregion
+
     #region Sectores
 
     public async Task<List<Sector>> GetAllSectoresAsync()
@@ -58,21 +95,21 @@ public class CachedCatalogService
             CacheKeys.AllSectores,
             async () => await _context.Sectores
                 .Where(s => s.Activo)
-                .OrderBy(s => s.ZonaId)
+                .OrderBy(s => s.RegionId)
                 .ThenBy(s => s.Nombre)
                 .AsNoTracking()
                 .ToListAsync(),
             CatalogCacheDuration) ?? new List<Sector>();
     }
 
-    public async Task<List<Sector>> GetSectoresByZonaAsync(int zonaId)
+    public async Task<List<Sector>> GetSectoresByRegionAsync(int regionId)
     {
-        var cacheKey = CacheKeys.Format(CacheKeys.SectoresByZona, zonaId);
+        var cacheKey = CacheKeys.Format(CacheKeys.SectoresByRegion, regionId);
 
         return await _cache.GetOrCreateAsync(
             cacheKey,
             async () => await _context.Sectores
-                .Where(s => s.ZonaId == zonaId && s.Activo)
+                .Where(s => s.RegionId == regionId && s.Activo)
                 .OrderBy(s => s.Nombre)
                 .AsNoTracking()
                 .ToListAsync(),
@@ -162,8 +199,19 @@ public class CachedCatalogService
     public void InvalidateZonas()
     {
         _cache.Remove(CacheKeys.AllZonas);
-        _cache.RemoveByPrefix("catalog:sectores:");
+        _cache.RemoveByPrefix("catalog:regiones:");
         _logger.LogInformation("Zona caches invalidated");
+    }
+
+    /// <summary>
+    /// Invalidate region-related caches.
+    /// </summary>
+    public void InvalidateRegiones()
+    {
+        _cache.Remove(CacheKeys.AllRegiones);
+        _cache.RemoveByPrefix("catalog:regiones:zona:");
+        _cache.RemoveByPrefix("catalog:sectores:");
+        _logger.LogInformation("Region caches invalidated");
     }
 
     /// <summary>
@@ -172,7 +220,7 @@ public class CachedCatalogService
     public void InvalidateSectores()
     {
         _cache.Remove(CacheKeys.AllSectores);
-        _cache.RemoveByPrefix("catalog:sectores:zona:");
+        _cache.RemoveByPrefix("catalog:sectores:region:");
         _cache.RemoveByPrefix("catalog:cuadrantes:");
         _logger.LogInformation("Sector caches invalidated");
     }

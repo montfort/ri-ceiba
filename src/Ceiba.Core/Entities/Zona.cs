@@ -3,7 +3,7 @@ namespace Ceiba.Core.Entities;
 /// <summary>
 /// Geographic zone entity (highest level in geographic hierarchy).
 /// Example: "Zona Norte", "Zona Sur", "Zona Centro"
-/// Part of hierarchical catalog: Zona → Sector → Cuadrante
+/// Part of hierarchical catalog: Zona → Región → Sector → Cuadrante
 /// </summary>
 public class Zona : BaseCatalogEntity
 {
@@ -19,10 +19,10 @@ public class Zona : BaseCatalogEntity
     public string Nombre { get; set; } = string.Empty;
 
     /// <summary>
-    /// Navigation property: Sectors within this zone.
+    /// Navigation property: Regions within this zone.
     /// Cascade delete configured in EF Core configuration.
     /// </summary>
-    public virtual ICollection<Sector> Sectores { get; set; } = new List<Sector>();
+    public virtual ICollection<Region> Regiones { get; set; } = new List<Region>();
 
     /// <summary>
     /// Navigation property: Reports assigned to this zone.

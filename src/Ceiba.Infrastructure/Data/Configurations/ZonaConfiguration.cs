@@ -51,10 +51,10 @@ public class ZonaConfiguration : IEntityTypeConfiguration<Zona>
             .HasDatabaseName("idx_zona_activo");
 
         // Relationships
-        builder.HasMany(z => z.Sectores)
-            .WithOne(s => s.Zona)
-            .HasForeignKey(s => s.ZonaId)
-            .OnDelete(DeleteBehavior.Restrict) // Prevent delete if sectors exist
+        builder.HasMany(z => z.Regiones)
+            .WithOne(r => r.Zona)
+            .HasForeignKey(r => r.ZonaId)
+            .OnDelete(DeleteBehavior.Restrict) // Prevent delete if regions exist
             .HasConstraintName("zona_id_FK");
     }
 }

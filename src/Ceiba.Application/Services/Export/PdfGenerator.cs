@@ -193,13 +193,14 @@ public class PdfGenerator : IPdfGenerator
             section.Item().PaddingTop(5).Row(row =>
             {
                 row.RelativeItem().Text($"Zona: {report.Zona}").FontSize(9);
-                row.RelativeItem().Text($"Sector: {report.Sector}").FontSize(9);
+                row.RelativeItem().Text($"Región: {report.Region}").FontSize(9);
             });
             section.Item().PaddingTop(3).Row(row =>
             {
+                row.RelativeItem().Text($"Sector: {report.Sector}").FontSize(9);
                 row.RelativeItem().Text($"Cuadrante: {report.Cuadrante}").FontSize(9);
-                row.RelativeItem().Text($"Turno CEIBA: {report.TurnoCeiba}").FontSize(9);
             });
+            section.Item().PaddingTop(3).Text($"Turno CEIBA: {report.TurnoCeiba}").FontSize(9);
         });
     }
 

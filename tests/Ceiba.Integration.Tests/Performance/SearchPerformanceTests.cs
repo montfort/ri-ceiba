@@ -188,8 +188,12 @@ public class SearchPerformanceTests : PerformanceTestBase
         var zona = new Core.Entities.Zona { Id = 1, Nombre = "Zona Norte", Activo = true };
         context.Zonas.Add(zona);
 
+        // Add regions
+        var region = new Core.Entities.Region { Id = 1, Nombre = "Región Norte", ZonaId = 1, Activo = true };
+        context.Regiones.Add(region);
+
         // Add sectors
-        var sector = new Core.Entities.Sector { Id = 1, Nombre = "Sector A", ZonaId = 1, Activo = true };
+        var sector = new Core.Entities.Sector { Id = 1, Nombre = "Sector Norte", RegionId = 1, Activo = true };
         context.Sectores.Add(sector);
 
         // Add cuadrantes
@@ -211,6 +215,7 @@ public class SearchPerformanceTests : PerformanceTestBase
                 HechosReportados = $"Hechos del reporte {i}",
                 DatetimeHechos = DateTime.UtcNow.AddDays(-random.Next(1, 365)),
                 ZonaId = 1,
+                RegionId = 1,
                 SectorId = 1,
                 CuadranteId = 1,
                 CreatedAt = DateTime.UtcNow.AddDays(-random.Next(1, 365))

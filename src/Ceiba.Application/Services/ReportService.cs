@@ -30,9 +30,10 @@ public class ReportService : IReportService
 
     public async Task<ReportDto> CreateReportAsync(CreateReportDto createDto, Guid usuarioId)
     {
-        // Validate hierarchy
+        // Validate hierarchy (Zona → Región → Sector → Cuadrante)
         var isValidHierarchy = await _catalogService.ValidateHierarchyAsync(
             createDto.ZonaId,
+            createDto.RegionId,
             createDto.SectorId,
             createDto.CuadranteId
         );
@@ -40,8 +41,8 @@ public class ReportService : IReportService
         if (!isValidHierarchy)
         {
             throw new ValidationException(
-                "La jerarquía geográfica no es válida. El sector debe pertenecer a la zona seleccionada " +
-                "y el cuadrante debe pertenecer al sector seleccionado."
+                "La jerarquía geográfica no es válida. La región debe pertenecer a la zona, " +
+                "el sector a la región y el cuadrante al sector seleccionado."
             );
         }
 
@@ -67,6 +68,7 @@ public class ReportService : IReportService
             Discapacidad = createDto.Discapacidad,
             Delito = createDto.Delito,
             ZonaId = createDto.ZonaId,
+            RegionId = createDto.RegionId,
             SectorId = createDto.SectorId,
             CuadranteId = createDto.CuadranteId,
             TurnoCeiba = createDto.TurnoCeiba,
@@ -204,20 +206,24 @@ public class ReportService : IReportService
 
     private async Task ApplyGeographicUpdatesAsync(ReporteIncidencia report, UpdateReportDto updateDto)
     {
-        if (!updateDto.ZonaId.HasValue && !updateDto.SectorId.HasValue && !updateDto.CuadranteId.HasValue)
+        if (!updateDto.ZonaId.HasValue && !updateDto.RegionId.HasValue &&
+            !updateDto.SectorId.HasValue && !updateDto.CuadranteId.HasValue)
             return;
 
         var newZonaId = updateDto.ZonaId ?? report.ZonaId;
+        var newRegionId = updateDto.RegionId ?? report.RegionId;
         var newSectorId = updateDto.SectorId ?? report.SectorId;
         var newCuadranteId = updateDto.CuadranteId ?? report.CuadranteId;
 
-        var isValidHierarchy = await _catalogService.ValidateHierarchyAsync(newZonaId, newSectorId, newCuadranteId);
+        var isValidHierarchy = await _catalogService.ValidateHierarchyAsync(
+            newZonaId, newRegionId, newSectorId, newCuadranteId);
         if (!isValidHierarchy)
         {
             throw new ValidationException("La jerarquía geográfica no es válida.");
         }
 
         report.ZonaId = newZonaId;
+        report.RegionId = newRegionId;
         report.SectorId = newSectorId;
         report.CuadranteId = newCuadranteId;
     }
@@ -419,6 +425,11 @@ public class ReportService : IReportService
                 Id = report.Zona.Id,
                 Nombre = report.Zona.Nombre
             },
+            Region = new CatalogItemDto
+            {
+                Id = report.Region.Id,
+                Nombre = report.Region.Nombre
+            },
             Sector = new CatalogItemDto
             {
                 Id = report.Sector.Id,
@@ -455,6 +466,7 @@ public class ReportService : IReportService
             (updateDto.Discapacidad.HasValue, "Discapacidad"),
             (updateDto.Delito != null, "Delito"),
             (updateDto.ZonaId.HasValue, "ZonaId"),
+            (updateDto.RegionId.HasValue, "RegionId"),
             (updateDto.SectorId.HasValue, "SectorId"),
             (updateDto.CuadranteId.HasValue, "CuadranteId"),
             (updateDto.TurnoCeiba.HasValue, "TurnoCeiba"),

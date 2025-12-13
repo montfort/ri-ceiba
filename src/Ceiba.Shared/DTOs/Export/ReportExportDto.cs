@@ -34,8 +34,9 @@ public record ReportExportDto
     public string TipoDeAtencion { get; init; } = string.Empty;
     public string TipoDeAccion { get; init; } = string.Empty;
 
-    // Geographic Location
+    // Geographic Location (Zona → Región → Sector → Cuadrante)
     public string Zona { get; init; } = string.Empty;
+    public string Region { get; init; } = string.Empty;
     public string Sector { get; init; } = string.Empty;
     public string Cuadrante { get; init; } = string.Empty;
     public string TurnoCeiba { get; init; } = string.Empty;

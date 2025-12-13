@@ -1,10 +1,10 @@
 namespace Ceiba.Core.Entities;
 
 /// <summary>
-/// Geographic sector entity (middle level in geographic hierarchy).
-/// Belongs to a Zona, contains multiple Cuadrantes.
+/// Geographic sector entity (third level in geographic hierarchy).
+/// Belongs to a Región, contains multiple Cuadrantes.
 /// Example: "Sector 1", "Sector A"
-/// Part of hierarchical catalog: Zona → Sector → Cuadrante
+/// Part of hierarchical catalog: Zona → Región → Sector → Cuadrante
 /// </summary>
 public class Sector : BaseCatalogEntity
 {
@@ -20,15 +20,15 @@ public class Sector : BaseCatalogEntity
     public string Nombre { get; set; } = string.Empty;
 
     /// <summary>
-    /// Foreign key to the parent Zona.
-    /// Required - sector must belong to a zone.
+    /// Foreign key to the parent Región.
+    /// Required - sector must belong to a region.
     /// </summary>
-    public int ZonaId { get; set; }
+    public int RegionId { get; set; }
 
     /// <summary>
-    /// Navigation property: Parent zone.
+    /// Navigation property: Parent region.
     /// </summary>
-    public virtual Zona Zona { get; set; } = null!;
+    public virtual Region Region { get; set; } = null!;
 
     /// <summary>
     /// Navigation property: Cuadrantes within this sector.

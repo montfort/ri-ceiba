@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ceiba.Web.Controllers;
 
 /// <summary>
-/// API controller for catalog operations (Zona, Sector, Cuadrante, Suggestions).
+/// API controller for catalog operations (Zona, Región, Sector, Cuadrante, Suggestions).
 /// US1: T040
 /// </summary>
 [ApiController]
@@ -45,10 +45,10 @@ public class CatalogsController : ControllerBase
     }
 
     /// <summary>
-    /// Gets sectors for a specific zone.
+    /// Gets regions for a specific zone.
     /// </summary>
-    [HttpGet("sectores")]
-    public async Task<ActionResult<List<CatalogItemDto>>> GetSectores([FromQuery] int zonaId)
+    [HttpGet("regiones")]
+    public async Task<ActionResult<List<CatalogItemDto>>> GetRegiones([FromQuery] int zonaId)
     {
         try
         {
@@ -57,12 +57,35 @@ public class CatalogsController : ControllerBase
                 return BadRequest(new { message = "El ID de zona es requerido" });
             }
 
-            var sectores = await _catalogService.GetSectoresByZonaAsync(zonaId);
+            var regiones = await _catalogService.GetRegionesByZonaAsync(zonaId);
+            return Ok(regiones);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting regiones for zona {ZonaId}", zonaId);
+            return StatusCode(500, new { message = "Error al obtener las regiones" });
+        }
+    }
+
+    /// <summary>
+    /// Gets sectors for a specific region.
+    /// </summary>
+    [HttpGet("sectores")]
+    public async Task<ActionResult<List<CatalogItemDto>>> GetSectores([FromQuery] int regionId)
+    {
+        try
+        {
+            if (regionId <= 0)
+            {
+                return BadRequest(new { message = "El ID de región es requerido" });
+            }
+
+            var sectores = await _catalogService.GetSectoresByRegionAsync(regionId);
             return Ok(sectores);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting sectores for zona {ZonaId}", zonaId);
+            _logger.LogError(ex, "Error getting sectores for region {RegionId}", regionId);
             return StatusCode(500, new { message = "Error al obtener los sectores" });
         }
     }
@@ -120,22 +143,23 @@ public class CatalogsController : ControllerBase
     }
 
     /// <summary>
-    /// Validates the geographic hierarchy (Zona → Sector → Cuadrante).
+    /// Validates the geographic hierarchy (Zona → Región → Sector → Cuadrante).
     /// </summary>
     [HttpGet("validate-hierarchy")]
     public async Task<ActionResult<bool>> ValidateHierarchy(
         [FromQuery] int zonaId,
+        [FromQuery] int regionId,
         [FromQuery] int sectorId,
         [FromQuery] int cuadranteId)
     {
         try
         {
-            if (zonaId <= 0 || sectorId <= 0 || cuadranteId <= 0)
+            if (zonaId <= 0 || regionId <= 0 || sectorId <= 0 || cuadranteId <= 0)
             {
                 return BadRequest(new { message = "Todos los IDs son requeridos" });
             }
 
-            var isValid = await _catalogService.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+            var isValid = await _catalogService.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
             return Ok(new { isValid });
         }
         catch (Exception ex)

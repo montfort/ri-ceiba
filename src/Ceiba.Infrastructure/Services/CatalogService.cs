@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Ceiba.Application.Services;
 
 /// <summary>
-/// Service implementation for catalog operations (Zona, Sector, Cuadrante, Suggestions).
+/// Service implementation for catalog operations (Zona, Región, Sector, Cuadrante, Suggestions).
 /// US1: T036
 /// </summary>
 public class CatalogService : ICatalogService
@@ -31,10 +31,23 @@ public class CatalogService : ICatalogService
             .ToListAsync();
     }
 
-    public async Task<List<CatalogItemDto>> GetSectoresByZonaAsync(int zonaId)
+    public async Task<List<CatalogItemDto>> GetRegionesByZonaAsync(int zonaId)
+    {
+        return await _context.Regiones
+            .Where(r => r.ZonaId == zonaId && r.Activo)
+            .OrderBy(r => r.Nombre)
+            .Select(r => new CatalogItemDto
+            {
+                Id = r.Id,
+                Nombre = r.Nombre
+            })
+            .ToListAsync();
+    }
+
+    public async Task<List<CatalogItemDto>> GetSectoresByRegionAsync(int regionId)
     {
         return await _context.Sectores
-            .Where(s => s.ZonaId == zonaId && s.Activo)
+            .Where(s => s.RegionId == regionId && s.Activo)
             .OrderBy(s => s.Nombre)
             .Select(s => new CatalogItemDto
             {
@@ -74,11 +87,18 @@ public class CatalogService : ICatalogService
             .ToListAsync();
     }
 
-    public async Task<bool> ValidateHierarchyAsync(int zonaId, int sectorId, int cuadranteId)
+    public async Task<bool> ValidateHierarchyAsync(int zonaId, int regionId, int sectorId, int cuadranteId)
     {
-        // Check if sector belongs to zona
+        // Check if region belongs to zona
+        var regionExists = await _context.Regiones
+            .AnyAsync(r => r.Id == regionId && r.ZonaId == zonaId && r.Activo);
+
+        if (!regionExists)
+            return false;
+
+        // Check if sector belongs to region
         var sectorExists = await _context.Sectores
-            .AnyAsync(s => s.Id == sectorId && s.ZonaId == zonaId && s.Activo);
+            .AnyAsync(s => s.Id == sectorId && s.RegionId == regionId && s.Activo);
 
         if (!sectorExists)
             return false;

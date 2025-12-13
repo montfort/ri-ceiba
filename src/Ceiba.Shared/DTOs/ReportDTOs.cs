@@ -34,6 +34,10 @@ public class CreateReportDto
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una zona válida")]
     public int ZonaId { get; set; }
 
+    [Required(ErrorMessage = "La región es requerida")]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una región válida")]
+    public int RegionId { get; set; }
+
     [Required(ErrorMessage = "El sector es requerido")]
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un sector válido")]
     public int SectorId { get; set; }
@@ -94,6 +98,9 @@ public class UpdateReportDto
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una zona válida")]
     public int? ZonaId { get; set; }
 
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una región válida")]
+    public int? RegionId { get; set; }
+
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un sector válido")]
     public int? SectorId { get; set; }
 
@@ -142,6 +149,7 @@ public class ReportDto
     public bool Discapacidad { get; set; }
     public string Delito { get; set; } = string.Empty;
     public CatalogItemDto Zona { get; set; } = null!;
+    public CatalogItemDto Region { get; set; } = null!;
     public CatalogItemDto Sector { get; set; } = null!;
     public CatalogItemDto Cuadrante { get; set; } = null!;
     public int TurnoCeiba { get; set; }
@@ -154,7 +162,7 @@ public class ReportDto
 }
 
 /// <summary>
-/// DTO for catalog items (Zona, Sector, Cuadrante).
+/// DTO for catalog items (Zona, Región, Sector, Cuadrante).
 /// US1: T037
 /// </summary>
 public class CatalogItemDto

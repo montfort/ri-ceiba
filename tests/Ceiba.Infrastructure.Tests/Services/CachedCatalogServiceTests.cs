@@ -43,9 +43,15 @@ public class CachedCatalogServiceTests : IDisposable
 
         _context.Zonas.AddRange(zona1, zona2, zonaInactiva);
 
-        var sector1 = new Sector { Id = 1, Nombre = "Sector Centro", ZonaId = 1, Activo = true };
-        var sector2 = new Sector { Id = 2, Nombre = "Sector Este", ZonaId = 1, Activo = true };
-        var sector3 = new Sector { Id = 3, Nombre = "Sector Oeste", ZonaId = 2, Activo = true };
+        // Regiones (Zona → Región → Sector → Cuadrante)
+        var region1 = new Region { Id = 1, Nombre = "Región Norte", ZonaId = 1, Activo = true };
+        var region2 = new Region { Id = 2, Nombre = "Región Sur", ZonaId = 2, Activo = true };
+
+        _context.Regiones.AddRange(region1, region2);
+
+        var sector1 = new Sector { Id = 1, Nombre = "Sector Centro", RegionId = 1, Activo = true };
+        var sector2 = new Sector { Id = 2, Nombre = "Sector Este", RegionId = 1, Activo = true };
+        var sector3 = new Sector { Id = 3, Nombre = "Sector Oeste", RegionId = 2, Activo = true };
 
         _context.Sectores.AddRange(sector1, sector2, sector3);
 
@@ -169,7 +175,7 @@ public class CachedCatalogServiceTests : IDisposable
         // Arrange
         var cachedSectores = new List<Sector>
         {
-            new() { Id = 1, Nombre = "Sector 1", ZonaId = 1, Activo = true }
+            new() { Id = 1, Nombre = "Sector 1", RegionId = 1, Activo = true }
         };
 
         _mockCache.GetOrCreateAsync(
@@ -185,14 +191,14 @@ public class CachedCatalogServiceTests : IDisposable
         result.Should().HaveCount(1);
     }
 
-    [Fact(DisplayName = "GetSectoresByZonaAsync should filter by zona id")]
-    public async Task GetSectoresByZonaAsync_ShouldFilterByZonaId()
+    [Fact(DisplayName = "GetSectoresByRegionAsync should filter by region id")]
+    public async Task GetSectoresByRegionAsync_ShouldFilterByRegionId()
     {
         // Arrange
         var cachedSectores = new List<Sector>
         {
-            new() { Id = 1, Nombre = "Sector Centro", ZonaId = 1, Activo = true },
-            new() { Id = 2, Nombre = "Sector Este", ZonaId = 1, Activo = true }
+            new() { Id = 1, Nombre = "Sector Centro", RegionId = 1, Activo = true },
+            new() { Id = 2, Nombre = "Sector Este", RegionId = 1, Activo = true }
         };
 
         _mockCache.GetOrCreateAsync(
@@ -202,11 +208,11 @@ public class CachedCatalogServiceTests : IDisposable
             .Returns(cachedSectores);
 
         // Act
-        var result = await _service.GetSectoresByZonaAsync(1);
+        var result = await _service.GetSectoresByRegionAsync(1);
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().AllSatisfy(s => s.ZonaId.Should().Be(1));
+        result.Should().AllSatisfy(s => s.RegionId.Should().Be(1));
     }
 
     #endregion
@@ -321,7 +327,7 @@ public class CachedCatalogServiceTests : IDisposable
 
         // Assert
         _mockCache.Received(1).Remove(CacheKeys.AllZonas);
-        _mockCache.Received(1).RemoveByPrefix("catalog:sectores:");
+        _mockCache.Received(1).RemoveByPrefix("catalog:regiones:");
     }
 
     [Fact(DisplayName = "InvalidateSectores should remove sector and related caches")]
@@ -332,7 +338,7 @@ public class CachedCatalogServiceTests : IDisposable
 
         // Assert
         _mockCache.Received(1).Remove(CacheKeys.AllSectores);
-        _mockCache.Received(1).RemoveByPrefix("catalog:sectores:zona:");
+        _mockCache.Received(1).RemoveByPrefix("catalog:sectores:region:");
         _mockCache.Received(1).RemoveByPrefix("catalog:cuadrantes:");
     }
 

@@ -38,10 +38,18 @@ public class CatalogServiceTests : IDisposable
 
         _context.Zonas.AddRange(zona1, zona2, zona3);
 
-        var sector1_1 = new Sector { Id = 1, Nombre = "Sector Norte-1", ZonaId = 1, Activo = true };
-        var sector1_2 = new Sector { Id = 2, Nombre = "Sector Norte-2", ZonaId = 1, Activo = true };
-        var sector2_1 = new Sector { Id = 3, Nombre = "Sector Sur-1", ZonaId = 2, Activo = true };
-        var sector2_2 = new Sector { Id = 4, Nombre = "Sector Sur-2", ZonaId = 2, Activo = false }; // Inactive
+        // Regiones (Zona → Región → Sector → Cuadrante)
+        var region1_1 = new Region { Id = 1, Nombre = "Región Norte-1", ZonaId = 1, Activo = true };
+        var region1_2 = new Region { Id = 2, Nombre = "Región Norte-2", ZonaId = 1, Activo = true };
+        var region2_1 = new Region { Id = 3, Nombre = "Región Sur-1", ZonaId = 2, Activo = true };
+        var region2_2 = new Region { Id = 4, Nombre = "Región Sur-2", ZonaId = 2, Activo = false }; // Inactive
+
+        _context.Regiones.AddRange(region1_1, region1_2, region2_1, region2_2);
+
+        var sector1_1 = new Sector { Id = 1, Nombre = "Sector Norte-1", RegionId = 1, Activo = true };
+        var sector1_2 = new Sector { Id = 2, Nombre = "Sector Norte-2", RegionId = 1, Activo = true };
+        var sector2_1 = new Sector { Id = 3, Nombre = "Sector Sur-1", RegionId = 3, Activo = true };
+        var sector2_2 = new Sector { Id = 4, Nombre = "Sector Sur-2", RegionId = 3, Activo = false }; // Inactive
 
         _context.Sectores.AddRange(sector1_1, sector1_2, sector2_1, sector2_2);
 
@@ -152,35 +160,61 @@ public class CatalogServiceTests : IDisposable
 
     #endregion
 
-    #region GetSectoresByZonaAsync Tests
+    #region GetRegionesByZonaAsync Tests
 
-    [Fact(DisplayName = "T036: GetSectoresByZonaAsync should return sectors for specific zone")]
-    public async Task GetSectoresByZonaAsync_ReturnsCorrectSectors()
+    [Fact(DisplayName = "T036: GetRegionesByZonaAsync should return regions for specific zone")]
+    public async Task GetRegionesByZonaAsync_ReturnsCorrectRegions()
     {
         // Act
-        var result = await _service.GetSectoresByZonaAsync(1);
+        var result = await _service.GetRegionesByZonaAsync(1);
 
         // Assert
-        result.Should().HaveCount(2); // Zona 1 has 2 active sectors
+        result.Should().HaveCount(2); // Zona 1 has 2 active regions
+        result.Should().AllSatisfy(r => r.Nombre.Should().StartWith("Región Norte"));
+    }
+
+    [Fact(DisplayName = "T036: GetRegionesByZonaAsync should only return active regions")]
+    public async Task GetRegionesByZonaAsync_OnlyReturnsActiveRegions()
+    {
+        // Act
+        var result = await _service.GetRegionesByZonaAsync(2);
+
+        // Assert
+        result.Should().HaveCount(1); // Zona 2 has 1 active region (region2_2 is inactive)
+        result.Should().AllSatisfy(r => r.Nombre.Should().Be("Región Sur-1"));
+    }
+
+    #endregion
+
+    #region GetSectoresByRegionAsync Tests
+
+    [Fact(DisplayName = "T036: GetSectoresByRegionAsync should return sectors for specific region")]
+    public async Task GetSectoresByRegionAsync_ReturnsCorrectSectors()
+    {
+        // Act
+        var result = await _service.GetSectoresByRegionAsync(1);
+
+        // Assert
+        result.Should().HaveCount(2); // Region 1 has 2 active sectors
         result.Should().AllSatisfy(s => s.Nombre.Should().StartWith("Sector Norte"));
     }
 
-    [Fact(DisplayName = "T036: GetSectoresByZonaAsync should only return active sectors")]
-    public async Task GetSectoresByZonaAsync_OnlyReturnsActiveSectors()
+    [Fact(DisplayName = "T036: GetSectoresByRegionAsync should only return active sectors")]
+    public async Task GetSectoresByRegionAsync_OnlyReturnsActiveSectors()
     {
         // Act
-        var result = await _service.GetSectoresByZonaAsync(2);
+        var result = await _service.GetSectoresByRegionAsync(3);
 
         // Assert
-        result.Should().HaveCount(1); // Zona 2 has 1 active sector (sector2_2 is inactive)
+        result.Should().HaveCount(1); // Region 3 has 1 active sector (sector2_2 is inactive)
         result.Should().AllSatisfy(s => s.Nombre.Should().Be("Sector Sur-1"));
     }
 
-    [Fact(DisplayName = "T036: GetSectoresByZonaAsync should return sectors ordered by name")]
-    public async Task GetSectoresByZonaAsync_ReturnsSectorsOrderedByName()
+    [Fact(DisplayName = "T036: GetSectoresByRegionAsync should return sectors ordered by name")]
+    public async Task GetSectoresByRegionAsync_ReturnsSectorsOrderedByName()
     {
         // Act
-        var result = await _service.GetSectoresByZonaAsync(1);
+        var result = await _service.GetSectoresByRegionAsync(1);
 
         // Assert
         result.Should().BeInAscendingOrder(s => s.Nombre);
@@ -188,35 +222,35 @@ public class CatalogServiceTests : IDisposable
         result.Last().Nombre.Should().Be("Sector Norte-2");
     }
 
-    [Fact(DisplayName = "T036: GetSectoresByZonaAsync should return empty list for non-existent zone")]
-    public async Task GetSectoresByZonaAsync_NonExistentZone_ReturnsEmptyList()
+    [Fact(DisplayName = "T036: GetSectoresByRegionAsync should return empty list for non-existent region")]
+    public async Task GetSectoresByRegionAsync_NonExistentRegion_ReturnsEmptyList()
     {
         // Act
-        var result = await _service.GetSectoresByZonaAsync(999);
+        var result = await _service.GetSectoresByRegionAsync(999);
 
         // Assert
         result.Should().BeEmpty();
     }
 
-    [Fact(DisplayName = "T036: GetSectoresByZonaAsync should return empty list for zone with no sectors")]
-    public async Task GetSectoresByZonaAsync_ZoneWithNoSectors_ReturnsEmptyList()
+    [Fact(DisplayName = "T036: GetSectoresByRegionAsync should return empty list for region with no sectors")]
+    public async Task GetSectoresByRegionAsync_RegionWithNoSectors_ReturnsEmptyList()
     {
-        // Arrange - Add a zone with no sectors
-        _context.Zonas.Add(new Zona { Id = 4, Nombre = "Zona Sin Sectores", Activo = true });
+        // Arrange - Add a region with no sectors
+        _context.Regiones.Add(new Region { Id = 10, Nombre = "Región Sin Sectores", ZonaId = 1, Activo = true });
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetSectoresByZonaAsync(4);
+        var result = await _service.GetSectoresByRegionAsync(10);
 
         // Assert
         result.Should().BeEmpty();
     }
 
-    [Fact(DisplayName = "T036: GetSectoresByZonaAsync should return CatalogItemDto with correct properties")]
-    public async Task GetSectoresByZonaAsync_ReturnsCatalogItemDtoWithCorrectProperties()
+    [Fact(DisplayName = "T036: GetSectoresByRegionAsync should return CatalogItemDto with correct properties")]
+    public async Task GetSectoresByRegionAsync_ReturnsCatalogItemDtoWithCorrectProperties()
     {
         // Act
-        var result = await _service.GetSectoresByZonaAsync(1);
+        var result = await _service.GetSectoresByRegionAsync(1);
 
         // Assert
         var firstSector = result.First();
@@ -277,7 +311,7 @@ public class CatalogServiceTests : IDisposable
     public async Task GetCuadrantesBySectorAsync_SectorWithNoCuadrantes_ReturnsEmptyList()
     {
         // Arrange - Add a sector with no cuadrantes
-        _context.Sectores.Add(new Sector { Id = 5, Nombre = "Sector Sin Cuadrantes", ZonaId = 1, Activo = true });
+        _context.Sectores.Add(new Sector { Id = 5, Nombre = "Sector Sin Cuadrantes", RegionId = 1, Activo = true });
         await _context.SaveChangesAsync();
 
         // Act
@@ -446,28 +480,46 @@ public class CatalogServiceTests : IDisposable
     [Fact(DisplayName = "T036: ValidateHierarchyAsync should return true for valid hierarchy")]
     public async Task ValidateHierarchyAsync_ValidHierarchy_ReturnsTrue()
     {
-        // Arrange: Zona 1 → Sector 1 → Cuadrante 1
+        // Arrange: Zona 1 → Region 1 → Sector 1 → Cuadrante 1
         int zonaId = 1;
+        int regionId = 1;
         int sectorId = 1;
         int cuadranteId = 1;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "T036: ValidateHierarchyAsync should return false when sector does not belong to zona")]
-    public async Task ValidateHierarchyAsync_SectorNotInZona_ReturnsFalse()
+    [Fact(DisplayName = "T036: ValidateHierarchyAsync should return false when region does not belong to zona")]
+    public async Task ValidateHierarchyAsync_RegionNotInZona_ReturnsFalse()
     {
-        // Arrange: Sector 3 belongs to Zona 2, not Zona 1
+        // Arrange: Region 3 belongs to Zona 2, not Zona 1
         int zonaId = 1;
+        int regionId = 3;
         int sectorId = 3;
         int cuadranteId = 5;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact(DisplayName = "T036: ValidateHierarchyAsync should return false when sector does not belong to region")]
+    public async Task ValidateHierarchyAsync_SectorNotInRegion_ReturnsFalse()
+    {
+        // Arrange: Sector 3 belongs to Region 3, not Region 1
+        int zonaId = 1;
+        int regionId = 1;
+        int sectorId = 3;
+        int cuadranteId = 5;
+
+        // Act
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
@@ -478,11 +530,12 @@ public class CatalogServiceTests : IDisposable
     {
         // Arrange: Cuadrante 5 belongs to Sector 3, not Sector 1
         int zonaId = 1;
+        int regionId = 1;
         int sectorId = 1;
         int cuadranteId = 5;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
@@ -493,11 +546,12 @@ public class CatalogServiceTests : IDisposable
     {
         // Arrange
         int zonaId = 1;
+        int regionId = 1;
         int sectorId = 999; // Non-existent
         int cuadranteId = 1;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
@@ -508,11 +562,12 @@ public class CatalogServiceTests : IDisposable
     {
         // Arrange
         int zonaId = 1;
+        int regionId = 1;
         int sectorId = 1;
         int cuadranteId = 999; // Non-existent
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
@@ -523,11 +578,12 @@ public class CatalogServiceTests : IDisposable
     {
         // Arrange
         int zonaId = 999; // Non-existent
+        int regionId = 1;
         int sectorId = 1;
         int cuadranteId = 1;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
@@ -536,13 +592,14 @@ public class CatalogServiceTests : IDisposable
     [Fact(DisplayName = "T036: ValidateHierarchyAsync should return false when sector is inactive")]
     public async Task ValidateHierarchyAsync_InactiveSector_ReturnsFalse()
     {
-        // Arrange: Sector 4 is inactive
+        // Arrange: Sector 4 is inactive (belongs to Region 3)
         int zonaId = 2;
+        int regionId = 3;
         int sectorId = 4;
-        int cuadranteId = 1; // Assume we add a cuadrante to sector 4
+        int cuadranteId = 1;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
@@ -553,39 +610,41 @@ public class CatalogServiceTests : IDisposable
     {
         // Arrange: Cuadrante 4 is inactive
         int zonaId = 1;
+        int regionId = 1;
         int sectorId = 2;
         int cuadranteId = 4;
 
         // Act
-        var result = await _service.ValidateHierarchyAsync(zonaId, sectorId, cuadranteId);
+        var result = await _service.ValidateHierarchyAsync(zonaId, regionId, sectorId, cuadranteId);
 
         // Assert
         result.Should().BeFalse();
     }
 
-    [Fact(DisplayName = "T036: ValidateHierarchyAsync should validate complete chain Zona→Sector→Cuadrante")]
+    [Fact(DisplayName = "T036: ValidateHierarchyAsync should validate complete chain Zona→Región→Sector→Cuadrante")]
     public async Task ValidateHierarchyAsync_ValidatesCompleteChain()
     {
-        // Test multiple valid hierarchies
+        // Test multiple valid hierarchies (Zona → Región → Sector → Cuadrante)
         var testCases = new[]
         {
-            new { Zona = 1, Sector = 1, Cuadrante = 1, Expected = true },
-            new { Zona = 1, Sector = 1, Cuadrante = 2, Expected = true },
-            new { Zona = 1, Sector = 2, Cuadrante = 3, Expected = true },
-            new { Zona = 2, Sector = 3, Cuadrante = 5, Expected = true },
+            new { Zona = 1, Region = 1, Sector = 1, Cuadrante = 1, Expected = true },
+            new { Zona = 1, Region = 1, Sector = 1, Cuadrante = 2, Expected = true },
+            new { Zona = 1, Region = 1, Sector = 2, Cuadrante = 3, Expected = true },
+            new { Zona = 2, Region = 3, Sector = 3, Cuadrante = 5, Expected = true },
             // Invalid hierarchies
-            new { Zona = 1, Sector = 3, Cuadrante = 5, Expected = false }, // Sector 3 belongs to Zona 2
-            new { Zona = 2, Sector = 1, Cuadrante = 1, Expected = false }, // Sector 1 belongs to Zona 1
+            new { Zona = 1, Region = 3, Sector = 3, Cuadrante = 5, Expected = false }, // Region 3 belongs to Zona 2
+            new { Zona = 1, Region = 1, Sector = 3, Cuadrante = 5, Expected = false }, // Sector 3 belongs to Region 3
+            new { Zona = 2, Region = 1, Sector = 1, Cuadrante = 1, Expected = false }, // Region 1 belongs to Zona 1
         };
 
         foreach (var testCase in testCases)
         {
             // Act
-            var result = await _service.ValidateHierarchyAsync(testCase.Zona, testCase.Sector, testCase.Cuadrante);
+            var result = await _service.ValidateHierarchyAsync(testCase.Zona, testCase.Region, testCase.Sector, testCase.Cuadrante);
 
             // Assert
             result.Should().Be(testCase.Expected,
-                $"Zona={testCase.Zona}, Sector={testCase.Sector}, Cuadrante={testCase.Cuadrante} should be {testCase.Expected}");
+                $"Zona={testCase.Zona}, Region={testCase.Region}, Sector={testCase.Sector}, Cuadrante={testCase.Cuadrante} should be {testCase.Expected}");
         }
     }
 
@@ -600,10 +659,11 @@ public class CatalogServiceTests : IDisposable
         var tasks = new List<Task>
         {
             _service.GetZonasAsync(),
-            _service.GetSectoresByZonaAsync(1),
+            _service.GetRegionesByZonaAsync(1),
+            _service.GetSectoresByRegionAsync(1),
             _service.GetCuadrantesBySectorAsync(1),
             _service.GetSuggestionsAsync("sexo"),
-            _service.ValidateHierarchyAsync(1, 1, 1)
+            _service.ValidateHierarchyAsync(1, 1, 1, 1)
         };
 
         // Act
@@ -625,10 +685,11 @@ public class CatalogServiceTests : IDisposable
 
         // Act & Assert
         (await emptyService.GetZonasAsync()).Should().BeEmpty();
-        (await emptyService.GetSectoresByZonaAsync(1)).Should().BeEmpty();
+        (await emptyService.GetRegionesByZonaAsync(1)).Should().BeEmpty();
+        (await emptyService.GetSectoresByRegionAsync(1)).Should().BeEmpty();
         (await emptyService.GetCuadrantesBySectorAsync(1)).Should().BeEmpty();
         (await emptyService.GetSuggestionsAsync("sexo")).Should().BeEmpty();
-        (await emptyService.ValidateHierarchyAsync(1, 1, 1)).Should().BeFalse();
+        (await emptyService.ValidateHierarchyAsync(1, 1, 1, 1)).Should().BeFalse();
     }
 
     [Fact(DisplayName = "T036: GetSuggestionsAsync should handle special characters in values")]

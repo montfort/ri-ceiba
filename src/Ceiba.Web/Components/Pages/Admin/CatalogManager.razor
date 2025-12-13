@@ -17,11 +17,16 @@
         </div>
     </div>
 
-    <!-- Tabs -->
+    <!-- Tabs (Zona → Región → Sector → Cuadrante) -->
     <ul class="nav nav-tabs mb-3" role="tablist">
         <li class="nav-item">
             <button class="nav-link @(ActiveTab == "zonas" ? "active" : "")" @onclick="SetTabZonas">
                 <i class="bi bi-map me-1"></i>Zonas
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(ActiveTab == "regiones" ? "active" : "")" @onclick="SetTabRegiones">
+                <i class="bi bi-diagram-3 me-1"></i>Regiones
             </button>
         </li>
         <li class="nav-item">
@@ -66,7 +71,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
-                                <th>Sectores</th>
+                                <th>Regiones</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -77,7 +82,7 @@
                                 <tr>
                                     <td>@zona.Id</td>
                                     <td>@zona.Nombre</td>
-                                    <td>@zona.SectoresCount</td>
+                                    <td>@zona.RegionesCount</td>
                                     <td>
                                         <span class="badge @(zona.Activo ? "bg-success" : "bg-secondary")">
                                             @(zona.Activo ? "Activo" : "Inactivo")
@@ -102,6 +107,70 @@
             </div>
         }
 
+        <!-- Regiones Tab -->
+        @if (ActiveTab == "regiones")
+        {
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="me-3">Regiones</span>
+                        <select class="form-select form-select-sm d-inline-block w-auto"
+                                @bind="FilterZonaId" @bind:after="LoadRegiones">
+                            <option value="">Todas las zonas</option>
+                            @foreach (var zona in Zonas.Where(z => z.Activo))
+                            {
+                                <option value="@zona.Id">@zona.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <button class="btn btn-sm btn-primary" @onclick="OpenRegionModal">
+                        <i class="bi bi-plus me-1"></i>Nueva Región
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Zona</th>
+                                <th>Sectores</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var region in Regiones)
+                            {
+                                <tr>
+                                    <td>@region.Id</td>
+                                    <td>@region.Nombre</td>
+                                    <td>@region.ZonaNombre</td>
+                                    <td>@region.SectoresCount</td>
+                                    <td>
+                                        <span class="badge @(region.Activo ? "bg-success" : "bg-secondary")">
+                                            @(region.Activo ? "Activo" : "Inactivo")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" @onclick="() => EditRegion(region)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn @(region.Activo ? "btn-outline-warning" : "btn-outline-success")"
+                                                    @onclick="() => ToggleRegion(region)">
+                                                <i class="bi @(region.Activo ? "bi-pause-circle" : "bi-play-circle")"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
         <!-- Sectores Tab -->
         @if (ActiveTab == "sectores")
         {
@@ -110,11 +179,11 @@
                     <div>
                         <span class="me-3">Sectores</span>
                         <select class="form-select form-select-sm d-inline-block w-auto"
-                                @bind="FilterZonaId" @bind:after="LoadSectores">
-                            <option value="">Todas las zonas</option>
-                            @foreach (var zona in Zonas.Where(z => z.Activo))
+                                @bind="FilterRegionId" @bind:after="LoadSectores">
+                            <option value="">Todas las regiones</option>
+                            @foreach (var region in Regiones.Where(r => r.Activo))
                             {
-                                <option value="@zona.Id">@zona.Nombre</option>
+                                <option value="@region.Id">@region.Nombre (@region.ZonaNombre)</option>
                             }
                         </select>
                     </div>
@@ -128,7 +197,7 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
-                                <th>Zona</th>
+                                <th>Región</th>
                                 <th>Cuadrantes</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -140,7 +209,7 @@
                                 <tr>
                                     <td>@sector.Id</td>
                                     <td>@sector.Nombre</td>
-                                    <td>@sector.ZonaNombre</td>
+                                    <td>@sector.RegionNombre</td>
                                     <td>@sector.CuadrantesCount</td>
                                     <td>
                                         <span class="badge @(sector.Activo ? "bg-success" : "bg-secondary")">
@@ -259,6 +328,45 @@
     </div>
 }
 
+<!-- Region Modal -->
+@if (ShowRegionModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(EditingRegionId.HasValue ? "Editar Región" : "Nueva Región")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseRegionModal"></button>
+                </div>
+                <div class="modal-body">
+                    @if (!string.IsNullOrEmpty(ModalError))
+                    {
+                        <div class="alert alert-danger">@ModalError</div>
+                    }
+                    <div class="mb-3">
+                        <label class="form-label">Zona *</label>
+                        <select class="form-select" @bind="RegionZonaId">
+                            <option value="0">-- Seleccione --</option>
+                            @foreach (var zona in Zonas.Where(z => z.Activo))
+                            {
+                                <option value="@zona.Id">@zona.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" @bind="RegionNombre" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseRegionModal">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="SaveRegion">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <!-- Sector Modal -->
 @if (ShowSectorModal)
 {
@@ -275,12 +383,12 @@
                         <div class="alert alert-danger">@ModalError</div>
                     }
                     <div class="mb-3">
-                        <label class="form-label">Zona *</label>
-                        <select class="form-select" @bind="SectorZonaId">
+                        <label class="form-label">Región *</label>
+                        <select class="form-select" @bind="SectorRegionId">
                             <option value="0">-- Seleccione --</option>
-                            @foreach (var zona in Zonas.Where(z => z.Activo))
+                            @foreach (var region in Regiones.Where(r => r.Activo))
                             {
-                                <option value="@zona.Id">@zona.Nombre</option>
+                                <option value="@region.Id">@region.Nombre (@region.ZonaNombre)</option>
                             }
                         </select>
                     </div>
@@ -344,22 +452,26 @@
     private string? ModalError { get; set; }
     private Guid CurrentUserId { get; set; }
 
-    // Tab navigation
+    // Tab navigation (Zona → Región → Sector → Cuadrante)
     private void SetTabZonas() => ActiveTab = "zonas";
+    private void SetTabRegiones() => ActiveTab = "regiones";
     private void SetTabSectores() => ActiveTab = "sectores";
     private void SetTabCuadrantes() => ActiveTab = "cuadrantes";
 
     // Modal close methods
     private void CloseZonaModal() => ShowZonaModal = false;
+    private void CloseRegionModal() => ShowRegionModal = false;
     private void CloseSectorModal() => ShowSectorModal = false;
     private void CloseCuadranteModal() => ShowCuadranteModal = false;
 
     private List<ZonaDto> Zonas { get; set; } = new();
+    private List<RegionDto> Regiones { get; set; } = new();
     private List<SectorDto> Sectores { get; set; } = new();
     private List<CuadranteDto> Cuadrantes { get; set; } = new();
 
     // Filters
     private string? FilterZonaId { get; set; }
+    private string? FilterRegionId { get; set; }
     private string? FilterSectorId { get; set; }
 
     // Zona modal
@@ -367,10 +479,16 @@
     private int? EditingZonaId { get; set; }
     private string ZonaNombre { get; set; } = string.Empty;
 
+    // Region modal
+    private bool ShowRegionModal { get; set; }
+    private int? EditingRegionId { get; set; }
+    private int RegionZonaId { get; set; }
+    private string RegionNombre { get; set; } = string.Empty;
+
     // Sector modal
     private bool ShowSectorModal { get; set; }
     private int? EditingSectorId { get; set; }
-    private int SectorZonaId { get; set; }
+    private int SectorRegionId { get; set; }
     private string SectorNombre { get; set; } = string.Empty;
 
     // Cuadrante modal
@@ -406,6 +524,7 @@
         try
         {
             Zonas = await CatalogService.GetZonasAsync();
+            await LoadRegiones();
             await LoadSectores();
             await LoadCuadrantes();
         }
@@ -415,10 +534,16 @@
         }
     }
 
-    private async Task LoadSectores()
+    private async Task LoadRegiones()
     {
         var zonaId = string.IsNullOrEmpty(FilterZonaId) ? (int?)null : int.Parse(FilterZonaId);
-        Sectores = await CatalogService.GetSectoresAsync(zonaId);
+        Regiones = await CatalogService.GetRegionesAsync(zonaId);
+    }
+
+    private async Task LoadSectores()
+    {
+        var regionId = string.IsNullOrEmpty(FilterRegionId) ? (int?)null : int.Parse(FilterRegionId);
+        Sectores = await CatalogService.GetSectoresAsync(regionId);
     }
 
     private async Task LoadCuadrantes()
@@ -482,11 +607,73 @@
         }
     }
 
+    // Region methods
+    private void OpenRegionModal()
+    {
+        EditingRegionId = null;
+        RegionZonaId = 0;
+        RegionNombre = string.Empty;
+        ModalError = null;
+        ShowRegionModal = true;
+    }
+
+    private void EditRegion(RegionDto region)
+    {
+        EditingRegionId = region.Id;
+        RegionZonaId = region.ZonaId;
+        RegionNombre = region.Nombre;
+        ModalError = null;
+        ShowRegionModal = true;
+    }
+
+    private async Task SaveRegion()
+    {
+        if (RegionZonaId == 0)
+        {
+            ModalError = "Debe seleccionar una zona.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(RegionNombre))
+        {
+            ModalError = "El nombre es requerido.";
+            return;
+        }
+
+        try
+        {
+            var dto = new CreateRegionDto { ZonaId = RegionZonaId, Nombre = RegionNombre };
+            if (EditingRegionId.HasValue)
+                await CatalogService.UpdateRegionAsync(EditingRegionId.Value, dto, CurrentUserId);
+            else
+                await CatalogService.CreateRegionAsync(dto, CurrentUserId);
+
+            ShowRegionModal = false;
+            await LoadRegiones();
+        }
+        catch (Exception ex)
+        {
+            ModalError = ex.Message;
+        }
+    }
+
+    private async Task ToggleRegion(RegionDto region)
+    {
+        try
+        {
+            await CatalogService.ToggleRegionActivoAsync(region.Id, CurrentUserId);
+            await LoadRegiones();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
     // Sector methods
     private void OpenSectorModal()
     {
         EditingSectorId = null;
-        SectorZonaId = 0;
+        SectorRegionId = 0;
         SectorNombre = string.Empty;
         ModalError = null;
         ShowSectorModal = true;
@@ -495,7 +682,7 @@
     private void EditSector(SectorDto sector)
     {
         EditingSectorId = sector.Id;
-        SectorZonaId = sector.ZonaId;
+        SectorRegionId = sector.RegionId;
         SectorNombre = sector.Nombre;
         ModalError = null;
         ShowSectorModal = true;
@@ -503,9 +690,9 @@
 
     private async Task SaveSector()
     {
-        if (SectorZonaId == 0)
+        if (SectorRegionId == 0)
         {
-            ModalError = "Debe seleccionar una zona.";
+            ModalError = "Debe seleccionar una región.";
             return;
         }
         if (string.IsNullOrWhiteSpace(SectorNombre))
@@ -516,7 +703,7 @@
 
         try
         {
-            var dto = new CreateSectorDto { ZonaId = SectorZonaId, Nombre = SectorNombre };
+            var dto = new CreateSectorDto { RegionId = SectorRegionId, Nombre = SectorNombre };
             if (EditingSectorId.HasValue)
                 await CatalogService.UpdateSectorAsync(EditingSectorId.Value, dto, CurrentUserId);
             else

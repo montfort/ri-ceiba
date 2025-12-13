@@ -245,7 +245,7 @@ public class ConcurrencyPerformanceTests : PerformanceTestBase
         context.Zonas.Add(new Zona { Id = 1, Nombre = "Zona Norte", Activo = true });
 
         // Add sectors
-        context.Sectores.Add(new Sector { Id = 1, Nombre = "Sector A", ZonaId = 1, Activo = true });
+        context.Sectores.Add(new Sector { Id = 1, Nombre = "Sector A", RegionId = 1, Activo = true });
 
         // Add cuadrantes
         context.Cuadrantes.Add(new Cuadrante { Id = 1, Nombre = "Cuadrante 1", SectorId = 1, Activo = true });

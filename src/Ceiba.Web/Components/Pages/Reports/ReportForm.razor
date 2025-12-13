@@ -129,12 +129,12 @@
                                 </div>
                             </div>
 
-                            <!-- Section 3: Ubicación Geográfica -->
+                            <!-- Section 3: Ubicación Geográfica (Zona → Región → Sector → Cuadrante) -->
                             <h5 class="border-bottom pb-2 mb-3 mt-4">
                                 <i class="bi bi-geo-alt me-2"></i>Ubicación Geográfica
                             </h5>
                             <div class="row mb-3">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <CascadingSelect Id="zona"
                                                      Label="Zona"
                                                      TValue="int"
@@ -146,7 +146,20 @@
                                                      PlaceholderText="Seleccione una zona" />
                                     <ValidationMessage For="@(() => Model.ZonaId)" />
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <CascadingSelect Id="region"
+                                                     Label="Región"
+                                                     TValue="int"
+                                                     Value="@Model.RegionId"
+                                                     ValueChanged="@OnRegionChanged"
+                                                     Items="@Regiones"
+                                                     Required="true"
+                                                     Disabled="@(Model.ZonaId == 0)"
+                                                     IsLoading="@IsLoadingRegiones"
+                                                     PlaceholderText="Primero seleccione una zona" />
+                                    <ValidationMessage For="@(() => Model.RegionId)" />
+                                </div>
+                                <div class="col-md-3">
                                     <CascadingSelect Id="sector"
                                                      Label="Sector"
                                                      TValue="int"
@@ -154,12 +167,12 @@
                                                      ValueChanged="@OnSectorChanged"
                                                      Items="@Sectores"
                                                      Required="true"
-                                                     Disabled="@(Model.ZonaId == 0)"
+                                                     Disabled="@(Model.RegionId == 0)"
                                                      IsLoading="@IsLoadingSectores"
-                                                     PlaceholderText="Primero seleccione una zona" />
+                                                     PlaceholderText="Primero seleccione una región" />
                                     <ValidationMessage For="@(() => Model.SectorId)" />
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <CascadingSelect Id="cuadrante"
                                                      Label="Cuadrante"
                                                      TValue="int"
@@ -317,6 +330,7 @@
     private bool IsLoading { get; set; } = true;
     private bool IsSaving { get; set; } = false;
     private bool IsLoadingCatalogs { get; set; } = true;
+    private bool IsLoadingRegiones { get; set; } = false;
     private bool IsLoadingSectores { get; set; } = false;
     private bool IsLoadingCuadrantes { get; set; } = false;
     private bool CannotEdit { get; set; } = false;
@@ -325,8 +339,9 @@
     private Guid CurrentUserId { get; set; }
     private bool IsRevisor { get; set; } = false;
 
-    // Catalog data
+    // Catalog data (Zona → Región → Sector → Cuadrante)
     private List<CatalogItemDto> Zonas { get; set; } = new();
+    private List<CatalogItemDto> Regiones { get; set; } = new();
     private List<CatalogItemDto> Sectores { get; set; } = new();
     private List<CatalogItemDto> Cuadrantes { get; set; } = new();
     private List<string> SexoSuggestions { get; set; } = new();
@@ -396,12 +411,14 @@
 
             // Store the geographic IDs before loading catalogs
             var savedZonaId = ExistingReport.Zona.Id;
+            var savedRegionId = ExistingReport.Region.Id;
             var savedSectorId = ExistingReport.Sector.Id;
             var savedCuadranteId = ExistingReport.Cuadrante.Id;
 
             // Load dependent catalogs FIRST (before setting Model values)
             // This ensures the dropdown options are available
-            await LoadSectoresAsync(savedZonaId);
+            await LoadRegionesAsync(savedZonaId);
+            await LoadSectoresAsync(savedRegionId);
             await LoadCuadrantesAsync(savedSectorId);
 
             // Now map to form model with all values
@@ -417,6 +434,7 @@
                 Discapacidad = ExistingReport.Discapacidad,
                 Delito = ExistingReport.Delito,
                 ZonaId = savedZonaId,
+                RegionId = savedRegionId,
                 SectorId = savedSectorId,
                 CuadranteId = savedCuadranteId,
                 TurnoCeiba = ExistingReport.TurnoCeiba,
@@ -428,8 +446,8 @@
                 Observaciones = ExistingReport.Observaciones
             };
 
-            Logger.LogInformation("Loaded report {ReportId}: Zona={ZonaId}, Sector={SectorId}, Cuadrante={CuadranteId}",
-                ReportId, savedZonaId, savedSectorId, savedCuadranteId);
+            Logger.LogInformation("Loaded report {ReportId}: Zona={ZonaId}, Region={RegionId}, Sector={SectorId}, Cuadrante={CuadranteId}",
+                ReportId, savedZonaId, savedRegionId, savedSectorId, savedCuadranteId);
         }
         catch (ForbiddenException)
         {
@@ -458,18 +476,38 @@
         }
     }
 
-    private async Task LoadSectoresAsync(int zonaId)
+    private async Task LoadRegionesAsync(int zonaId)
     {
-        IsLoadingSectores = true;
-        Logger.LogInformation("Loading sectores for zona {ZonaId}", zonaId);
+        IsLoadingRegiones = true;
+        Logger.LogInformation("Loading regiones for zona {ZonaId}", zonaId);
         try
         {
-            Sectores = await CatalogService.GetSectoresByZonaAsync(zonaId);
-            Logger.LogInformation("Loaded {Count} sectores for zona {ZonaId}", Sectores.Count, zonaId);
+            Regiones = await CatalogService.GetRegionesByZonaAsync(zonaId);
+            Logger.LogInformation("Loaded {Count} regiones for zona {ZonaId}", Regiones.Count, zonaId);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error loading sectores for zona {ZonaId}", zonaId);
+            Logger.LogError(ex, "Error loading regiones for zona {ZonaId}", zonaId);
+            ErrorMessage = $"Error al cargar regiones: {ex.Message}";
+        }
+        finally
+        {
+            IsLoadingRegiones = false;
+        }
+    }
+
+    private async Task LoadSectoresAsync(int regionId)
+    {
+        IsLoadingSectores = true;
+        Logger.LogInformation("Loading sectores for region {RegionId}", regionId);
+        try
+        {
+            Sectores = await CatalogService.GetSectoresByRegionAsync(regionId);
+            Logger.LogInformation("Loaded {Count} sectores for region {RegionId}", Sectores.Count, regionId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading sectores for region {RegionId}", regionId);
             ErrorMessage = $"Error al cargar sectores: {ex.Message}";
         }
         finally
@@ -605,6 +643,7 @@
             Discapacidad = Model.Discapacidad,
             Delito = Model.Delito,
             ZonaId = Model.ZonaId,
+            RegionId = Model.RegionId,
             SectorId = Model.SectorId,
             CuadranteId = Model.CuadranteId,
             TurnoCeiba = Model.TurnoCeiba,
@@ -622,10 +661,31 @@
         Navigation.NavigateTo("/reports");
     }
 
-    // Helper methods for two-way binding with cascading data load
+    // Helper methods for two-way binding with cascading data load (Zona → Región → Sector → Cuadrante)
     private async Task OnZonaChanged(int value)
     {
         Model.ZonaId = value;
+
+        // Reset all dependent fields
+        Model.RegionId = 0;
+        Model.SectorId = 0;
+        Model.CuadranteId = 0;
+        Regiones.Clear();
+        Sectores.Clear();
+        Cuadrantes.Clear();
+
+        // Load regiones for the new zona
+        if (value > 0)
+        {
+            await LoadRegionesAsync(value);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task OnRegionChanged(int value)
+    {
+        Model.RegionId = value;
 
         // Reset dependent fields
         Model.SectorId = 0;
@@ -633,7 +693,7 @@
         Sectores.Clear();
         Cuadrantes.Clear();
 
-        // Load sectores for the new zona
+        // Load sectores for the new region
         if (value > 0)
         {
             await LoadSectoresAsync(value);

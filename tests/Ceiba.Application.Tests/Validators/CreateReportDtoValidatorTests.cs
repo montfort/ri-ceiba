@@ -969,6 +969,7 @@ public class CreateReportDtoValidatorTests
             Discapacidad = false,
             Delito = "Violencia familiar",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,

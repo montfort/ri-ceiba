@@ -81,9 +81,13 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
             .HasMaxLength(100)
             .IsRequired();
 
-        // Geographic Relations
+        // Geographic Relations (Zona → Región → Sector → Cuadrante)
         builder.Property(r => r.ZonaId)
             .HasColumnName("zona_id")
+            .IsRequired();
+
+        builder.Property(r => r.RegionId)
+            .HasColumnName("region_id")
             .IsRequired();
 
         builder.Property(r => r.SectorId)
@@ -99,6 +103,12 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
             .HasForeignKey(r => r.ZonaId)
             .OnDelete(DeleteBehavior.Restrict)
             .HasConstraintName("FK_REPORTE_ZONA");
+
+        builder.HasOne(r => r.Region)
+            .WithMany(reg => reg.Reportes)
+            .HasForeignKey(r => r.RegionId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasConstraintName("FK_REPORTE_REGION");
 
         builder.HasOne(r => r.Sector)
             .WithMany(s => s.Reportes)
@@ -170,6 +180,9 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
 
         builder.HasIndex(r => r.ZonaId)
             .HasDatabaseName("idx_reporte_zona");
+
+        builder.HasIndex(r => r.RegionId)
+            .HasDatabaseName("idx_reporte_region");
 
         builder.HasIndex(r => r.Delito)
             .HasDatabaseName("idx_reporte_delito");

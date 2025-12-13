@@ -36,7 +36,8 @@ public class CacheKeysTests
     {
         // Assert
         CacheKeys.SugerenciasByCampo.Should().Contain("{0}");
-        CacheKeys.SectoresByZona.Should().Contain("{0}");
+        CacheKeys.RegionesByZona.Should().Contain("{0}");
+        CacheKeys.SectoresByRegion.Should().Contain("{0}");
         CacheKeys.CuadrantesBySector.Should().Contain("{0}");
         CacheKeys.ReportById.Should().Contain("{0}");
         CacheKeys.ReportsByUser.Should().Contain("{0}");
@@ -68,17 +69,30 @@ public class CacheKeysTests
         result.Should().Be("stats:reports:zona:5:2025-01-15");
     }
 
-    [Fact(DisplayName = "Format with SectoresByZona should create correct key")]
-    public void Format_SectoresByZona_ShouldCreateCorrectKey()
+    [Fact(DisplayName = "Format with RegionesByZona should create correct key")]
+    public void Format_RegionesByZona_ShouldCreateCorrectKey()
     {
         // Arrange
         var zonaId = 42;
 
         // Act
-        var result = CacheKeys.Format(CacheKeys.SectoresByZona, zonaId);
+        var result = CacheKeys.Format(CacheKeys.RegionesByZona, zonaId);
 
         // Assert
-        result.Should().Be("catalog:sectores:zona:42");
+        result.Should().Be("catalog:regiones:zona:42");
+    }
+
+    [Fact(DisplayName = "Format with SectoresByRegion should create correct key")]
+    public void Format_SectoresByRegion_ShouldCreateCorrectKey()
+    {
+        // Arrange
+        var regionId = 42;
+
+        // Act
+        var result = CacheKeys.Format(CacheKeys.SectoresByRegion, regionId);
+
+        // Assert
+        result.Should().Be("catalog:sectores:region:42");
     }
 
     [Fact(DisplayName = "Format with CuadrantesBySector should create correct key")]

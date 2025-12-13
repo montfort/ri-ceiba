@@ -119,7 +119,7 @@ public class CatalogContractTests : IClassFixture<CeibaWebApplicationFactory>
         var createDto = new CreateSectorDto
         {
             Nombre = "Test Sector",
-            ZonaId = 1,
+            RegionId = 1,
             Activo = true
         };
 
@@ -137,7 +137,7 @@ public class CatalogContractTests : IClassFixture<CeibaWebApplicationFactory>
         var updateDto = new CreateSectorDto
         {
             Nombre = "Updated Sector",
-            ZonaId = 1,
+            RegionId = 1,
             Activo = true
         };
 
@@ -323,14 +323,14 @@ public class CatalogContractTests : IClassFixture<CeibaWebApplicationFactory>
             Id = 1,
             Nombre = "Test Zona",
             Activo = true,
-            SectoresCount = 5
+            RegionesCount = 5
         };
 
         // Assert
         dto.Id.Should().Be(1);
         dto.Nombre.Should().Be("Test Zona");
         dto.Activo.Should().BeTrue();
-        dto.SectoresCount.Should().Be(5);
+        dto.RegionesCount.Should().Be(5);
     }
 
     [Fact(DisplayName = "T062: SectorDto should include Zona reference")]
@@ -396,18 +396,18 @@ public class CatalogContractTests : IClassFixture<CeibaWebApplicationFactory>
         dto.Activo.Should().BeTrue();
     }
 
-    [Fact(DisplayName = "T062: CreateSectorDto should require ZonaId")]
-    public void CreateSectorDto_ShouldRequireZonaId()
+    [Fact(DisplayName = "T062: CreateSectorDto should require RegionId")]
+    public void CreateSectorDto_ShouldRequireRegionId()
     {
         // Arrange
-        var zonaIdProperty = typeof(CreateSectorDto).GetProperty(nameof(CreateSectorDto.ZonaId));
+        var regionIdProperty = typeof(CreateSectorDto).GetProperty(nameof(CreateSectorDto.RegionId));
 
         // Assert
-        zonaIdProperty.Should().NotBeNull();
-        zonaIdProperty!.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.RequiredAttribute), true)
-            .Should().NotBeEmpty("ZonaId should be required");
-        zonaIdProperty.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.RangeAttribute), true)
-            .Should().NotBeEmpty("ZonaId should have Range validation");
+        regionIdProperty.Should().NotBeNull();
+        regionIdProperty!.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.RequiredAttribute), true)
+            .Should().NotBeEmpty("RegionId should be required");
+        regionIdProperty.GetCustomAttributes(typeof(System.ComponentModel.DataAnnotations.RangeAttribute), true)
+            .Should().NotBeEmpty("RegionId should have Range validation");
     }
 
     [Fact(DisplayName = "T062: CreateCuadranteDto should require SectorId")]

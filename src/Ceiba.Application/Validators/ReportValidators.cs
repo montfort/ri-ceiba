@@ -29,6 +29,9 @@ public class CreateReportDtoValidator : AbstractValidator<CreateReportDto>
         RuleFor(x => x.ZonaId)
             .GreaterThan(0).WithMessage("Debe seleccionar una zona válida");
 
+        RuleFor(x => x.RegionId)
+            .GreaterThan(0).WithMessage("Debe seleccionar una región válida");
+
         RuleFor(x => x.SectorId)
             .GreaterThan(0).WithMessage("Debe seleccionar un sector válido");
 
@@ -91,6 +94,10 @@ public class UpdateReportDtoValidator : AbstractValidator<UpdateReportDto>
         RuleFor(x => x.ZonaId)
             .GreaterThan(0).WithMessage("Debe seleccionar una zona válida")
             .When(x => x.ZonaId.HasValue);
+
+        RuleFor(x => x.RegionId)
+            .GreaterThan(0).WithMessage("Debe seleccionar una región válida")
+            .When(x => x.RegionId.HasValue);
 
         RuleFor(x => x.SectorId)
             .GreaterThan(0).WithMessage("Debe seleccionar un sector válido")

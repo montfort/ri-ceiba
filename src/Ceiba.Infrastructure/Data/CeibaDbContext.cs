@@ -25,8 +25,9 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
         CurrentUserId = userId;
     }
 
-    // Geographic Catalogs (Hierarchical: Zona → Sector → Cuadrante)
+    // Geographic Catalogs (Hierarchical: Zona → Región → Sector → Cuadrante)
     public DbSet<Zona> Zonas => Set<Zona>();
+    public DbSet<Region> Regiones => Set<Region>();
     public DbSet<Sector> Sectores => Set<Sector>();
     public DbSet<Cuadrante> Cuadrantes => Set<Cuadrante>();
 

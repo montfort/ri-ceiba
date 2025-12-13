@@ -520,7 +520,7 @@ public class AdminControllerTests
     public async Task CreateSector_ValidData_ReturnsCreated()
     {
         // Arrange
-        var createDto = new CreateSectorDto { Nombre = "New Sector", ZonaId = 1 };
+        var createDto = new CreateSectorDto { Nombre = "New Sector", RegionId = 1 };
         var createdSector = new SectorDto { Id = 1, Nombre = "New Sector" };
 
         _catalogServiceMock.Setup(x => x.CreateSectorAsync(createDto, _adminUserId))
@@ -534,12 +534,12 @@ public class AdminControllerTests
     }
 
     [Fact]
-    public async Task CreateSector_ZonaNotFound_ReturnsNotFound()
+    public async Task CreateSector_RegionNotFound_ReturnsNotFound()
     {
         // Arrange
-        var createDto = new CreateSectorDto { Nombre = "New Sector", ZonaId = 999 };
+        var createDto = new CreateSectorDto { Nombre = "New Sector", RegionId = 999 };
         _catalogServiceMock.Setup(x => x.CreateSectorAsync(createDto, _adminUserId))
-            .ThrowsAsync(new KeyNotFoundException("Zona not found"));
+            .ThrowsAsync(new KeyNotFoundException("Region not found"));
 
         // Act
         var result = await _controller.CreateSector(createDto);

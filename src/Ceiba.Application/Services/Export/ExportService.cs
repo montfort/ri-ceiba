@@ -322,8 +322,9 @@ public class ExportService : IExportService
             TipoDeAtencion = report.TipoDeAtencion,
             TipoDeAccion = MapTipoDeAccion(report.TipoDeAccion),
 
-            // Geographic Location
+            // Geographic Location (Zona → Región → Sector → Cuadrante)
             Zona = report.Zona?.Nombre ?? string.Empty,
+            Region = report.Region?.Nombre ?? string.Empty,
             Sector = report.Sector?.Nombre ?? string.Empty,
             Cuadrante = report.Cuadrante?.Nombre ?? string.Empty,
             TurnoCeiba = MapTurnoCeiba(report.TurnoCeiba),

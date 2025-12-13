@@ -179,11 +179,11 @@ public class ReportFormComponentTests : TestContext
         options.Should().Contain(o => o.TextContent.Contains("Zona Sur"));
     }
 
-    [Fact(DisplayName = "T026: Sector dropdown should update when zona changes")]
-    public async Task SectorDropdown_ShouldUpdateWhenZonaChanges()
+    [Fact(DisplayName = "T026: Sector dropdown should update when region changes")]
+    public async Task SectorDropdown_ShouldUpdateWhenRegionChanges()
     {
         // Arrange
-        var zonaId = 1;
+        var regionId = 1;
         var sectores = new List<CatalogItemDto>
         {
             new() { Id = 1, Nombre = "Sector 1" },
@@ -191,16 +191,16 @@ public class ReportFormComponentTests : TestContext
         };
 
         _mockCatalogService
-            .Setup(c => c.GetSectoresByZonaAsync(zonaId))
+            .Setup(c => c.GetSectoresByRegionAsync(regionId))
             .ReturnsAsync(sectores);
 
         SetupCatalogMocks();
 
         var cut = Render<ReportForm>();
 
-        // Act: Select a zona
-        var zonaSelect = cut.Find("select#zona");
-        await cut.InvokeAsync(() => zonaSelect.Change(zonaId.ToString()));
+        // Act: Select a region (requires zona to be selected first)
+        var regionSelect = cut.Find("select#region");
+        await cut.InvokeAsync(() => regionSelect.Change(regionId.ToString()));
         await Task.Delay(100); // Wait for async update
 
         // Assert: Verify sector options are populated
@@ -350,7 +350,14 @@ public class ReportFormComponentTests : TestContext
             });
 
         _mockCatalogService
-            .Setup(c => c.GetSectoresByZonaAsync(It.IsAny<int>()))
+            .Setup(c => c.GetRegionesByZonaAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<CatalogItemDto>
+            {
+                new() { Id = 1, Nombre = "Región Norte" }
+            });
+
+        _mockCatalogService
+            .Setup(c => c.GetSectoresByRegionAsync(It.IsAny<int>()))
             .ReturnsAsync(new List<CatalogItemDto>
             {
                 new() { Id = 1, Nombre = "Sector 1" }
@@ -386,7 +393,20 @@ public class ReportFormComponentTests : TestContext
             cut.Find("input#edad").Change("28");
             cut.Find("input#delito").Input("Violencia familiar");
             cut.Find("select#zona").Change("1");
+        });
+        await Task.Delay(50); // Wait for region load
+        await cut.InvokeAsync(() =>
+        {
+            cut.Find("select#region").Change("1");
+        });
+        await Task.Delay(50); // Wait for sector load
+        await cut.InvokeAsync(() =>
+        {
             cut.Find("select#sector").Change("1");
+        });
+        await Task.Delay(50); // Wait for cuadrante load
+        await cut.InvokeAsync(() =>
+        {
             cut.Find("select#cuadrante").Change("1");
             cut.Find("select#turnoCeiba").Change("1");
             cut.Find("input#tipoDeAtencion").Input("Presencial");

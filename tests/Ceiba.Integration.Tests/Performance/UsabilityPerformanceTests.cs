@@ -126,10 +126,16 @@ public class UsabilityPerformanceTests : PerformanceTestBase
                     .Select(i => new { Id = i, Name = $"Zona {i}" })
                     .ToList();
 
-                // Level 2: Sectors (filtered by zone)
+                // Level 2: Regions (filtered by zone)
+                var regions = Enumerable.Range(1, 15)
+                    .Select(i => new { Id = i, Name = $"Región {i}", ZonaId = (i % 10) + 1 })
+                    .Where(r => r.ZonaId == 1)
+                    .ToList();
+
+                // Level 3: Sectors (filtered by region)
                 var sectors = Enumerable.Range(1, 20)
-                    .Select(i => new { Id = i, Name = $"Sector {i}", ZonaId = (i % 10) + 1 })
-                    .Where(s => s.ZonaId == 1)
+                    .Select(i => new { Id = i, Name = $"Sector {i}", RegionId = (i % 15) + 1 })
+                    .Where(s => s.RegionId == 1)
                     .ToList();
 
                 // Level 3: Cuadrantes (filtered by sector)

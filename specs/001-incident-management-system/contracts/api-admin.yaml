@@ -215,6 +215,72 @@ paths:
         '200':
           description: Zone updated
 
+  # Catalog Management - Regiones
+  /api/admin/regiones:
+    get:
+      summary: List regions
+      operationId: listRegiones
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: zonaId
+          in: query
+          schema:
+            type: integer
+        - name: activo
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of regions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegionResponse'
+
+    post:
+      summary: Create region
+      operationId: createRegion
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegionRequest'
+      responses:
+        '201':
+          description: Region created
+
+  /api/admin/regiones/{id}:
+    put:
+      summary: Update region
+      operationId: updateRegion
+      tags: [Catalogs]
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRegionRequest'
+      responses:
+        '200':
+          description: Region updated
+
   # Catalog Management - Sectores
   /api/admin/sectores:
     get:
@@ -224,7 +290,7 @@ paths:
       security:
         - cookieAuth: []
       parameters:
-        - name: zonaId
+        - name: regionId
           in: query
           schema:
             type: integer
@@ -497,17 +563,55 @@ components:
           type: string
         activo:
           type: boolean
+        regionesCount:
+          type: integer
         createdAt:
           type: string
           format: date-time
 
-    CreateSectorRequest:
+    CreateRegionRequest:
       type: object
       required: [nombre, zonaId]
       properties:
         nombre:
           type: string
         zonaId:
+          type: integer
+
+    UpdateRegionRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+        activo:
+          type: boolean
+
+    RegionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        zonaId:
+          type: integer
+        zonaNombre:
+          type: string
+        sectoresCount:
+          type: integer
+        activo:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateSectorRequest:
+      type: object
+      required: [nombre, regionId]
+      properties:
+        nombre:
+          type: string
+        regionId:
           type: integer
 
     UpdateSectorRequest:
@@ -525,7 +629,15 @@ components:
           type: integer
         nombre:
           type: string
+        regionId:
+          type: integer
+        regionNombre:
+          type: string
         zonaId:
+          type: integer
+        zonaNombre:
+          type: string
+        cuadrantesCount:
           type: integer
         activo:
           type: boolean

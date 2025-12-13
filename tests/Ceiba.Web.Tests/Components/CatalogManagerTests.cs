@@ -204,21 +204,21 @@ public class CatalogManagerTests : TestContext
         cut.Markup.Should().Contain("Sector Centro");
     }
 
-    [Fact(DisplayName = "CatalogManager should filter sectores by zona")]
-    public async Task CatalogManager_ShouldFilterSectoresByZona()
+    [Fact(DisplayName = "CatalogManager should filter sectores by region")]
+    public async Task CatalogManager_ShouldFilterSectoresByRegion()
     {
         // Arrange
         var cut = Render<CatalogManager>();
         var sectoresTab = cut.FindAll(".nav-link").First(n => n.TextContent.Contains("Sectores"));
         await cut.InvokeAsync(() => sectoresTab.Click());
 
-        // Act
-        var zonaFilter = cut.Find("select.form-select");
-        await cut.InvokeAsync(() => zonaFilter.Change("1"));
+        // Act - Select region filter
+        var regionFilter = cut.Find("select.form-select");
+        await cut.InvokeAsync(() => regionFilter.Change("1"));
 
-        // Assert
+        // Assert - Verify GetSectoresAsync was called with regionId
         _mockCatalogService.Verify(
-            s => s.GetSectoresAsync(1),
+            s => s.GetSectoresAsync(1, It.IsAny<bool?>()),
             Times.AtLeastOnce);
     }
 
@@ -316,14 +316,20 @@ public class CatalogManagerTests : TestContext
     {
         var zonas = new List<ZonaDto>
         {
-            new() { Id = 1, Nombre = "Zona Norte", Activo = true, SectoresCount = 2 },
-            new() { Id = 2, Nombre = "Zona Sur", Activo = true, SectoresCount = 1 }
+            new() { Id = 1, Nombre = "Zona Norte", Activo = true, RegionesCount = 2 },
+            new() { Id = 2, Nombre = "Zona Sur", Activo = true, RegionesCount = 1 }
+        };
+
+        var regiones = new List<RegionDto>
+        {
+            new() { Id = 1, Nombre = "Región Centro", ZonaId = 1, ZonaNombre = "Zona Norte", Activo = true, SectoresCount = 2 },
+            new() { Id = 2, Nombre = "Región Este", ZonaId = 1, ZonaNombre = "Zona Norte", Activo = true, SectoresCount = 1 }
         };
 
         var sectores = new List<SectorDto>
         {
-            new() { Id = 1, Nombre = "Sector Centro", ZonaId = 1, ZonaNombre = "Zona Norte", Activo = true, CuadrantesCount = 3 },
-            new() { Id = 2, Nombre = "Sector Este", ZonaId = 1, ZonaNombre = "Zona Norte", Activo = true, CuadrantesCount = 2 }
+            new() { Id = 1, Nombre = "Sector Centro", RegionId = 1, ZonaNombre = "Zona Norte", Activo = true, CuadrantesCount = 3 },
+            new() { Id = 2, Nombre = "Sector Este", RegionId = 1, ZonaNombre = "Zona Norte", Activo = true, CuadrantesCount = 2 }
         };
 
         var cuadrantes = new List<CuadranteDto>
@@ -333,6 +339,7 @@ public class CatalogManagerTests : TestContext
         };
 
         _mockCatalogService.Setup(s => s.GetZonasAsync()).ReturnsAsync(zonas);
+        _mockCatalogService.Setup(s => s.GetRegionesAsync(It.IsAny<int?>())).ReturnsAsync(regiones);
         _mockCatalogService.Setup(s => s.GetSectoresAsync(It.IsAny<int?>())).ReturnsAsync(sectores);
         _mockCatalogService.Setup(s => s.GetCuadrantesAsync(It.IsAny<int?>())).ReturnsAsync(cuadrantes);
         _mockCatalogService.Setup(s => s.CreateZonaAsync(It.IsAny<CreateZonaDto>(), It.IsAny<Guid>()))

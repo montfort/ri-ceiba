@@ -55,6 +55,7 @@ public class ReportServiceTests
             Discapacidad = false,
             Delito = "Violencia familiar",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -77,6 +78,7 @@ public class ReportServiceTests
             Edad = 28,
             Delito = "Violencia familiar",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -87,7 +89,8 @@ public class ReportServiceTests
             Traslados = 0,
             Observaciones = "Observaciones adicionales",
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
-            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
             Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
         };
 
@@ -100,7 +103,7 @@ public class ReportServiceTests
             .ReturnsAsync(savedReport);
 
         _mockCatalogService
-            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1))
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1, 1))
             .ReturnsAsync(true);
 
         // Act
@@ -142,7 +145,8 @@ public class ReportServiceTests
             Edad = 28,
             Delito = "Test",
             ZonaId = 1,
-            SectorId = 99, // Invalid sector not belonging to zona 1
+            RegionId = 1,
+            SectorId = 99, // Invalid sector not belonging to region 1
             CuadranteId = 1,
             TurnoCeiba = 1,
             TipoDeAtencion = "Presencial",
@@ -153,7 +157,7 @@ public class ReportServiceTests
         };
 
         _mockCatalogService
-            .Setup(c => c.ValidateHierarchyAsync(1, 99, 1))
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 99, 1))
             .ReturnsAsync(false);
 
         // Act & Assert
@@ -175,6 +179,7 @@ public class ReportServiceTests
             Edad = 200, // Invalid edad > 149
             Delito = "Test",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -212,6 +217,7 @@ public class ReportServiceTests
             Edad = 28,
             Delito = "Violencia familiar",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -228,6 +234,7 @@ public class ReportServiceTests
             Edad = 35,
             Delito = "Robo con violencia",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TipoDeAccion = 1,
@@ -246,6 +253,7 @@ public class ReportServiceTests
             Edad = 35,
             Delito = "Robo con violencia",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -255,7 +263,8 @@ public class ReportServiceTests
             AccionesRealizadas = "Acciones actualizadas",
             Traslados = 0,
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
-            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
             Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
         };
 
@@ -272,7 +281,7 @@ public class ReportServiceTests
             .ReturnsAsync(updatedReport);
 
         _mockCatalogService
-            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1))
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1, 1))
             .ReturnsAsync(true);
 
         // Act
@@ -350,6 +359,7 @@ public class ReportServiceTests
             Edad = 28,
             Delito = "Violencia familiar",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TipoDeAccion = 1,
@@ -369,6 +379,7 @@ public class ReportServiceTests
             Edad = 28,
             Delito = "Violencia familiar",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -379,7 +390,8 @@ public class ReportServiceTests
             Traslados = 0,
             Observaciones = "Modificado por supervisor",
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
-            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
             Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
         };
 
@@ -396,7 +408,7 @@ public class ReportServiceTests
             .ReturnsAsync(updatedReport);
 
         _mockCatalogService
-            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1))
+            .Setup(c => c.ValidateHierarchyAsync(1, 1, 1, 1))
             .ReturnsAsync(true);
 
         // Act: REVISOR can edit any report
@@ -439,6 +451,7 @@ public class ReportServiceTests
             Edad = 28,
             Delito = "Test",
             ZonaId = 1,
+            RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
             TurnoCeiba = 1,
@@ -448,7 +461,8 @@ public class ReportServiceTests
             AccionesRealizadas = "Test acciones",
             Traslados = 0,
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
-            Sector = new Sector { Id = 1, Nombre = "Sector 1", ZonaId = 1 },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
             Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
         };
 

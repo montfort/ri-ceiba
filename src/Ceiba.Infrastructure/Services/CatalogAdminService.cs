@@ -47,7 +47,7 @@ public class CatalogAdminService : ICatalogAdminService
                 Id = z.Id,
                 Nombre = z.Nombre,
                 Activo = z.Activo,
-                SectoresCount = z.Sectores.Count
+                RegionesCount = z.Regiones.Count
             })
             .ToListAsync(cancellationToken);
     }
@@ -63,7 +63,7 @@ public class CatalogAdminService : ICatalogAdminService
                 Id = z.Id,
                 Nombre = z.Nombre,
                 Activo = z.Activo,
-                SectoresCount = z.Sectores.Count
+                RegionesCount = z.Regiones.Count
             })
             .FirstOrDefaultAsync(cancellationToken);
     }
@@ -90,7 +90,7 @@ public class CatalogAdminService : ICatalogAdminService
             Id = zona.Id,
             Nombre = zona.Nombre,
             Activo = zona.Activo,
-            SectoresCount = 0
+            RegionesCount = 0
         };
     }
 
@@ -101,7 +101,7 @@ public class CatalogAdminService : ICatalogAdminService
         CancellationToken cancellationToken = default)
     {
         var zona = await _context.Zonas
-            .Include(z => z.Sectores)
+            .Include(z => z.Regiones)
             .FirstOrDefaultAsync(z => z.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Zona con ID {id} no encontrada");
 
@@ -118,7 +118,7 @@ public class CatalogAdminService : ICatalogAdminService
             Id = zona.Id,
             Nombre = zona.Nombre,
             Activo = zona.Activo,
-            SectoresCount = zona.Sectores.Count
+            RegionesCount = zona.Regiones.Count
         };
     }
 
@@ -128,7 +128,7 @@ public class CatalogAdminService : ICatalogAdminService
         CancellationToken cancellationToken = default)
     {
         var zona = await _context.Zonas
-            .Include(z => z.Sectores)
+            .Include(z => z.Regiones)
             .FirstOrDefaultAsync(z => z.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Zona con ID {id} no encontrada");
 
@@ -143,7 +143,167 @@ public class CatalogAdminService : ICatalogAdminService
             Id = zona.Id,
             Nombre = zona.Nombre,
             Activo = zona.Activo,
-            SectoresCount = zona.Sectores.Count
+            RegionesCount = zona.Regiones.Count
+        };
+    }
+
+    #endregion
+
+    #region Region Management
+
+    public async Task<List<RegionDto>> GetRegionesAsync(
+        int? zonaId = null,
+        bool? activo = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Regiones
+            .Include(r => r.Zona)
+            .AsQueryable();
+
+        if (zonaId.HasValue)
+        {
+            query = query.Where(r => r.ZonaId == zonaId.Value);
+        }
+
+        if (activo.HasValue)
+        {
+            query = query.Where(r => r.Activo == activo.Value);
+        }
+
+        return await query
+            .OrderBy(r => r.Zona.Nombre)
+            .ThenBy(r => r.Nombre)
+            .Select(r => new RegionDto
+            {
+                Id = r.Id,
+                Nombre = r.Nombre,
+                ZonaId = r.ZonaId,
+                ZonaNombre = r.Zona.Nombre,
+                Activo = r.Activo,
+                SectoresCount = r.Sectores.Count
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<RegionDto?> GetRegionByIdAsync(
+        int id,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Regiones
+            .Include(r => r.Zona)
+            .Where(r => r.Id == id)
+            .Select(r => new RegionDto
+            {
+                Id = r.Id,
+                Nombre = r.Nombre,
+                ZonaId = r.ZonaId,
+                ZonaNombre = r.Zona.Nombre,
+                Activo = r.Activo,
+                SectoresCount = r.Sectores.Count
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<RegionDto> CreateRegionAsync(
+        CreateRegionDto createDto,
+        Guid adminUserId,
+        CancellationToken cancellationToken = default)
+    {
+        // Validate zona exists
+        var zona = await _context.Zonas.FindAsync(new object[] { createDto.ZonaId }, cancellationToken)
+            ?? throw new KeyNotFoundException($"Zona con ID {createDto.ZonaId} no encontrada");
+
+        var region = new Region
+        {
+            Nombre = createDto.Nombre,
+            ZonaId = createDto.ZonaId,
+            Activo = createDto.Activo,
+            UsuarioId = adminUserId,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.Regiones.Add(region);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Region {Nombre} created in Zona {ZonaId} by admin {AdminId}",
+            region.Nombre, region.ZonaId, adminUserId);
+
+        return new RegionDto
+        {
+            Id = region.Id,
+            Nombre = region.Nombre,
+            ZonaId = region.ZonaId,
+            ZonaNombre = zona.Nombre,
+            Activo = region.Activo,
+            SectoresCount = 0
+        };
+    }
+
+    public async Task<RegionDto> UpdateRegionAsync(
+        int id,
+        CreateRegionDto updateDto,
+        Guid adminUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var region = await _context.Regiones
+            .Include(r => r.Zona)
+            .Include(r => r.Sectores)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Región con ID {id} no encontrada");
+
+        // Validate new zona if changed
+        if (region.ZonaId != updateDto.ZonaId)
+        {
+            var newZona = await _context.Zonas.FindAsync(new object[] { updateDto.ZonaId }, cancellationToken)
+                ?? throw new KeyNotFoundException($"Zona con ID {updateDto.ZonaId} no encontrada");
+            region.ZonaId = updateDto.ZonaId;
+        }
+
+        region.Nombre = updateDto.Nombre;
+        region.Activo = updateDto.Activo;
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Reload zona name
+        await _context.Entry(region).Reference(r => r.Zona).LoadAsync(cancellationToken);
+
+        _logger.LogInformation("Region {Id} updated by admin {AdminId}", id, adminUserId);
+
+        return new RegionDto
+        {
+            Id = region.Id,
+            Nombre = region.Nombre,
+            ZonaId = region.ZonaId,
+            ZonaNombre = region.Zona.Nombre,
+            Activo = region.Activo,
+            SectoresCount = region.Sectores.Count
+        };
+    }
+
+    public async Task<RegionDto> ToggleRegionActivoAsync(
+        int id,
+        Guid adminUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var region = await _context.Regiones
+            .Include(r => r.Zona)
+            .Include(r => r.Sectores)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Región con ID {id} no encontrada");
+
+        region.Activo = !region.Activo;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Region {Id} toggled to {Activo} by admin {AdminId}", id, region.Activo, adminUserId);
+
+        return new RegionDto
+        {
+            Id = region.Id,
+            Nombre = region.Nombre,
+            ZonaId = region.ZonaId,
+            ZonaNombre = region.Zona.Nombre,
+            Activo = region.Activo,
+            SectoresCount = region.Sectores.Count
         };
     }
 
@@ -152,17 +312,18 @@ public class CatalogAdminService : ICatalogAdminService
     #region Sector Management
 
     public async Task<List<SectorDto>> GetSectoresAsync(
-        int? zonaId = null,
+        int? regionId = null,
         bool? activo = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Sectores
-            .Include(s => s.Zona)
+            .Include(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .AsQueryable();
 
-        if (zonaId.HasValue)
+        if (regionId.HasValue)
         {
-            query = query.Where(s => s.ZonaId == zonaId.Value);
+            query = query.Where(s => s.RegionId == regionId.Value);
         }
 
         if (activo.HasValue)
@@ -171,14 +332,17 @@ public class CatalogAdminService : ICatalogAdminService
         }
 
         return await query
-            .OrderBy(s => s.Zona.Nombre)
+            .OrderBy(s => s.Region.Zona.Nombre)
+            .ThenBy(s => s.Region.Nombre)
             .ThenBy(s => s.Nombre)
             .Select(s => new SectorDto
             {
                 Id = s.Id,
                 Nombre = s.Nombre,
-                ZonaId = s.ZonaId,
-                ZonaNombre = s.Zona.Nombre,
+                RegionId = s.RegionId,
+                RegionNombre = s.Region.Nombre,
+                ZonaId = s.Region.ZonaId,
+                ZonaNombre = s.Region.Zona.Nombre,
                 Activo = s.Activo,
                 CuadrantesCount = s.Cuadrantes.Count
             })
@@ -190,14 +354,17 @@ public class CatalogAdminService : ICatalogAdminService
         CancellationToken cancellationToken = default)
     {
         return await _context.Sectores
-            .Include(s => s.Zona)
+            .Include(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .Where(s => s.Id == id)
             .Select(s => new SectorDto
             {
                 Id = s.Id,
                 Nombre = s.Nombre,
-                ZonaId = s.ZonaId,
-                ZonaNombre = s.Zona.Nombre,
+                RegionId = s.RegionId,
+                RegionNombre = s.Region.Nombre,
+                ZonaId = s.Region.ZonaId,
+                ZonaNombre = s.Region.Zona.Nombre,
                 Activo = s.Activo,
                 CuadrantesCount = s.Cuadrantes.Count
             })
@@ -209,30 +376,35 @@ public class CatalogAdminService : ICatalogAdminService
         Guid adminUserId,
         CancellationToken cancellationToken = default)
     {
-        // Validate zona exists
-        var zona = await _context.Zonas.FindAsync(new object[] { createDto.ZonaId }, cancellationToken)
-            ?? throw new KeyNotFoundException($"Zona con ID {createDto.ZonaId} no encontrada");
+        // Validate region exists
+        var region = await _context.Regiones
+            .Include(r => r.Zona)
+            .FirstOrDefaultAsync(r => r.Id == createDto.RegionId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Región con ID {createDto.RegionId} no encontrada");
 
         var sector = new Sector
         {
             Nombre = createDto.Nombre,
-            ZonaId = createDto.ZonaId,
-            Activo = createDto.Activo
+            RegionId = createDto.RegionId,
+            Activo = createDto.Activo,
+            UsuarioId = adminUserId,
+            CreatedAt = DateTime.UtcNow
         };
 
         _context.Sectores.Add(sector);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
-        _logger.LogInformation("Sector {Nombre} created in Zona {ZonaId} by admin {AdminId}",
-            sector.Nombre, sector.ZonaId, adminUserId);
+        _logger.LogInformation("Sector {Nombre} created in Region {RegionId} by admin {AdminId}",
+            sector.Nombre, sector.RegionId, adminUserId);
 
         return new SectorDto
         {
             Id = sector.Id,
             Nombre = sector.Nombre,
-            ZonaId = sector.ZonaId,
-            ZonaNombre = zona.Nombre,
+            RegionId = sector.RegionId,
+            RegionNombre = region.Nombre,
+            ZonaId = region.ZonaId,
+            ZonaNombre = region.Zona.Nombre,
             Activo = sector.Activo,
             CuadrantesCount = 0
         };
@@ -245,17 +417,20 @@ public class CatalogAdminService : ICatalogAdminService
         CancellationToken cancellationToken = default)
     {
         var sector = await _context.Sectores
-            .Include(s => s.Zona)
+            .Include(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .Include(s => s.Cuadrantes)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Sector con ID {id} no encontrado");
 
-        // Validate new zona if changed
-        if (sector.ZonaId != updateDto.ZonaId)
+        // Validate new region if changed
+        if (sector.RegionId != updateDto.RegionId)
         {
-            var newZona = await _context.Zonas.FindAsync(new object[] { updateDto.ZonaId }, cancellationToken)
-                ?? throw new KeyNotFoundException($"Zona con ID {updateDto.ZonaId} no encontrada");
-            sector.ZonaId = updateDto.ZonaId;
+            var newRegion = await _context.Regiones
+                .Include(r => r.Zona)
+                .FirstOrDefaultAsync(r => r.Id == updateDto.RegionId, cancellationToken)
+                ?? throw new KeyNotFoundException($"Región con ID {updateDto.RegionId} no encontrada");
+            sector.RegionId = updateDto.RegionId;
         }
 
         sector.Nombre = updateDto.Nombre;
@@ -263,10 +438,9 @@ public class CatalogAdminService : ICatalogAdminService
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Reload zona name
-        await _context.Entry(sector).Reference(s => s.Zona).LoadAsync(cancellationToken);
-
-        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
+        // Reload region and zona names
+        await _context.Entry(sector).Reference(s => s.Region).LoadAsync(cancellationToken);
+        await _context.Entry(sector.Region).Reference(r => r.Zona).LoadAsync(cancellationToken);
 
         _logger.LogInformation("Sector {Id} updated by admin {AdminId}", id, adminUserId);
 
@@ -274,8 +448,10 @@ public class CatalogAdminService : ICatalogAdminService
         {
             Id = sector.Id,
             Nombre = sector.Nombre,
-            ZonaId = sector.ZonaId,
-            ZonaNombre = sector.Zona.Nombre,
+            RegionId = sector.RegionId,
+            RegionNombre = sector.Region.Nombre,
+            ZonaId = sector.Region.ZonaId,
+            ZonaNombre = sector.Region.Zona.Nombre,
             Activo = sector.Activo,
             CuadrantesCount = sector.Cuadrantes.Count
         };
@@ -287,7 +463,8 @@ public class CatalogAdminService : ICatalogAdminService
         CancellationToken cancellationToken = default)
     {
         var sector = await _context.Sectores
-            .Include(s => s.Zona)
+            .Include(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .Include(s => s.Cuadrantes)
             .FirstOrDefaultAsync(s => s.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Sector con ID {id} no encontrado");
@@ -295,16 +472,16 @@ public class CatalogAdminService : ICatalogAdminService
         sector.Activo = !sector.Activo;
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
-
         _logger.LogInformation("Sector {Id} toggled to {Activo} by admin {AdminId}", id, sector.Activo, adminUserId);
 
         return new SectorDto
         {
             Id = sector.Id,
             Nombre = sector.Nombre,
-            ZonaId = sector.ZonaId,
-            ZonaNombre = sector.Zona.Nombre,
+            RegionId = sector.RegionId,
+            RegionNombre = sector.Region.Nombre,
+            ZonaId = sector.Region.ZonaId,
+            ZonaNombre = sector.Region.Zona.Nombre,
             Activo = sector.Activo,
             CuadrantesCount = sector.Cuadrantes.Count
         };
@@ -321,7 +498,8 @@ public class CatalogAdminService : ICatalogAdminService
     {
         var query = _context.Cuadrantes
             .Include(c => c.Sector)
-            .ThenInclude(s => s.Zona)
+            .ThenInclude(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .AsQueryable();
 
         if (sectorId.HasValue)
@@ -335,7 +513,8 @@ public class CatalogAdminService : ICatalogAdminService
         }
 
         return await query
-            .OrderBy(c => c.Sector.Zona.Nombre)
+            .OrderBy(c => c.Sector.Region.Zona.Nombre)
+            .ThenBy(c => c.Sector.Region.Nombre)
             .ThenBy(c => c.Sector.Nombre)
             .ThenBy(c => c.Nombre)
             .Select(c => new CuadranteDto
@@ -344,8 +523,10 @@ public class CatalogAdminService : ICatalogAdminService
                 Nombre = c.Nombre,
                 SectorId = c.SectorId,
                 SectorNombre = c.Sector.Nombre,
-                ZonaId = c.Sector.ZonaId,
-                ZonaNombre = c.Sector.Zona.Nombre,
+                RegionId = c.Sector.RegionId,
+                RegionNombre = c.Sector.Region.Nombre,
+                ZonaId = c.Sector.Region.ZonaId,
+                ZonaNombre = c.Sector.Region.Zona.Nombre,
                 Activo = c.Activo
             })
             .ToListAsync(cancellationToken);
@@ -357,7 +538,8 @@ public class CatalogAdminService : ICatalogAdminService
     {
         return await _context.Cuadrantes
             .Include(c => c.Sector)
-            .ThenInclude(s => s.Zona)
+            .ThenInclude(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .Where(c => c.Id == id)
             .Select(c => new CuadranteDto
             {
@@ -365,8 +547,10 @@ public class CatalogAdminService : ICatalogAdminService
                 Nombre = c.Nombre,
                 SectorId = c.SectorId,
                 SectorNombre = c.Sector.Nombre,
-                ZonaId = c.Sector.ZonaId,
-                ZonaNombre = c.Sector.Zona.Nombre,
+                RegionId = c.Sector.RegionId,
+                RegionNombre = c.Sector.Region.Nombre,
+                ZonaId = c.Sector.Region.ZonaId,
+                ZonaNombre = c.Sector.Region.Zona.Nombre,
                 Activo = c.Activo
             })
             .FirstOrDefaultAsync(cancellationToken);
@@ -378,7 +562,8 @@ public class CatalogAdminService : ICatalogAdminService
         CancellationToken cancellationToken = default)
     {
         var sector = await _context.Sectores
-            .Include(s => s.Zona)
+            .Include(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .FirstOrDefaultAsync(s => s.Id == createDto.SectorId, cancellationToken)
             ?? throw new KeyNotFoundException($"Sector con ID {createDto.SectorId} no encontrado");
 
@@ -386,13 +571,13 @@ public class CatalogAdminService : ICatalogAdminService
         {
             Nombre = createDto.Nombre,
             SectorId = createDto.SectorId,
-            Activo = createDto.Activo
+            Activo = createDto.Activo,
+            UsuarioId = adminUserId,
+            CreatedAt = DateTime.UtcNow
         };
 
         _context.Cuadrantes.Add(cuadrante);
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Cuadrante {Nombre} created in Sector {SectorId} by admin {AdminId}",
             cuadrante.Nombre, cuadrante.SectorId, adminUserId);
@@ -403,8 +588,10 @@ public class CatalogAdminService : ICatalogAdminService
             Nombre = cuadrante.Nombre,
             SectorId = cuadrante.SectorId,
             SectorNombre = sector.Nombre,
-            ZonaId = sector.ZonaId,
-            ZonaNombre = sector.Zona.Nombre,
+            RegionId = sector.RegionId,
+            RegionNombre = sector.Region.Nombre,
+            ZonaId = sector.Region.ZonaId,
+            ZonaNombre = sector.Region.Zona.Nombre,
             Activo = cuadrante.Activo
         };
     }
@@ -417,14 +604,16 @@ public class CatalogAdminService : ICatalogAdminService
     {
         var cuadrante = await _context.Cuadrantes
             .Include(c => c.Sector)
-            .ThenInclude(s => s.Zona)
+            .ThenInclude(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Cuadrante con ID {id} no encontrado");
 
         if (cuadrante.SectorId != updateDto.SectorId)
         {
             var newSector = await _context.Sectores
-                .Include(s => s.Zona)
+                .Include(s => s.Region)
+                .ThenInclude(r => r.Zona)
                 .FirstOrDefaultAsync(s => s.Id == updateDto.SectorId, cancellationToken)
                 ?? throw new KeyNotFoundException($"Sector con ID {updateDto.SectorId} no encontrado");
             cuadrante.SectorId = updateDto.SectorId;
@@ -436,9 +625,8 @@ public class CatalogAdminService : ICatalogAdminService
         await _context.SaveChangesAsync(cancellationToken);
 
         await _context.Entry(cuadrante).Reference(c => c.Sector).LoadAsync(cancellationToken);
-        await _context.Entry(cuadrante.Sector).Reference(s => s.Zona).LoadAsync(cancellationToken);
-
-        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
+        await _context.Entry(cuadrante.Sector).Reference(s => s.Region).LoadAsync(cancellationToken);
+        await _context.Entry(cuadrante.Sector.Region).Reference(r => r.Zona).LoadAsync(cancellationToken);
 
         _logger.LogInformation("Cuadrante {Id} updated by admin {AdminId}", id, adminUserId);
 
@@ -448,8 +636,10 @@ public class CatalogAdminService : ICatalogAdminService
             Nombre = cuadrante.Nombre,
             SectorId = cuadrante.SectorId,
             SectorNombre = cuadrante.Sector.Nombre,
-            ZonaId = cuadrante.Sector.ZonaId,
-            ZonaNombre = cuadrante.Sector.Zona.Nombre,
+            RegionId = cuadrante.Sector.RegionId,
+            RegionNombre = cuadrante.Sector.Region.Nombre,
+            ZonaId = cuadrante.Sector.Region.ZonaId,
+            ZonaNombre = cuadrante.Sector.Region.Zona.Nombre,
             Activo = cuadrante.Activo
         };
     }
@@ -461,14 +651,13 @@ public class CatalogAdminService : ICatalogAdminService
     {
         var cuadrante = await _context.Cuadrantes
             .Include(c => c.Sector)
-            .ThenInclude(s => s.Zona)
+            .ThenInclude(s => s.Region)
+            .ThenInclude(r => r.Zona)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Cuadrante con ID {id} no encontrado");
 
         cuadrante.Activo = !cuadrante.Activo;
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
 
         _logger.LogInformation("Cuadrante {Id} toggled to {Activo} by admin {AdminId}", id, cuadrante.Activo, adminUserId);
 
@@ -478,8 +667,10 @@ public class CatalogAdminService : ICatalogAdminService
             Nombre = cuadrante.Nombre,
             SectorId = cuadrante.SectorId,
             SectorNombre = cuadrante.Sector.Nombre,
-            ZonaId = cuadrante.Sector.ZonaId,
-            ZonaNombre = cuadrante.Sector.Zona.Nombre,
+            RegionId = cuadrante.Sector.RegionId,
+            RegionNombre = cuadrante.Sector.Region.Nombre,
+            ZonaId = cuadrante.Sector.Region.ZonaId,
+            ZonaNombre = cuadrante.Sector.Region.Zona.Nombre,
             Activo = cuadrante.Activo
         };
     }

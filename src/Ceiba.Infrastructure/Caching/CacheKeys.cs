@@ -8,12 +8,14 @@ public static class CacheKeys
 {
     // Catalog caches (rarely change, long TTL)
     public const string AllZonas = "catalog:zonas:all";
+    public const string AllRegiones = "catalog:regiones:all";
     public const string AllSectores = "catalog:sectores:all";
     public const string AllCuadrantes = "catalog:cuadrantes:all";
     public const string SugerenciasByCampo = "catalog:sugerencias:{0}"; // {0} = campo name
 
-    // Geographic hierarchy caches
-    public const string SectoresByZona = "catalog:sectores:zona:{0}"; // {0} = zonaId
+    // Geographic hierarchy caches (Zona → Región → Sector → Cuadrante)
+    public const string RegionesByZona = "catalog:regiones:zona:{0}"; // {0} = zonaId
+    public const string SectoresByRegion = "catalog:sectores:region:{0}"; // {0} = regionId
     public const string CuadrantesBySector = "catalog:cuadrantes:sector:{0}"; // {0} = sectorId
 
     // Report caches (short TTL due to frequent updates)

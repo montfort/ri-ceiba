@@ -40,7 +40,11 @@ public class CatalogAdminServiceTests : IDisposable
         var zona = new Zona { Id = 1, Nombre = "Zona Test", Activo = true };
         _context.Zonas.Add(zona);
 
-        var sector = new Sector { Id = 1, Nombre = "Sector Test", ZonaId = 1, Activo = true };
+        // Region (Zona → Región → Sector → Cuadrante)
+        var region = new Region { Id = 1, Nombre = "Región Test", ZonaId = 1, Activo = true };
+        _context.Regiones.Add(region);
+
+        var sector = new Sector { Id = 1, Nombre = "Sector Test", RegionId = 1, Activo = true };
         _context.Sectores.Add(sector);
 
         var cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante Test", SectorId = 1, Activo = true };
@@ -423,22 +427,22 @@ public class CatalogAdminServiceTests : IDisposable
 
     #region Sector CRUD Tests
 
-    [Fact(DisplayName = "T105: GetSectoresAsync should return sectors filtered by zona")]
-    public async Task GetSectoresAsync_FilterByZona_ReturnsFiltered()
+    [Fact(DisplayName = "T105: GetSectoresAsync should return sectors filtered by region")]
+    public async Task GetSectoresAsync_FilterByRegion_ReturnsFiltered()
     {
         // Act
-        var result = await _service.GetSectoresAsync(zonaId: 1);
+        var result = await _service.GetSectoresAsync(regionId: 1);
 
         // Assert
         result.Should().NotBeEmpty();
-        result.Should().OnlyContain(s => s.ZonaId == 1);
+        result.Should().OnlyContain(s => s.RegionId == 1);
     }
 
     [Fact(DisplayName = "T105: CreateSectorAsync should create new sector")]
     public async Task CreateSectorAsync_ValidData_CreatesSector()
     {
         // Arrange
-        var createDto = new CreateSectorDto { Nombre = "Nuevo Sector", ZonaId = 1, Activo = true };
+        var createDto = new CreateSectorDto { Nombre = "Nuevo Sector", RegionId = 1 };
 
         // Act
         var result = await _service.CreateSectorAsync(createDto, _adminUserId);
@@ -453,7 +457,7 @@ public class CatalogAdminServiceTests : IDisposable
     public async Task CreateSectorAsync_InvalidZona_ThrowsKeyNotFoundException()
     {
         // Arrange
-        var createDto = new CreateSectorDto { Nombre = "Test", ZonaId = 999, Activo = true };
+        var createDto = new CreateSectorDto { Nombre = "Sector Invalid", RegionId = 999 };
 
         // Act & Assert
         await Assert.ThrowsAsync<KeyNotFoundException>(

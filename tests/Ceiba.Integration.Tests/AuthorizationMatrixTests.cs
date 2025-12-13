@@ -69,7 +69,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
             await dbContext.SaveChangesAsync();
         }
 
-        var sector = await dbContext.Sectores.FirstOrDefaultAsync() ?? new Sector { Nombre = "Test Sector", ZonaId = zona.Id };
+        var sector = await dbContext.Sectores.FirstOrDefaultAsync() ?? new Sector { Nombre = "Test Sector", RegionId = zona.Id };
         if (sector.Id == 0)
         {
             dbContext.Sectores.Add(sector);

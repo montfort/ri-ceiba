@@ -64,7 +64,7 @@ public class ExportServiceTests
             ZonaId = 1,
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
             SectorId = 1,
-            Sector = new Sector { Id = 1, Nombre = "Sector A", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector A", RegionId = 1 },
             CuadranteId = 1,
             Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1", SectorId = 1 },
             TurnoCeiba = 1,

@@ -90,9 +90,21 @@ public class ReporteIncidencia : BaseEntityWithUser
     public virtual Zona Zona { get; set; } = null!;
 
     /// <summary>
+    /// Foreign key to Región.
+    /// Required - every report must have a geographic region.
+    /// Must belong to the selected Zona.
+    /// </summary>
+    public int RegionId { get; set; }
+
+    /// <summary>
+    /// Navigation property: Region where incident occurred.
+    /// </summary>
+    public virtual Region Region { get; set; } = null!;
+
+    /// <summary>
     /// Foreign key to Sector.
     /// Required - every report must have a geographic sector.
-    /// Must belong to the selected Zona.
+    /// Must belong to the selected Región.
     /// </summary>
     public int SectorId { get; set; }
 
@@ -245,6 +257,9 @@ public class ReporteIncidencia : BaseEntityWithUser
 
         if (ZonaId <= 0)
             errors.Add("El campo 'zonaId' es requerido.");
+
+        if (RegionId <= 0)
+            errors.Add("El campo 'regionId' es requerido.");
 
         if (SectorId <= 0)
             errors.Add("El campo 'sectorId' es requerido.");
