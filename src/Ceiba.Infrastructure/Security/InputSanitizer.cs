@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -159,7 +160,10 @@ public partial class InputSanitizer : IInputSanitizer
 
     /// <summary>
     /// Sanitize a URL to prevent open redirects.
+    /// Returns string instead of Uri to support relative URLs like "/path".
     /// </summary>
+    [SuppressMessage("Design", "CA1055:URI-like return values should not be strings",
+        Justification = "Method returns relative URLs which are not valid absolute URIs")]
     public string? SanitizeUrl(string? input, string? allowedHost = null)
     {
         if (string.IsNullOrEmpty(input))
@@ -250,6 +254,14 @@ public interface IInputSanitizer
     string SanitizeForSql(string? input);
     string? SanitizeEmail(string? input);
     string SanitizeFileName(string? input);
+
+    /// <summary>
+    /// Sanitize a URL to prevent open redirects.
+    /// Returns string instead of Uri to support relative URLs like "/path".
+    /// </summary>
+    [SuppressMessage("Design", "CA1055:URI-like return values should not be strings",
+        Justification = "Method returns relative URLs which are not valid absolute URIs")]
     string? SanitizeUrl(string? input, string? allowedHost = null);
+
     string Truncate(string? input, int maxLength);
 }

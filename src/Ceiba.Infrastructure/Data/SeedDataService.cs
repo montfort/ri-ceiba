@@ -37,14 +37,9 @@ public class SeedDataService : ISeedDataService
             Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "docs", "regiones.json"))
         };
 
-        foreach (var path in searchPaths)
-        {
-            if (File.Exists(path))
-                return path;
-        }
-
-        throw new FileNotFoundException(
-            "regiones.json not found. Set CEIBA_REGIONES_JSON_PATH environment variable or place file in SeedData folder.");
+        return searchPaths.FirstOrDefault(File.Exists)
+            ?? throw new FileNotFoundException(
+                "regiones.json not found. Set CEIBA_REGIONES_JSON_PATH environment variable or place file in SeedData folder.");
     }
 
     public SeedDataService(

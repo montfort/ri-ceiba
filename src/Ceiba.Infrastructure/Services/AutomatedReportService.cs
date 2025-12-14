@@ -910,15 +910,9 @@ public class AutomatedReportService : IAutomatedReportService
                 "/opt/homebrew/bin/pandoc",
             };
 
-        foreach (var path in knownPaths)
-        {
-            if (File.Exists(path))
-                return path;
-        }
-
-        // Fallback to bare command name (will use PATH)
-        // Acceptable in Docker containers where PATH is controlled
-        return "pandoc";
+        // Use LINQ to find first existing path, fallback to bare command name (uses PATH)
+        // Bare command fallback is acceptable in Docker containers where PATH is controlled
+        return knownPaths.FirstOrDefault(File.Exists) ?? "pandoc";
     }
 
     #endregion
