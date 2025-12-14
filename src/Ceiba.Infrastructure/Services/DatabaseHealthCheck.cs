@@ -65,11 +65,10 @@ public class DatabaseHealthCheck : IServiceHealthCheck
             {
                 ServiceStatus.Healthy => "Database responding normally",
                 ServiceStatus.Degraded => $"Database responding slowly ({responseTime}ms)",
-                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)",
-                _ => $"Unknown status ({responseTime}ms)"
+                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)"
             };
 
-            var isHealthy = status == ServiceStatus.Healthy || status == ServiceStatus.Degraded;
+            var isHealthy = status is ServiceStatus.Healthy or ServiceStatus.Degraded;
 
             _logger.LogDebug(
                 "Database health check: {Status} in {ResponseTime}ms",
