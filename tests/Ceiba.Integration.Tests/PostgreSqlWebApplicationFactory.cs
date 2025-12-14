@@ -30,9 +30,19 @@ public class PostgreSqlWebApplicationFactory : WebApplicationFactory<Program>, I
     private static string PgHost => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_HOST") ?? "localhost";
     private static string PgPort => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_PORT") ?? "5432";
     private static string PgUser => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_USER") ?? "postgres";
-    private static string PgPassword => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_PASSWORD")
+    private static string? PgPasswordOrNull => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_PASSWORD");
+
+    /// <summary>
+    /// Returns true if PostgreSQL is properly configured for integration tests.
+    /// Tests can use this to skip when PostgreSQL is not available.
+    /// </summary>
+    public static bool IsConfigured => !string.IsNullOrEmpty(PgPasswordOrNull);
+
+    private static string PgPassword => PgPasswordOrNull
         ?? throw new InvalidOperationException(
-            "PostgreSQL password not configured. Set CEIBA_TEST_PG_PASSWORD environment variable.");
+            "PostgreSQL password not configured. Set CEIBA_TEST_PG_PASSWORD environment variable. " +
+            "These tests require a real PostgreSQL instance. " +
+            "In CI, filter these tests with: --filter \"Collection!=PostgreSQL\"");
 
     private string ConnectionString =>
         $"Host={PgHost};Port={PgPort};Database={_databaseName};Username={PgUser};Password={PgPassword}";

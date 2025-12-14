@@ -125,6 +125,10 @@ jobs:
         run: dotnet test tests/Ceiba.Integration.Tests/Ceiba.Integration.Tests.csproj --no-build --configuration Release --filter "Category!=E2E" --verbosity normal --logger "trx;LogFileName=integration-tests.trx" --results-directory ./TestResults
         env:
           ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=ceiba_test_password"
+          CEIBA_TEST_PG_HOST: localhost
+          CEIBA_TEST_PG_PORT: "5432"
+          CEIBA_TEST_PG_USER: ceiba
+          CEIBA_TEST_PG_PASSWORD: ceiba_test_password
 
       - name: Publish Integration Test Results
         uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
@@ -305,7 +309,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           dotnet test --no-build --configuration Release \
-            --filter "Category!=E2E" \
+            --filter "Category!=E2E&Collection!=PostgreSQL" \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --settings coverlet.runsettings \
