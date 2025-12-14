@@ -447,7 +447,7 @@ public class EmailConfigServiceTests : IDisposable
 
         // Assert
         Assert.True(result.Success);
-        Assert.NotNull(result.TestedAt);
+        Assert.True(result.TestedAt != default);
     }
 
     [Fact]
@@ -592,10 +592,10 @@ public class EmailConfigServiceTests : IDisposable
         Assert.Equal("EU", result.MailgunRegion);
         Assert.Equal("from@test.com", result.FromEmail);
         Assert.Equal("Test Sender", result.FromName);
-        Assert.NotNull(result.LastTestedAt);
+        Assert.True(result.LastTestedAt != default);
         Assert.True(result.LastTestSuccess);
-        Assert.NotNull(result.CreatedAt);
-        Assert.NotNull(result.UpdatedAt);
+        Assert.True(result.CreatedAt != default);
+        Assert.True(result.UpdatedAt != default);
     }
 
     #endregion

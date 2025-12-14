@@ -175,7 +175,7 @@ public class AccessibilityE2ETests : PlaywrightTestBase
         // Either URL changed or validation messages appeared or we're still on login page (failed auth)
         var urlChanged = !Page.Url.Contains("login") ||
                         Page.Url.Contains("ReturnUrl") ||
-                        Page.Url.Contains("?");
+                        Page.Url.Contains('?');
         var hasValidation = await Page.Locator(".validation-summary-errors, .field-validation-error, [role='alert']").CountAsync() > 0;
         var stillOnLogin = Page.Url.Contains("login", StringComparison.OrdinalIgnoreCase);
 
@@ -221,17 +221,17 @@ public class AccessibilityE2ETests : PlaywrightTestBase
 
         // Check if any focus indicator exists (outline, box-shadow, or border)
         // Bootstrap uses box-shadow for focus states, and browsers may have default outlines
-        var outlineWidth = focusInfo.ContainsKey("outlineWidth") ? focusInfo["outlineWidth"]?.ToString() : "0px";
-        var boxShadow = focusInfo.ContainsKey("boxShadow") ? focusInfo["boxShadow"]?.ToString() : "none";
-        var borderWidth = focusInfo.ContainsKey("borderWidth") ? focusInfo["borderWidth"]?.ToString() : "0px";
-        var outlineStyle = focusInfo.ContainsKey("outlineStyle") ? focusInfo["outlineStyle"]?.ToString() : "none";
+        var outlineWidth = focusInfo.TryGetValue("outlineWidth", out var ow) ? ow?.ToString() : "0px";
+        var boxShadow = focusInfo.TryGetValue("boxShadow", out var bs) ? bs?.ToString() : "none";
+        var borderWidth = focusInfo.TryGetValue("borderWidth", out var bw) ? bw?.ToString() : "0px";
+        var outlineStyle = focusInfo.TryGetValue("outlineStyle", out var os) ? os?.ToString() : "none";
 
         var hasOutline = outlineWidth != "0px" && outlineStyle != "none";
         var hasBoxShadow = !string.IsNullOrEmpty(boxShadow) && boxShadow != "none";
         var hasBorder = borderWidth != "0px";
 
         // Also check if element is an interactive element (inputs have browser default focus)
-        var tagName = focusInfo.ContainsKey("tagName") ? focusInfo["tagName"]?.ToString() ?? "" : "";
+        var tagName = focusInfo.TryGetValue("tagName", out var tn) ? tn?.ToString() ?? "" : "";
         var isInteractiveElement = tagName == "INPUT" || tagName == "BUTTON" || tagName == "A" || tagName == "SELECT" || tagName == "TEXTAREA";
 
         // Check if we reached an interactive element at all (which means Tab navigation works)

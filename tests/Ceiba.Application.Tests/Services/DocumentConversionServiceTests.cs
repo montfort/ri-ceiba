@@ -341,7 +341,7 @@ El año 2024 fue significativo para nuestra gestión.
         }
 
         // Arrange
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         cts.Cancel();
 
         // Act & Assert - TaskCanceledException inherits from OperationCanceledException

@@ -277,36 +277,5 @@ public class VisualRegressionE2ETests : PlaywrightTestBase
         ");
     }
 
-    /// <summary>
-    /// Compare current screenshot against a baseline.
-    /// Creates baseline if it doesn't exist.
-    /// </summary>
-    private async Task<bool> CompareWithBaselineAsync(string name)
-    {
-        var baselinePath = Path.Combine(SnapshotDir, $"{name}-baseline.png");
-        var currentPath = Path.Combine(SnapshotDir, $"{name}-current.png");
-
-        // Take current screenshot
-        await Page.ScreenshotAsync(new PageScreenshotOptions
-        {
-            Path = currentPath,
-            FullPage = true
-        });
-
-        // If no baseline exists, create it
-        if (!File.Exists(baselinePath))
-        {
-            File.Copy(currentPath, baselinePath);
-            return true; // First run, no comparison possible
-        }
-
-        // Simple file comparison (byte-by-byte)
-        // In production, use a proper image comparison library
-        var baselineBytes = await File.ReadAllBytesAsync(baselinePath);
-        var currentBytes = await File.ReadAllBytesAsync(currentPath);
-
-        return baselineBytes.SequenceEqual(currentBytes);
-    }
-
     #endregion
 }

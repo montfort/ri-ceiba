@@ -15,7 +15,7 @@ namespace Ceiba.Infrastructure.Tests.Services;
 public class AuditServiceTests : IDisposable
 {
     private readonly CeibaDbContext _context;
-    private readonly IAuditService _service;
+    private readonly AuditService _service;
     private readonly Guid _testUserId = Guid.NewGuid();
     private readonly Guid _anotherUserId = Guid.NewGuid();
     private readonly string _databaseName;

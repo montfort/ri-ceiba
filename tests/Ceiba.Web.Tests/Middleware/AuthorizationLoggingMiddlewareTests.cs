@@ -117,8 +117,8 @@ namespace Ceiba.Web.Tests.Middleware
                     LogLevel.Error,
                     It.IsAny<EventId>(),
                     It.IsAny<It.IsAnyType>(),  // Changed from It.Is<It.IsAnyType>((v, t) => true)
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),  // Changed Func parameter types
+                    It.IsAny<Exception?>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),  // Nullable Exception to match ILogger signature
                 Times.AtLeastOnce);
         }
     }

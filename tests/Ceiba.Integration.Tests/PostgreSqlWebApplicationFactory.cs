@@ -112,7 +112,10 @@ public class PostgreSqlWebApplicationFactory : WebApplicationFactory<Program>, I
         await connection.OpenAsync();
 
         await using var cmd = connection.CreateCommand();
+        // CA2100: _databaseName is internally generated GUID, not user input
+#pragma warning disable CA2100
         cmd.CommandText = $"CREATE DATABASE \"{_databaseName}\"";
+#pragma warning restore CA2100
         try
         {
             await cmd.ExecuteNonQueryAsync();
@@ -131,16 +134,22 @@ public class PostgreSqlWebApplicationFactory : WebApplicationFactory<Program>, I
 
         // Terminate existing connections
         await using var terminateCmd = connection.CreateCommand();
+        // CA2100: _databaseName is internally generated GUID, not user input
+#pragma warning disable CA2100
         terminateCmd.CommandText = $@"
             SELECT pg_terminate_backend(pg_stat_activity.pid)
             FROM pg_stat_activity
             WHERE pg_stat_activity.datname = '{_databaseName}'
             AND pid <> pg_backend_pid()";
+#pragma warning restore CA2100
         await terminateCmd.ExecuteNonQueryAsync();
 
         // Drop database
         await using var dropCmd = connection.CreateCommand();
+        // CA2100: _databaseName is internally generated GUID, not user input
+#pragma warning disable CA2100
         dropCmd.CommandText = $"DROP DATABASE IF EXISTS \"{_databaseName}\"";
+#pragma warning restore CA2100
         await dropCmd.ExecuteNonQueryAsync();
 
         await base.DisposeAsync();

@@ -10,7 +10,7 @@ namespace Ceiba.Infrastructure.Tests.Services;
 /// </summary>
 public class LoginSecurityServiceTests : IDisposable
 {
-    private readonly IMemoryCache _cache;
+    private readonly MemoryCache _cache;
     private readonly LoginSecurityService _service;
 
     public LoginSecurityServiceTests()

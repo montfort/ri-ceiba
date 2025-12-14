@@ -36,8 +36,11 @@ public class E2ETestServerFixture : IAsyncLifetime
 
     /// <summary>
     /// The base URL of the test server (e.g., "http://localhost:5001").
+    /// Returns string for ease of use with Playwright navigation APIs.
     /// </summary>
+#pragma warning disable CA1056 // URI-like properties should not be strings
     public string BaseUrl { get; private set; } = string.Empty;
+#pragma warning restore CA1056
 
     /// <summary>
     /// The port the test server is listening on.

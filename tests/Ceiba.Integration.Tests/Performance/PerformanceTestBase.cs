@@ -11,8 +11,8 @@ namespace Ceiba.Integration.Tests.Performance;
 [Trait("Category", "Performance")]
 public abstract class PerformanceTestBase : IDisposable
 {
-    protected readonly ITestOutputHelper Output;
-    protected readonly Stopwatch Stopwatch;
+    protected ITestOutputHelper Output { get; }
+    protected Stopwatch Stopwatch { get; }
 
     protected PerformanceTestBase(ITestOutputHelper output)
     {
@@ -121,7 +121,7 @@ public abstract class PerformanceTestBase : IDisposable
     {
         Output.WriteLine($"Running {concurrentUsers} concurrent users for {duration.TotalSeconds}s...");
 
-        var cts = new CancellationTokenSource(duration);
+        using var cts = new CancellationTokenSource(duration);
         var completedOperations = 0;
         var errors = 0;
         var responseTimes = new List<double>();

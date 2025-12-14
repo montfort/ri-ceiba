@@ -151,7 +151,7 @@ public class AutomatedReportServiceTests : IDisposable
             Edad = edad,
             TipoDeAtencion = "Presencial",
             TipoDeAccion = 1,
-            Zona = zona,
+            Zona = zona!,
             LgbtttiqPlus = false,
             Migrante = false,
             SituacionCalle = false,

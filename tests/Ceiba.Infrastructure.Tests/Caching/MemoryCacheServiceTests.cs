@@ -12,7 +12,7 @@ namespace Ceiba.Infrastructure.Tests.Caching;
 /// </summary>
 public class MemoryCacheServiceTests : IDisposable
 {
-    private readonly IMemoryCache _memoryCache;
+    private readonly MemoryCache _memoryCache;
     private readonly ILogger<MemoryCacheService> _logger;
     private readonly MemoryCacheService _cacheService;
 

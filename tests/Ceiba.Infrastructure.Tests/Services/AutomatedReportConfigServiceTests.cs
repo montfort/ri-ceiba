@@ -383,8 +383,8 @@ public class AutomatedReportConfigServiceTests : IDisposable
         Assert.True(result.Habilitado);
         Assert.Equal(new TimeSpan(14, 30, 0), result.HoraGeneracion);
         Assert.Equal("./output", result.RutaSalida);
-        Assert.NotNull(result.CreatedAt);
-        Assert.NotNull(result.UpdatedAt);
+        Assert.True(result.CreatedAt != default);
+        Assert.True(result.UpdatedAt != default);
     }
 
     #endregion

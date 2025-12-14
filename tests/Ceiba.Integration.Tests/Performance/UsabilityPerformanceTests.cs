@@ -317,9 +317,10 @@ public class UsabilityPerformanceTests : PerformanceTestBase
         Assert.Equal(9, requiredOperations.Length);
     }
 
-    private static bool ValidateField(string fieldName, string value)
+    private static void ValidateField(string fieldName, string value)
     {
-        return fieldName switch
+        // Simulates field validation logic (result intentionally not returned as this is a simulation)
+        _ = fieldName switch
         {
             "delito" => !string.IsNullOrWhiteSpace(value),
             "hechos" => value.Length >= 10,

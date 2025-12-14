@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- CA1826: bUnit's FindAll() returns IRefreshableElementCollection which is indexable,
+         but FirstOrDefault() is the idiomatic pattern for testing element existence -->
+    <NoWarn>$(NoWarn);CA1826</NoWarn>
   </PropertyGroup>
 
   <!-- Base test packages (Microsoft.NET.Test.Sdk, xunit, coverlet) defined in Directory.Build.props -->

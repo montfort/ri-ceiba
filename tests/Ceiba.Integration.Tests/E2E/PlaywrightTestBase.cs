@@ -10,8 +10,8 @@ namespace Ceiba.Integration.Tests.E2E;
 /// </summary>
 public class WithTestNameAttribute : BeforeAfterTestAttribute
 {
-    public static string CurrentTestName = string.Empty;
-    public static string CurrentClassName = string.Empty;
+    public static string CurrentTestName { get; private set; } = string.Empty;
+    public static string CurrentClassName { get; private set; } = string.Empty;
 
     public override void Before(MethodInfo methodInfo)
     {
@@ -34,7 +34,7 @@ public class WithTestNameAttribute : BeforeAfterTestAttribute
 [Collection("E2E")]
 public abstract class PlaywrightTestBase : PageTest
 {
-    protected readonly E2ETestServerFixture ServerFixture;
+    protected E2ETestServerFixture ServerFixture { get; }
 
     protected PlaywrightTestBase(E2ETestServerFixture serverFixture)
     {
@@ -43,8 +43,11 @@ public abstract class PlaywrightTestBase : PageTest
 
     /// <summary>
     /// Base URL from the test server fixture, or environment variable override.
+    /// Returns string for ease of use with Playwright navigation APIs.
     /// </summary>
+#pragma warning disable CA1056 // URI-like properties should not be strings
     protected string BaseUrl => Environment.GetEnvironmentVariable("BASE_URL") ?? ServerFixture.BaseUrl;
+#pragma warning restore CA1056
 
     public override async Task InitializeAsync()
     {
