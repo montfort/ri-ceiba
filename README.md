@@ -22,8 +22,6 @@
 
 **Ceiba** es una aplicación web empresarial desarrollada para la **Unidad Especializada en Género de la Secretaría de Seguridad Ciudadana de la Ciudad de México (SSC CDMX)**. El sistema digitaliza y optimiza el proceso de registro, seguimiento y análisis de reportes de incidencias relacionadas con casos de género.
 
-El nombre "Ceiba" hace referencia al árbol sagrado mesoamericano, símbolo de fortaleza, protección y conexión entre diferentes niveles — representando la misión del sistema de conectar a los agentes en campo con los supervisores y la administración central.
-
 ### 🎯 Propósito
 
 - **Digitalizar** el proceso de reportes que tradicionalmente se manejaba en papel
