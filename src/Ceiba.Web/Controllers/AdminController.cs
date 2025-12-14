@@ -19,18 +19,21 @@ public class AdminController : ControllerBase
 {
     private readonly IUserManagementService _userService;
     private readonly ICatalogAdminService _catalogService;
-    private readonly SeedDataService _seedDataService;
+    private readonly ISeedDataService _seedDataService;
+    private readonly IRegionDataLoader _regionDataLoader;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         IUserManagementService userService,
         ICatalogAdminService catalogService,
-        SeedDataService seedDataService,
+        ISeedDataService seedDataService,
+        IRegionDataLoader regionDataLoader,
         ILogger<AdminController> logger)
     {
         _userService = userService;
         _catalogService = catalogService;
         _seedDataService = seedDataService;
+        _regionDataLoader = regionDataLoader;
         _logger = logger;
     }
 
@@ -247,8 +250,7 @@ public class AdminController : ControllerBase
     {
         try
         {
-            var regionLoader = HttpContext.RequestServices.GetRequiredService<RegionDataLoader>();
-            var stats = await regionLoader.GetCurrentStatsAsync();
+            var stats = await _regionDataLoader.GetCurrentStatsAsync();
 
             return Ok(new GeographicCatalogStatsDto
             {
@@ -281,8 +283,7 @@ public class AdminController : ControllerBase
             await _seedDataService.ReloadGeographicCatalogsAsync();
 
             // Get the new stats
-            var regionLoader = HttpContext.RequestServices.GetRequiredService<RegionDataLoader>();
-            var stats = await regionLoader.GetCurrentStatsAsync();
+            var stats = await _regionDataLoader.GetCurrentStatsAsync();
 
             return Ok(new GeographicCatalogStatsDto
             {

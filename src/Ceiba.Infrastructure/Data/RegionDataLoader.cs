@@ -30,7 +30,7 @@ public record RegionJsonZona(
 /// Service to load geographic hierarchy data from regiones.json.
 /// Supports both fresh seeding and updating existing data.
 /// </summary>
-public class RegionDataLoader
+public class RegionDataLoader : IRegionDataLoader
 {
     private readonly CeibaDbContext _context;
     private readonly ILogger<RegionDataLoader> _logger;

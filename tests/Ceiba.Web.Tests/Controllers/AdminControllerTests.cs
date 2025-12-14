@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Ceiba.Core.Interfaces;
+using Ceiba.Infrastructure.Data;
 using Ceiba.Shared.DTOs;
 using Ceiba.Web.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,8 @@ public class AdminControllerTests
 {
     private readonly Mock<IUserManagementService> _userServiceMock;
     private readonly Mock<ICatalogAdminService> _catalogServiceMock;
+    private readonly Mock<ISeedDataService> _seedDataServiceMock;
+    private readonly Mock<IRegionDataLoader> _regionDataLoaderMock;
     private readonly Mock<ILogger<AdminController>> _loggerMock;
     private readonly AdminController _controller;
     private readonly Guid _adminUserId = Guid.NewGuid();
@@ -25,11 +28,15 @@ public class AdminControllerTests
     {
         _userServiceMock = new Mock<IUserManagementService>();
         _catalogServiceMock = new Mock<ICatalogAdminService>();
+        _seedDataServiceMock = new Mock<ISeedDataService>();
+        _regionDataLoaderMock = new Mock<IRegionDataLoader>();
         _loggerMock = new Mock<ILogger<AdminController>>();
 
         _controller = new AdminController(
             _userServiceMock.Object,
             _catalogServiceMock.Object,
+            _seedDataServiceMock.Object,
+            _regionDataLoaderMock.Object,
             _loggerMock.Object);
 
         SetupAuthenticatedAdmin();
@@ -680,6 +687,110 @@ public class AdminControllerTests
 
         // Assert
         Assert.IsType<NotFoundObjectResult>(result);
+    }
+
+    #endregion
+
+    #region Geographic Catalog Stats and Reload Tests
+
+    [Fact]
+    public async Task GetGeographicCatalogStats_Success_ReturnsOkWithStats()
+    {
+        // Arrange
+        var mockStats = new RegionDataLoader.SeedingStats
+        {
+            Zonas = 5,
+            Regiones = 16,
+            Sectores = 72,
+            Cuadrantes = 1015
+        };
+
+        _regionDataLoaderMock.Setup(x => x.GetCurrentStatsAsync())
+            .ReturnsAsync(mockStats);
+
+        // Act
+        var result = await _controller.GetGeographicCatalogStats();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var stats = Assert.IsType<GeographicCatalogStatsDto>(okResult.Value);
+        Assert.Equal(5, stats.ZonasCount);
+        Assert.Equal(16, stats.RegionesCount);
+        Assert.Equal(72, stats.SectoresCount);
+        Assert.Equal(1015, stats.CuadrantesCount);
+    }
+
+    [Fact]
+    public async Task GetGeographicCatalogStats_Exception_Returns500()
+    {
+        // Arrange
+        _regionDataLoaderMock.Setup(x => x.GetCurrentStatsAsync())
+            .ThrowsAsync(new Exception("Database error"));
+
+        // Act
+        var result = await _controller.GetGeographicCatalogStats();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task ReloadGeographicCatalogs_Success_ReturnsOkWithStats()
+    {
+        // Arrange
+        _seedDataServiceMock.Setup(x => x.ReloadGeographicCatalogsAsync())
+            .Returns(Task.CompletedTask);
+
+        var mockStats = new RegionDataLoader.SeedingStats
+        {
+            Zonas = 5,
+            Regiones = 16,
+            Sectores = 72,
+            Cuadrantes = 1015
+        };
+
+        _regionDataLoaderMock.Setup(x => x.GetCurrentStatsAsync())
+            .ReturnsAsync(mockStats);
+
+        // Act
+        var result = await _controller.ReloadGeographicCatalogs();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var stats = Assert.IsType<GeographicCatalogStatsDto>(okResult.Value);
+        Assert.Contains("recargados exitosamente", stats.Message);
+        Assert.Equal(5, stats.ZonasCount);
+    }
+
+    [Fact]
+    public async Task ReloadGeographicCatalogs_FileNotFound_Returns500()
+    {
+        // Arrange
+        _seedDataServiceMock.Setup(x => x.ReloadGeographicCatalogsAsync())
+            .ThrowsAsync(new FileNotFoundException("regiones.json not found"));
+
+        // Act
+        var result = await _controller.ReloadGeographicCatalogs();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(500, statusResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task ReloadGeographicCatalogs_Exception_Returns500()
+    {
+        // Arrange
+        _seedDataServiceMock.Setup(x => x.ReloadGeographicCatalogsAsync())
+            .ThrowsAsync(new Exception("Database error"));
+
+        // Act
+        var result = await _controller.ReloadGeographicCatalogs();
+
+        // Assert
+        var statusResult = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(500, statusResult.StatusCode);
     }
 
     #endregion

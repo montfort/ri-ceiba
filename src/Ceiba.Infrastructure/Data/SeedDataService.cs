@@ -8,13 +8,13 @@ namespace Ceiba.Infrastructure.Data;
 /// Service to seed initial data into the database.
 /// Creates default roles, admin user, and geographic catalogs from regiones.json.
 /// </summary>
-public class SeedDataService
+public class SeedDataService : ISeedDataService
 {
     private readonly CeibaDbContext _context;
     private readonly UserManager<IdentityUser<Guid>> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<SeedDataService> _logger;
-    private readonly RegionDataLoader _regionDataLoader;
+    private readonly IRegionDataLoader _regionDataLoader;
 
     /// <summary>
     /// Path to the regiones.json file. Can be overridden via environment variable.
@@ -51,21 +51,8 @@ public class SeedDataService
         CeibaDbContext context,
         UserManager<IdentityUser<Guid>> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
-        ILogger<SeedDataService> logger)
-    {
-        _context = context;
-        _userManager = userManager;
-        _roleManager = roleManager;
-        _logger = logger;
-        _regionDataLoader = new RegionDataLoader(context, new Logger<RegionDataLoader>(new LoggerFactory()));
-    }
-
-    public SeedDataService(
-        CeibaDbContext context,
-        UserManager<IdentityUser<Guid>> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager,
         ILogger<SeedDataService> logger,
-        RegionDataLoader regionDataLoader)
+        IRegionDataLoader regionDataLoader)
     {
         _context = context;
         _userManager = userManager;

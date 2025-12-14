@@ -97,8 +97,8 @@ try
 
     // Registrar servicios de aplicación (T016)
     builder.Services.AddScoped<IAuditService, AuditService>();
-    builder.Services.AddScoped<RegionDataLoader>(); // Geographic catalog loader
-    builder.Services.AddScoped<SeedDataService>(); // T020
+    builder.Services.AddScoped<IRegionDataLoader, RegionDataLoader>(); // Geographic catalog loader
+    builder.Services.AddScoped<ISeedDataService, SeedDataService>(); // T020
     // Note: AddHttpContextAccessor already called above for AuditSaveChangesInterceptor
 
     // Registrar servicios de User Story 1 (T045)
@@ -285,7 +285,7 @@ try
                 Log.Information("Database migrations applied successfully");
 
                 // Seed initial data (T020)
-                var seedService = scope.ServiceProvider.GetRequiredService<SeedDataService>();
+                var seedService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
                 await seedService.SeedAsync();
                 Log.Information("Database seeded successfully");
             }
