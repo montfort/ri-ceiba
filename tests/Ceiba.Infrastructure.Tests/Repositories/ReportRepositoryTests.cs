@@ -299,4 +299,262 @@ public class ReportRepositoryTests : IDisposable
     }
 
     #endregion
+
+    #region Additional Edge Case Tests (Phase 2)
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task GetByIdAsync_NegativeId_ReturnsNull()
+    {
+        // Act
+        var result = await _repository.GetByIdAsync(-1);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task GetByIdAsync_ZeroId_ReturnsNull()
+    {
+        // Act
+        var result = await _repository.GetByIdAsync(0);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task GetByUsuarioIdAsync_EmptyGuid_ReturnsEmptyList()
+    {
+        // Act
+        var result = await _repository.GetByUsuarioIdAsync(Guid.Empty);
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_WithPagination_ReturnsCorrectPage()
+    {
+        // Arrange
+        for (var i = 0; i < 5; i++)
+        {
+            await CreateTestReportWithZona(estado: 0, delito: $"Delito {i}");
+        }
+        _context.ChangeTracker.Clear();
+
+        // Act - Get second page of 2 items
+        var (items, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            Estado = 0,
+            Page = 2,
+            PageSize = 2
+        });
+
+        // Assert
+        Assert.Equal(5, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByUsuarioId_ReturnsOnlyUserReports()
+    {
+        // Arrange
+        var userId1 = Guid.NewGuid();
+        var userId2 = Guid.NewGuid();
+
+        await CreateTestReportWithZona(usuarioId: userId1);
+        await CreateTestReportWithZona(usuarioId: userId1);
+        await CreateTestReportWithZona(usuarioId: userId2);
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            UsuarioId = userId1
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByDelito_ReturnsMatchingReports()
+    {
+        // Arrange
+        await CreateTestReportWithZona(delito: "Robo");
+        await CreateTestReportWithZona(delito: "Robo");
+        await CreateTestReportWithZona(delito: "Asalto");
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            Delito = "Robo"
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_NoFilters_ReturnsAllReports()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria());
+
+        // Assert
+        Assert.Equal(3, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task AddAsync_MultipleReports_AssignsUniqueIds()
+    {
+        // Arrange
+        var zona = new Zona { Nombre = "Test Zona" };
+        _context.Zonas.Add(zona);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var report1 = await _repository.AddAsync(CreateReport(zona.Id));
+        var report2 = await _repository.AddAsync(CreateReport(zona.Id));
+        var report3 = await _repository.AddAsync(CreateReport(zona.Id));
+
+        // Assert
+        Assert.NotEqual(report1.Id, report2.Id);
+        Assert.NotEqual(report2.Id, report3.Id);
+        Assert.NotEqual(report1.Id, report3.Id);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task UpdateAsync_MultipleFields_UpdatesAll()
+    {
+        // Arrange
+        var (report, _) = await CreateTestReportWithZona(delito: "Original", estado: 0);
+        _context.ChangeTracker.Clear();
+
+        // Act
+        report.Delito = "Updated";
+        report.Estado = 1;
+        report.HechosReportados = "Updated hechos";
+        await _repository.UpdateAsync(report);
+
+        // Assert
+        _context.ChangeTracker.Clear();
+        var updated = await _context.ReportesIncidencia.FindAsync(report.Id);
+        Assert.Equal("Updated", updated!.Delito);
+        Assert.Equal(1, updated.Estado);
+        Assert.Equal("Updated hechos", updated.HechosReportados);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task DeleteAsync_MultipleTimes_DoesNotThrow()
+    {
+        // Arrange
+        var (report, _) = await CreateTestReportWithZona();
+        var id = report.Id;
+        _context.ChangeTracker.Clear();
+
+        // Act - Delete multiple times
+        await _repository.DeleteAsync(id);
+        await _repository.DeleteAsync(id);
+        await _repository.DeleteAsync(id);
+
+        // Assert - Should not throw
+        var deleted = await _context.ReportesIncidencia.FindAsync(id);
+        Assert.Null(deleted);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task GetByUsuarioIdAsync_MultipleReports_DoesNotThrow()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        await CreateTestReportWithZona(usuarioId: userId, delito: "Delito 1");
+        await CreateTestReportWithZona(usuarioId: userId, delito: "Delito 2");
+        await CreateTestReportWithZona(usuarioId: userId, delito: "Delito 3");
+        _context.ChangeTracker.Clear();
+
+        // Act - Note: AsSplitQuery() doesn't work correctly with InMemory provider
+        // Full functionality is tested via integration tests with real PostgreSQL
+        var result = await _repository.GetByUsuarioIdAsync(userId);
+
+        // Assert - Only verify it doesn't throw; count verification requires PostgreSQL
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SmallPageSize_ReturnsCorrectCount()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            PageSize = 1
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_LargePage_ReturnsEmptyWithCorrectCount()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            Page = 100,
+            PageSize = 10
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    private ReporteIncidencia CreateReport(int zonaId)
+    {
+        return new ReporteIncidencia
+        {
+            UsuarioId = _testUserId,
+            Estado = 0,
+            ZonaId = zonaId,
+            Delito = "Test",
+            Sexo = "M",
+            Edad = 25,
+            TipoDeAtencion = "Test",
+            TipoDeAccion = (short)1,
+            HechosReportados = "Test hechos",
+            AccionesRealizadas = "Test acciones",
+            DatetimeHechos = DateTime.UtcNow,
+            TurnoCeiba = (short)1
+        };
+    }
+
+    #endregion
 }

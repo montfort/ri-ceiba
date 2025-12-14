@@ -545,4 +545,322 @@ public class AiNarrativeServiceTests
     }
 
     #endregion
+
+    #region Additional Edge Case Tests (Phase 2)
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync with empty statistics should return fallback")]
+    public async Task GenerateNarrativeAsync_EmptyStatistics_ReturnsFallback()
+    {
+        // Arrange
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync((ConfiguracionIA?)null);
+
+        var service = CreateService();
+        var request = new NarrativeRequestDto
+        {
+            FechaInicio = DateTime.UtcNow.AddDays(-7),
+            FechaFin = DateTime.UtcNow,
+            Statistics = new ReportStatisticsDto
+            {
+                TotalReportes = 0,
+                ReportesEntregados = 0,
+                ReportesBorrador = 0
+            },
+            Incidents = new List<IncidentSummaryDto>()
+        };
+
+        // Act
+        var result = await service.GenerateNarrativeAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        result.Narrativa.Should().Contain("0 reportes");
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync with network timeout should return fallback")]
+    public async Task GenerateNarrativeAsync_Timeout_ReturnsFallback()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "test-api-key",
+            Modelo = "gpt-4",
+            MaxTokens = 1000
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ThrowsAsync(new TaskCanceledException("Request timeout"));
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        var result = await service.GenerateNarrativeAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue(); // Fallback is successful
+        result.Narrativa.Should().NotBeEmpty();
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync with malformed JSON response should handle gracefully")]
+    public async Task GenerateNarrativeAsync_MalformedJson_ReturnsFallback()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "test-api-key",
+            Modelo = "gpt-4",
+            MaxTokens = 1000
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        SetupHttpResponse(HttpStatusCode.OK, "{ invalid json }");
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        var result = await service.GenerateNarrativeAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue(); // Fallback is successful
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync with empty response should handle gracefully")]
+    public async Task GenerateNarrativeAsync_EmptyResponse_ReturnsFallback()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "test-api-key",
+            Modelo = "gpt-4",
+            MaxTokens = 1000
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        var emptyResponse = new { choices = Array.Empty<object>() };
+        SetupHttpResponse(HttpStatusCode.OK, JsonSerializer.Serialize(emptyResponse));
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        var result = await service.GenerateNarrativeAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue(); // Fallback is successful
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync with Azure OpenAI should use correct endpoint")]
+    public async Task GenerateNarrativeAsync_AzureOpenAI_UsesCorrectEndpoint()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "AzureOpenAI",
+            ApiKey = "azure-api-key",
+            Modelo = "gpt-4",
+            Endpoint = "https://myinstance.openai.azure.com/openai/deployments/gpt-4/chat/completions?api-version=2023-05-15",
+            MaxTokens = 1000,
+            Temperature = 0.7
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        var openAiResponse = new
+        {
+            choices = new[]
+            {
+                new { message = new { content = "Azure OpenAI response..." } }
+            },
+            usage = new { total_tokens = 300 }
+        };
+
+        SetupHttpResponse(HttpStatusCode.OK, JsonSerializer.Serialize(openAiResponse));
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        var result = await service.GenerateNarrativeAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        result.Narrativa.Should().Contain("Azure OpenAI response");
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync should include all incident details in request")]
+    public async Task GenerateNarrativeAsync_IncludesIncidentDetails()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "test-api-key",
+            Modelo = "gpt-4",
+            MaxTokens = 1000
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        string? capturedBody = null;
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>(async (req, _) =>
+            {
+                if (req.Content != null)
+                    capturedBody = await req.Content.ReadAsStringAsync();
+            })
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    choices = new[] { new { message = new { content = "Response" } } },
+                    usage = new { total_tokens = 100 }
+                }))
+            });
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        await service.GenerateNarrativeAsync(request);
+
+        // Assert - Verify request was made with incident details in prompt
+        capturedBody.Should().NotBeNull();
+        capturedBody.Should().Contain("Violencia familiar");
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync should respect token limits")]
+    public async Task GenerateNarrativeAsync_RespectsTokenLimits()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "test-api-key",
+            Modelo = "gpt-4",
+            MaxTokens = 500,
+            Temperature = 0.5
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        string? capturedBody = null;
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>(async (req, _) =>
+            {
+                if (req.Content != null)
+                    capturedBody = await req.Content.ReadAsStringAsync();
+            })
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(JsonSerializer.Serialize(new
+                {
+                    choices = new[] { new { message = new { content = "Response" } } },
+                    usage = new { total_tokens = 100 }
+                }))
+            });
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        await service.GenerateNarrativeAsync(request);
+
+        // Assert - Verify request includes max_tokens configuration
+        capturedBody.Should().NotBeNull();
+        capturedBody.Should().Contain("500"); // Max tokens
+    }
+
+    [Fact(DisplayName = "T082: IsAvailableAsync should return true for configured cloud provider")]
+    public async Task IsAvailableAsync_ConfiguredCloudProvider_ReturnsTrue()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "valid-api-key",
+            Modelo = "gpt-4"
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        // Mock the HEAD request that IsAvailableAsync makes
+        _mockHttpHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Head),
+                ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(new HttpResponseMessage(HttpStatusCode.OK));
+
+        var service = CreateService();
+
+        // Act
+        var result = await service.IsAvailableAsync();
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact(DisplayName = "T082: GenerateNarrativeAsync with cancellation should respect token")]
+    public async Task GenerateNarrativeAsync_WithCancellation_RespectsCancellationToken()
+    {
+        // Arrange
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            ApiKey = "test-api-key",
+            Modelo = "gpt-4",
+            MaxTokens = 1000
+        };
+
+        _mockConfigService.Setup(x => x.GetActiveConfigurationAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(config);
+
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var service = CreateService();
+        var request = CreateTestRequest();
+
+        // Act
+        var result = await service.GenerateNarrativeAsync(request, cts.Token);
+
+        // Assert - Should return fallback since operation was cancelled
+        result.Success.Should().BeTrue();
+    }
+
+    #endregion
 }

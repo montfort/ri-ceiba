@@ -350,4 +350,259 @@ El año 2024 fue significativo para nuestra gestión.
     }
 
     #endregion
+
+    #region Additional Edge Case Tests (Phase 2)
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public void Constructor_WithNullLogger_DoesNotThrow()
+    {
+        // Act - Constructor accepts null logger without throwing
+        var service = new DocumentConversionService(null!);
+
+        // Assert - Service is created (though may fail at runtime when logger is used)
+        Assert.NotNull(service);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_NullTitle_DoesNotThrow()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Act & Assert - Should not throw with null title
+        var result = await _service.ConvertMarkdownToWordAsync("# Test", null!);
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentWithNewlines_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange
+        var markdown = "Line 1\n\nLine 2\n\n\nLine 3";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentWithTabs_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange
+        var markdown = "# Title\n\n\tIndented content\n\t\tDouble indented";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentWithHtmlTags_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange
+        var markdown = "# Title\n\n<strong>Bold HTML</strong>\n\n<em>Italic HTML</em>";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentWithCodeBlocks_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange
+        var markdown = @"
+# Code Examples
+
+Inline `code` example.
+
+```json
+{
+    ""key"": ""value""
+}
+```
+";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentWithImages_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange - Image syntax that will just be ignored since image doesn't exist
+        var markdown = "# Document\n\n![Alt text](nonexistent.png)";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentWithLinks_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange
+        var markdown = "# Document\n\n[Link text](https://example.com)\n\n[Reference link][ref]\n\n[ref]: https://example.com";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public void IsPandocAvailable_MultipleCalls_ReturnsSameValue()
+    {
+        // Act
+        var result1 = _service.IsPandocAvailable();
+        var result2 = _service.IsPandocAvailable();
+        var result3 = _service.IsPandocAvailable();
+
+        // Assert - Should always return the same value (cached)
+        Assert.Equal(result1, result2);
+        Assert.Equal(result2, result3);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public void GetPandocVersion_MultipleCalls_ReturnsSameValue()
+    {
+        // Act
+        var result1 = _service.GetPandocVersion();
+        var result2 = _service.GetPandocVersion();
+
+        // Assert - Should return the same value (cached)
+        Assert.Equal(result1, result2);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_ContentNearMaxSize_Succeeds()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange - Content close to but under max size
+        var nearMaxContent = new string('x', DocumentConversionService.MaxInputCharacters - 100);
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(nearMaxContent, "Test");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_MinimalContent_Succeeds()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange - Minimal valid content
+        var minimalContent = "x";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(minimalContent, "");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task ConvertMarkdownToWordAsync_SpecialUnicodeCharacters_HandlesCorrectly()
+    {
+        // Skip if Pandoc is not available
+        if (!_service.IsPandocAvailable())
+        {
+            return;
+        }
+
+        // Arrange - Various unicode characters
+        var markdown = "# Unicode Test\n\n日本語 한국어 中文\n\n© ® ™ € £ ¥\n\n→ ← ↑ ↓ ↔ ↕\n\n✓ ✗ ★ ☆";
+
+        // Act
+        var result = await _service.ConvertMarkdownToWordAsync(markdown, "Unicode Document");
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.True(result.Length > 0);
+    }
+
+    #endregion
 }

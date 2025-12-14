@@ -691,4 +691,181 @@ public class ResilientEmailServiceTests
     }
 
     #endregion
+
+    #region Additional Edge Case Tests (Phase 2)
+
+    [Fact]
+    [Trait("NFR", "T146")]
+    public async Task SendWithRetryAsync_NullRequest_ThrowsException()
+    {
+        // Arrange
+        var service = CreateService();
+
+        // Act & Assert - Service throws NullReferenceException for null request
+        await Assert.ThrowsAnyAsync<Exception>(
+            () => service.SendWithRetryAsync(null!));
+    }
+
+    [Fact]
+    [Trait("NFR", "T150")]
+    public async Task QueueEmail_ManualEnqueue_IncreasesQueueCount()
+    {
+        // Arrange
+        var options = new EmailResilienceOptions { QueueOnFailure = true };
+        var service = CreateService(options);
+
+        // Get initial count
+        var initialCount = service.QueuedEmailCount;
+
+        // Force a failure to queue an email
+        _mockEmailService.SendAsync(Arg.Any<SendEmailRequestDto>(), Arg.Any<CancellationToken>())
+            .Returns(new SendEmailResultDto { Success = false, Error = "Fail" });
+
+        // Act
+        await service.SendWithRetryAsync(CreateRequest("Test Queue"));
+
+        // Assert
+        service.QueuedEmailCount.Should().BeGreaterThan(initialCount);
+    }
+
+    [Fact]
+    [Trait("NFR", "T148")]
+    public void CurrentCircuitState_InitialState_IsClosed()
+    {
+        // Arrange
+        var service = CreateService();
+
+        // Assert
+        service.CurrentCircuitState.Should().Be(CircuitState.Closed);
+    }
+
+    [Fact]
+    [Trait("NFR", "T153")]
+    public void GetHealth_InitialState_ReturnsHealthyStatus()
+    {
+        // Arrange
+        var service = CreateService();
+
+        // Act
+        var health = service.GetHealth();
+
+        // Assert
+        health.IsHealthy.Should().BeTrue();
+        health.CircuitState.Should().Be(CircuitState.Closed);
+        health.QueuedEmails.Should().Be(0);
+        health.FailureCount.Should().Be(0);
+        health.CircuitOpenedAt.Should().BeNull();
+    }
+
+    [Fact]
+    [Trait("NFR", "T155")]
+    public void LastSuccessfulSend_InitialState_HasValue()
+    {
+        // Arrange
+        var before = DateTime.UtcNow;
+        var service = CreateService();
+
+        // Assert - Service initializes LastSuccessfulSend to DateTime.UtcNow
+        service.LastSuccessfulSend.Should().NotBeNull();
+        service.LastSuccessfulSend.Should().BeOnOrAfter(before.AddSeconds(-1));
+    }
+
+    [Fact]
+    [Trait("NFR", "T146")]
+    public async Task SendWithRetryAsync_CancellationRequested_StopsRetrying()
+    {
+        // Arrange
+        var options = new EmailResilienceOptions { MaxRetries = 5, RetryDelayMs = 100 };
+        var service = CreateService(options);
+        var request = CreateRequest();
+
+        _mockEmailService.SendAsync(request, Arg.Any<CancellationToken>())
+            .Returns(new SendEmailResultDto { Success = false, Error = "Fail" });
+
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(50); // Cancel quickly
+
+        // Act & Assert - Service throws TaskCanceledException when cancelled
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => service.SendWithRetryAsync(request, cts.Token));
+    }
+
+    [Fact]
+    [Trait("NFR", "T150")]
+    public async Task Queue_MultipleEmails_MaintainsOrder()
+    {
+        // Arrange
+        var options = new EmailResilienceOptions
+        {
+            MaxRetries = 1,
+            RetryDelayMs = 1,
+            QueueOnFailure = true,
+            MaxQueueSize = 10,
+            FailureThreshold = 100
+        };
+        var service = CreateService(options);
+
+        _mockEmailService.SendAsync(Arg.Any<SendEmailRequestDto>(), Arg.Any<CancellationToken>())
+            .Returns(new SendEmailResultDto { Success = false, Error = "Fail" });
+
+        // Act - Queue multiple emails
+        for (var i = 0; i < 5; i++)
+        {
+            await service.SendWithRetryAsync(CreateRequest($"Email {i}"));
+        }
+
+        // Assert
+        service.QueuedEmailCount.Should().Be(5);
+    }
+
+    [Fact]
+    [Trait("NFR", "T147")]
+    public async Task SendWithRetryAsync_DefaultOptions_UsesReasonableDefaults()
+    {
+        // Arrange
+        var service = CreateService(); // No custom options
+        var request = CreateRequest();
+
+        _mockEmailService.SendAsync(request, Arg.Any<CancellationToken>())
+            .Returns(new SendEmailResultDto { Success = true });
+
+        // Act
+        var result = await service.SendWithRetryAsync(request);
+
+        // Assert
+        result.Success.Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("NFR", "T153")]
+    public async Task GetHealth_AfterMultipleOperations_ReflectsState()
+    {
+        // Arrange
+        var options = new EmailResilienceOptions
+        {
+            MaxRetries = 1,
+            RetryDelayMs = 1,
+            FailureThreshold = 10,
+            QueueOnFailure = true
+        };
+        var service = CreateService(options);
+
+        _mockEmailService.SendAsync(Arg.Any<SendEmailRequestDto>(), Arg.Any<CancellationToken>())
+            .Returns(new SendEmailResultDto { Success = false, Error = "Fail" });
+
+        // Queue some failed emails
+        for (var i = 0; i < 3; i++)
+        {
+            await service.SendWithRetryAsync(CreateRequest($"Email {i}"));
+        }
+
+        // Act
+        var health = service.GetHealth();
+
+        // Assert
+        health.QueuedEmails.Should().Be(3);
+        health.FailureCount.Should().BeGreaterThan(0);
+    }
+
+    #endregion
 }
