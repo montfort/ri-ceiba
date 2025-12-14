@@ -11,15 +11,34 @@ namespace Ceiba.Integration.Tests;
 /// <summary>
 /// WebApplicationFactory that uses real PostgreSQL for integration tests.
 /// Use this for tests that require real database features like ExecuteDeleteAsync.
+///
+/// Required environment variables:
+///   CEIBA_TEST_PG_HOST     - PostgreSQL host (default: localhost)
+///   CEIBA_TEST_PG_PORT     - PostgreSQL port (default: 5432)
+///   CEIBA_TEST_PG_USER     - PostgreSQL username (default: postgres)
+///   CEIBA_TEST_PG_PASSWORD - PostgreSQL password (required, no default)
+///
+/// Example setup:
+///   export CEIBA_TEST_PG_PASSWORD=your_password
+///   dotnet test --filter "Collection=PostgreSQL"
 /// </summary>
 public class PostgreSqlWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private readonly string _databaseName = $"ceiba_test_{Guid.NewGuid():N}";
 
-    // Connection string for local PostgreSQL
-    // Uses credentials: montfort/montfort78
+    // PostgreSQL connection settings from environment variables
+    private static string PgHost => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_HOST") ?? "localhost";
+    private static string PgPort => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_PORT") ?? "5432";
+    private static string PgUser => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_USER") ?? "postgres";
+    private static string PgPassword => Environment.GetEnvironmentVariable("CEIBA_TEST_PG_PASSWORD")
+        ?? throw new InvalidOperationException(
+            "PostgreSQL password not configured. Set CEIBA_TEST_PG_PASSWORD environment variable.");
+
     private string ConnectionString =>
-        $"Host=localhost;Port=5432;Database={_databaseName};Username=montfort;Password=montfort78";
+        $"Host={PgHost};Port={PgPort};Database={_databaseName};Username={PgUser};Password={PgPassword}";
+
+    private static string MasterConnectionString =>
+        $"Host={PgHost};Port={PgPort};Database=postgres;Username={PgUser};Password={PgPassword}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -79,8 +98,7 @@ public class PostgreSqlWebApplicationFactory : WebApplicationFactory<Program>, I
     public async Task InitializeAsync()
     {
         // Create the test database
-        var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=montfort;Password=montfort78";
-        await using var connection = new Npgsql.NpgsqlConnection(masterConnection);
+        await using var connection = new Npgsql.NpgsqlConnection(MasterConnectionString);
         await connection.OpenAsync();
 
         await using var cmd = connection.CreateCommand();
@@ -98,8 +116,7 @@ public class PostgreSqlWebApplicationFactory : WebApplicationFactory<Program>, I
     public new async Task DisposeAsync()
     {
         // Drop the test database
-        var masterConnection = "Host=localhost;Port=5432;Database=postgres;Username=montfort;Password=montfort78";
-        await using var connection = new Npgsql.NpgsqlConnection(masterConnection);
+        await using var connection = new Npgsql.NpgsqlConnection(MasterConnectionString);
         await connection.OpenAsync();
 
         // Terminate existing connections
