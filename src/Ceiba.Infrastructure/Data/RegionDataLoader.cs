@@ -157,28 +157,21 @@ public class RegionDataLoader : IRegionDataLoader
 
     /// <summary>
     /// Clears all geographic catalog data (Cuadrantes, Sectores, Regiones, Zonas).
-    /// Use with caution - this will cascade delete related data.
+    /// Will fail if any reports reference geographic data (required fields cannot be nullified).
     /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown if reports exist that reference geographic data.</exception>
     public async Task ClearGeographicCatalogsAsync()
     {
         _logger.LogWarning("Clearing all geographic catalogs...");
 
-        // Check if there are reports referencing geographic data
-        var hasReportsWithGeography = await _context.ReportesIncidencia
-            .AnyAsync(r => r.ZonaId != null || r.RegionId != null || r.SectorId != null || r.CuadranteId != null);
+        // Check if there are any reports - geographic fields are required, so we can't clear catalogs if reports exist
+        var hasReports = await _context.ReportesIncidencia.AnyAsync();
 
-        if (hasReportsWithGeography)
+        if (hasReports)
         {
-            _logger.LogWarning("Found reports with geographic references. Clearing geographic references from reports first...");
-
-            // Clear geographic references from reports (set to null)
-            await _context.ReportesIncidencia
-                .Where(r => r.ZonaId != null || r.RegionId != null || r.SectorId != null || r.CuadranteId != null)
-                .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(r => r.ZonaId, (int?)null)
-                    .SetProperty(r => r.RegionId, (int?)null)
-                    .SetProperty(r => r.SectorId, (int?)null)
-                    .SetProperty(r => r.CuadranteId, (int?)null));
+            throw new InvalidOperationException(
+                "Cannot clear geographic catalogs: reports exist that reference geographic data. " +
+                "Geographic fields are required and cannot be nullified. Delete reports first.");
         }
 
         // Delete in order (respecting foreign key constraints)
