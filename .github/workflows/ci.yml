@@ -309,7 +309,7 @@ jobs:
       - name: Run tests with coverage
         run: |
           dotnet test --no-build --configuration Release \
-            --filter "Category!=E2E&Collection!=PostgreSQL" \
+            --filter "Category!=E2E&Category!=PostgreSQL" \
             --collect:"XPlat Code Coverage" \
             --results-directory ./coverage \
             --settings coverlet.runsettings \

@@ -11,6 +11,7 @@ namespace Ceiba.Integration.Tests.Data;
 /// Tests ExecuteDeleteAsync and ClearGeographicCatalogsAsync which require real database.
 /// </summary>
 [Collection("PostgreSQL")]
+[Trait("Category", "PostgreSQL")]
 public class RegionDataLoaderIntegrationTests : IClassFixture<PostgreSqlWebApplicationFactory>
 {
     private readonly PostgreSqlWebApplicationFactory _factory;
