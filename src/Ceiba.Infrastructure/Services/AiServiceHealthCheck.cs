@@ -43,7 +43,7 @@ public class AiServiceHealthCheck : IServiceHealthCheck
                 };
             }
 
-            var isAvailable = await _aiService.IsAvailableAsync();
+            var isAvailable = await _aiService.IsAvailableAsync(cancellationToken);
             stopwatch.Stop();
 
             var status = isAvailable ? ServiceStatus.Healthy : ServiceStatus.Unhealthy;

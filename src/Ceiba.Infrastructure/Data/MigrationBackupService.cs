@@ -172,14 +172,8 @@ public class MigrationBackupService
                 "/opt/homebrew/bin/pg_dump",
             };
 
-        foreach (var path in knownPaths)
-        {
-            if (File.Exists(path))
-                return path;
-        }
-
-        // Fallback to bare command name (will use PATH, but warn about security)
-        // This is acceptable in containerized environments where PATH is controlled
-        return "pg_dump";
+        // Use LINQ to find first existing path, fallback to bare command name (uses PATH)
+        // Bare command fallback is acceptable in containerized environments where PATH is controlled
+        return knownPaths.FirstOrDefault(File.Exists) ?? "pg_dump";
     }
 }
