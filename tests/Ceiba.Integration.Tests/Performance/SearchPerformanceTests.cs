@@ -32,7 +32,7 @@ public class SearchPerformanceTests : PerformanceTestBase
         // Act & Assert
         await MeasureAsync(
             "Search reports (no filters)",
-            async () => await repository.SearchAsync(page: 1, pageSize: 20),
+            async () => await repository.SearchAsync(new ReportSearchCriteria { Page = 1, PageSize = 20 }),
             SearchThreshold);
     }
 
@@ -47,14 +47,16 @@ public class SearchPerformanceTests : PerformanceTestBase
         // Act & Assert
         await MeasureAsync(
             "Search reports (with filters)",
-            async () => await repository.SearchAsync(
-                estado: 1,
-                zonaId: 1,
-                delito: "robo",
-                fechaDesde: DateTime.UtcNow.AddMonths(-6),
-                fechaHasta: DateTime.UtcNow,
-                page: 1,
-                pageSize: 20),
+            async () => await repository.SearchAsync(new ReportSearchCriteria
+            {
+                Estado = 1,
+                ZonaId = 1,
+                Delito = "robo",
+                FechaDesde = DateTime.UtcNow.AddMonths(-6),
+                FechaHasta = DateTime.UtcNow,
+                Page = 1,
+                PageSize = 20
+            }),
             SearchThreshold);
     }
 
@@ -69,9 +71,10 @@ public class SearchPerformanceTests : PerformanceTestBase
         // Act & Assert - Test multiple pages
         for (var page = 1; page <= 5; page++)
         {
+            var currentPage = page;
             await MeasureAsync(
                 $"Search reports (page {page})",
-                async () => await repository.SearchAsync(page: page, pageSize: 20),
+                async () => await repository.SearchAsync(new ReportSearchCriteria { Page = currentPage, PageSize = 20 }),
                 FastSearchThreshold);
         }
     }
@@ -87,10 +90,12 @@ public class SearchPerformanceTests : PerformanceTestBase
         // Act & Assert
         await MeasureAsync(
             "Search reports (text search)",
-            async () => await repository.SearchAsync(
-                delito: "asalto",
-                page: 1,
-                pageSize: 20),
+            async () => await repository.SearchAsync(new ReportSearchCriteria
+            {
+                Delito = "asalto",
+                Page = 1,
+                PageSize = 20
+            }),
             SearchThreshold);
     }
 
@@ -125,10 +130,12 @@ public class SearchPerformanceTests : PerformanceTestBase
             "Search reports (10 iterations)",
             async () =>
             {
-                await repository.SearchAsync(
-                    estado: 1,
-                    page: 1,
-                    pageSize: 20);
+                await repository.SearchAsync(new ReportSearchCriteria
+                {
+                    Estado = 1,
+                    Page = 1,
+                    PageSize = 20
+                });
             },
             iterations: 10,
             warmupDuration: TimeSpan.FromSeconds(1));

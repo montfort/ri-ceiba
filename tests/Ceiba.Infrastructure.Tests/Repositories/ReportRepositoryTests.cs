@@ -1,4 +1,5 @@
 using Ceiba.Core.Entities;
+using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -131,7 +132,7 @@ public class ReportRepositoryTests : IDisposable
         _context.ChangeTracker.Clear();
 
         // Act - Search for non-existent estado
-        var (items, totalCount) = await _repository.SearchAsync(estado: 99);
+        var (items, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria { Estado = 99 });
 
         // Assert
         Assert.Equal(0, totalCount);
@@ -148,7 +149,7 @@ public class ReportRepositoryTests : IDisposable
         _context.ChangeTracker.Clear();
 
         // Act
-        var (_, totalCount) = await _repository.SearchAsync(estado: 0);
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria { Estado = 0 });
 
         // Assert - Count works even if items don't due to InMemory limitations
         Assert.Equal(2, totalCount);

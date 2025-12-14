@@ -138,7 +138,7 @@ public class LoginSecurityService : ILoginSecurityService
         return record;
     }
 
-    private class LoginAttemptRecord
+    private sealed class LoginAttemptRecord
     {
         public int Count { get; set; }
         public DateTime LastAttempt { get; set; }

@@ -11,6 +11,8 @@ namespace Ceiba.Application.Services;
 /// </summary>
 public class ReportService : IReportService
 {
+    private const string ENTITY_NAME = "REPORTE_INCIDENCIA";
+
     private readonly IReportRepository _reportRepository;
     private readonly IAuditService _auditService;
     private readonly ICatalogService _catalogService;
@@ -94,7 +96,7 @@ public class ReportService : IReportService
         await _auditService.LogAsync(
             "REPORT_CREATE",
             savedReport.Id,
-            "REPORTE_INCIDENCIA",
+            ENTITY_NAME,
             System.Text.Json.JsonSerializer.Serialize(new { reportId = savedReport.Id, estado = "Borrador", usuarioId }),
             null
         );
@@ -145,7 +147,7 @@ public class ReportService : IReportService
         await _auditService.LogAsync(
             "REPORT_UPDATE",
             reportId,
-            "REPORTE_INCIDENCIA",
+            ENTITY_NAME,
             System.Text.Json.JsonSerializer.Serialize(new { reportId, usuarioId, updatedFields = GetUpdatedFields(updateDto) }),
             null
         );
@@ -280,13 +282,13 @@ public class ReportService : IReportService
         report.Submit();
 
         // Save changes
-        var submittedReport = await _reportRepository.UpdateAsync(report);
+        _ = await _reportRepository.UpdateAsync(report);
 
         // Audit log
         await _auditService.LogAsync(
             "REPORT_SUBMIT",
             reportId,
-            "REPORTE_INCIDENCIA",
+            ENTITY_NAME,
             System.Text.Json.JsonSerializer.Serialize(new { reportId, usuarioId, estadoAnterior = 0, estadoNuevo = 1 }),
             null
         );
@@ -320,21 +322,24 @@ public class ReportService : IReportService
         Guid usuarioId,
         bool isRevisor = false)
     {
-        // CREADOR can only see their own reports
-        var filterUsuarioId = isRevisor ? filter.Estado.HasValue ? null : (Guid?)null : usuarioId;
+        // CREADOR can only see their own reports; REVISOR sees all
+        Guid? filterUsuarioId = isRevisor ? null : usuarioId;
 
-        var (items, totalCount) = await _reportRepository.SearchAsync(
-            estado: filter.Estado,
-            zonaId: filter.ZonaId,
-            delito: filter.Delito,
-            fechaDesde: filter.FechaDesde,
-            fechaHasta: filter.FechaHasta,
-            usuarioId: filterUsuarioId,
-            page: filter.Page,
-            pageSize: Math.Min(filter.PageSize, 500), // Max 500 per page
-            sortBy: filter.SortBy,
-            sortDesc: filter.SortDesc
-        );
+        var criteria = new ReportSearchCriteria
+        {
+            Estado = filter.Estado,
+            ZonaId = filter.ZonaId,
+            Delito = filter.Delito,
+            FechaDesde = filter.FechaDesde,
+            FechaHasta = filter.FechaHasta,
+            UsuarioId = filterUsuarioId,
+            Page = filter.Page,
+            PageSize = Math.Min(filter.PageSize, 500), // Max 500 per page
+            SortBy = filter.SortBy,
+            SortDesc = filter.SortDesc
+        };
+
+        var (items, totalCount) = await _reportRepository.SearchAsync(criteria);
 
         var reportDtos = new List<ReportDto>();
         foreach (var item in items)
@@ -379,7 +384,7 @@ public class ReportService : IReportService
         await _auditService.LogAsync(
             "REPORT_DELETE",
             reportId,
-            "REPORTE_INCIDENCIA",
+            ENTITY_NAME,
             System.Text.Json.JsonSerializer.Serialize(new { reportId, usuarioId, estado = "Borrador" }),
             null
         );

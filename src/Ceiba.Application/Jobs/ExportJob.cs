@@ -80,9 +80,9 @@ public class ExportJob
                 "Reports: {ReportCount}, Size: {SizeKb}KB, User: {UserId}",
                 result.ReportCount, result.Data.Length / 1024, userId);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException ex)
         {
-            _logger.LogWarning(
+            _logger.LogWarning(ex,
                 "Background export job cancelled for User: {UserId}",
                 userId);
 

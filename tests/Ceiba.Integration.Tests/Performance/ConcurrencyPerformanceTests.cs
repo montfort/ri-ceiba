@@ -1,4 +1,5 @@
 using Ceiba.Core.Entities;
+using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,7 @@ public class ConcurrencyPerformanceTests : PerformanceTestBase
             {
                 await using var context = CreateTestContext(dbName);
                 var repository = new ReportRepository(context);
-                await repository.SearchAsync(page: 1, pageSize: 20);
+                await repository.SearchAsync(new ReportSearchCriteria { Page = 1, PageSize = 20 });
             },
             concurrentUsers: 10,
             duration: TimeSpan.FromSeconds(5));
@@ -60,10 +61,12 @@ public class ConcurrencyPerformanceTests : PerformanceTestBase
             {
                 await using var context = CreateTestContext(dbName);
                 var repository = new ReportRepository(context);
-                await repository.SearchAsync(
-                    estado: userId % 3,
-                    page: 1,
-                    pageSize: 20);
+                await repository.SearchAsync(new ReportSearchCriteria
+                {
+                    Estado = userId % 3,
+                    Page = 1,
+                    PageSize = 20
+                });
             },
             concurrentUsers: 25,
             duration: TimeSpan.FromSeconds(5));
@@ -94,7 +97,7 @@ public class ConcurrencyPerformanceTests : PerformanceTestBase
                 switch (operation)
                 {
                     case 0:
-                        await repository.SearchAsync(page: 1, pageSize: 20);
+                        await repository.SearchAsync(new ReportSearchCriteria { Page = 1, PageSize = 20 });
                         break;
                     case 1:
                         await repository.GetByIdAsync((userId % 100) + 1);
@@ -103,10 +106,12 @@ public class ConcurrencyPerformanceTests : PerformanceTestBase
                         await repository.GetByIdWithRelationsAsync((userId % 100) + 1);
                         break;
                     case 3:
-                        await repository.SearchAsync(
-                            delito: "robo",
-                            page: 1,
-                            pageSize: 10);
+                        await repository.SearchAsync(new ReportSearchCriteria
+                        {
+                            Delito = "robo",
+                            Page = 1,
+                            PageSize = 10
+                        });
                         break;
                 }
             },
@@ -137,7 +142,7 @@ public class ConcurrencyPerformanceTests : PerformanceTestBase
             {
                 await using var context = CreateTestContext(dbName);
                 var repository = new ReportRepository(context);
-                await repository.SearchAsync(page: 1, pageSize: 20);
+                await repository.SearchAsync(new ReportSearchCriteria { Page = 1, PageSize = 20 });
             },
             concurrentUsers: 20,
             duration: TimeSpan.FromSeconds(15));

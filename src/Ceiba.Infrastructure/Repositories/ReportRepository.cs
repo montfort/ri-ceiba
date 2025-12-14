@@ -55,51 +55,41 @@ public class ReportRepository : IReportRepository
             .ToListAsync();
     }
 
-    public async Task<(List<ReporteIncidencia> Items, int TotalCount)> SearchAsync(
-        int? estado = null,
-        int? zonaId = null,
-        string? delito = null,
-        DateTime? fechaDesde = null,
-        DateTime? fechaHasta = null,
-        Guid? usuarioId = null,
-        int page = 1,
-        int pageSize = 20,
-        string sortBy = "createdAt",
-        bool sortDesc = true)
+    public async Task<(List<ReporteIncidencia> Items, int TotalCount)> SearchAsync(ReportSearchCriteria criteria)
     {
         // T117c, T117d: Build optimized query
         var query = _context.ReportesIncidencia.AsQueryable();
 
         // Apply filters BEFORE includes for better query plan
-        if (estado.HasValue)
+        if (criteria.Estado.HasValue)
         {
-            query = query.Where(r => r.Estado == estado.Value);
+            query = query.Where(r => r.Estado == criteria.Estado.Value);
         }
 
-        if (zonaId.HasValue)
+        if (criteria.ZonaId.HasValue)
         {
-            query = query.Where(r => r.ZonaId == zonaId.Value);
+            query = query.Where(r => r.ZonaId == criteria.ZonaId.Value);
         }
 
         // T117d: Use EF.Functions.Like for better index usage on LIKE queries
-        if (!string.IsNullOrWhiteSpace(delito))
+        if (!string.IsNullOrWhiteSpace(criteria.Delito))
         {
-            query = query.Where(r => EF.Functions.Like(r.Delito, $"%{delito}%"));
+            query = query.Where(r => EF.Functions.Like(r.Delito, $"%{criteria.Delito}%"));
         }
 
-        if (fechaDesde.HasValue)
+        if (criteria.FechaDesde.HasValue)
         {
-            query = query.Where(r => r.CreatedAt >= fechaDesde.Value);
+            query = query.Where(r => r.CreatedAt >= criteria.FechaDesde.Value);
         }
 
-        if (fechaHasta.HasValue)
+        if (criteria.FechaHasta.HasValue)
         {
-            query = query.Where(r => r.CreatedAt <= fechaHasta.Value);
+            query = query.Where(r => r.CreatedAt <= criteria.FechaHasta.Value);
         }
 
-        if (usuarioId.HasValue)
+        if (criteria.UsuarioId.HasValue)
         {
-            query = query.Where(r => r.UsuarioId == usuarioId.Value);
+            query = query.Where(r => r.UsuarioId == criteria.UsuarioId.Value);
         }
 
         // T117c: Get count with optimized query (no includes needed for count)
@@ -112,12 +102,12 @@ public class ReportRepository : IReportRepository
         }
 
         // Apply sorting with explicit ordering for index usage
-        query = ApplySorting(query, sortBy, sortDesc);
+        query = ApplySorting(query, criteria.SortBy, criteria.SortDesc);
 
         // T117c: Apply pagination BEFORE includes for better performance
         var paginatedQuery = query
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Skip((criteria.Page - 1) * criteria.PageSize)
+            .Take(criteria.PageSize);
 
         // T117d: Add includes AFTER pagination with AsSplitQuery
         var items = await paginatedQuery

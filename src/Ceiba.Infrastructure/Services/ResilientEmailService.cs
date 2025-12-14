@@ -331,7 +331,7 @@ public class ResilientEmailService : IResilientEmailService
             _emailQueue.Count, request.Subject);
     }
 
-    private class QueuedEmail
+    private sealed class QueuedEmail
     {
         public required SendEmailRequestDto Request { get; init; }
         public DateTime QueuedAt { get; init; }

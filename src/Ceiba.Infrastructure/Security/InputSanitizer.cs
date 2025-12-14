@@ -177,13 +177,11 @@ public partial class InputSanitizer : IInputSanitizer
             return input;
         }
 
-        if (Uri.TryCreate(input, UriKind.Absolute, out var uri))
+        if (Uri.TryCreate(input, UriKind.Absolute, out var uri) &&
+            !string.IsNullOrEmpty(allowedHost) &&
+            uri.Host.Equals(allowedHost, StringComparison.OrdinalIgnoreCase))
         {
-            if (!string.IsNullOrEmpty(allowedHost) &&
-                uri.Host.Equals(allowedHost, StringComparison.OrdinalIgnoreCase))
-            {
-                return input;
-            }
+            return input;
         }
 
         // Return null for potentially dangerous URLs

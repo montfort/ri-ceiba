@@ -233,10 +233,10 @@ public class DocumentConversionService : IDocumentConversionService
             {
                 await process.WaitForExitAsync(linkedCts.Token);
             }
-            catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+            catch (OperationCanceledException ex) when (timeoutCts.IsCancellationRequested)
             {
                 process.Kill(entireProcessTree: true);
-                _logger.LogError("Pandoc conversion timed out after {Timeout}s", ConversionTimeoutSeconds);
+                _logger.LogError(ex, "Pandoc conversion timed out after {Timeout}s", ConversionTimeoutSeconds);
                 return new PandocResult
                 {
                     Success = false,
@@ -359,7 +359,7 @@ public class DocumentConversionService : IDocumentConversionService
         }
     }
 
-    private record PandocResult
+    private sealed record PandocResult
     {
         public bool Success { get; init; }
         public string? Error { get; init; }
