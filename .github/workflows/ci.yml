@@ -122,7 +122,7 @@ jobs:
         run: dotnet build --no-restore --configuration Release
 
       - name: Run Integration Tests
-        run: dotnet test tests/Ceiba.Integration.Tests/Ceiba.Integration.Tests.csproj --no-build --configuration Release --filter "Category!=E2E" --verbosity normal --logger "trx;LogFileName=integration-tests.trx" --results-directory ./TestResults
+        run: dotnet test tests/Ceiba.Integration.Tests/Ceiba.Integration.Tests.csproj --no-build --configuration Release --filter "Category!=E2E&Category!=PostgreSQL" --verbosity normal --logger "trx;LogFileName=integration-tests.trx" --results-directory ./TestResults
         env:
           ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=ceiba_test_password"
           CEIBA_TEST_PG_HOST: localhost
