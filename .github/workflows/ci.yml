@@ -196,12 +196,14 @@ jobs:
           dotnet build
           pwsh bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
-      - name: Run database migrations
+      - name: Install dotnet-ef tool
         run: |
           dotnet tool install --global dotnet-ef || true
-          export PATH="$PATH:$HOME/.dotnet/tools"
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Run database migrations
+        run: |
           echo "Running migrations..."
-          # Use connection string directly via command line argument to avoid env var issues
           dotnet ef database update \
             --project src/Ceiba.Infrastructure \
             --startup-project src/Ceiba.Web \
