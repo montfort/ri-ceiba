@@ -61,12 +61,12 @@ public class DatabaseHealthCheck : IServiceHealthCheck
                 _ => ServiceStatus.Unhealthy // > DegradedResponseTimeMs
             };
 
-            // All ServiceStatus enum values are explicitly handled (no unreachable default case)
             var details = status switch
             {
                 ServiceStatus.Healthy => "Database responding normally",
                 ServiceStatus.Degraded => $"Database responding slowly ({responseTime}ms)",
-                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)"
+                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)",
+                _ => $"Unknown status ({responseTime}ms)"
             };
 
             var isHealthy = status == ServiceStatus.Healthy || status == ServiceStatus.Degraded;
