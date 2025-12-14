@@ -119,7 +119,8 @@ public class E2ETestServerFixture : IAsyncLifetime
 
         // Register application services
         services.AddScoped<IAuditService, AuditService>();
-        services.AddScoped<SeedDataService>();
+        services.AddScoped<IRegionDataLoader, RegionDataLoader>();
+        services.AddScoped<ISeedDataService, SeedDataService>();
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IReportRepository, ReportRepository>();
@@ -249,7 +250,7 @@ public class E2ETestServerFixture : IAsyncLifetime
         await db.Database.EnsureCreatedAsync();
 
         // Seed basic test data
-        var seedService = scope.ServiceProvider.GetRequiredService<SeedDataService>();
+        var seedService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
         await seedService.SeedAsync();
     }
 

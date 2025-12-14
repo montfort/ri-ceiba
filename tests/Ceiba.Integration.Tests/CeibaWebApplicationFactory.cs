@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Ceiba.Integration.Tests;
 
@@ -51,6 +52,10 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
                 optionsBuilder.EnableSensitiveDataLogging();
                 return new CeibaDbContext(optionsBuilder.Options, null);
             });
+
+            // Re-register services that depend on DbContext with the new in-memory context
+            services.AddScoped<IRegionDataLoader, RegionDataLoader>();
+            services.AddScoped<ISeedDataService, SeedDataService>();
         });
 
         builder.UseEnvironment("Testing");
