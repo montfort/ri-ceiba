@@ -46,6 +46,10 @@ try
     if (!string.IsNullOrEmpty(aspireConnectionString))
     {
         // Aspire está orquestando - usar integración Aspire para PostgreSQL
+        // ASP0000 is suppressed because Aspire's AddNpgsqlDbContext doesn't provide IServiceProvider
+        // in configureDbContextOptions callback. BuildServiceProvider is necessary to register the
+        // audit interceptor. This is a known limitation with Aspire integration.
+#pragma warning disable ASP0000 // Do not call 'BuildServiceProvider' in 'ConfigureServices'
         builder.AddNpgsqlDbContext<CeibaDbContext>("ceiba", configureDbContextOptions: options =>
         {
             // Add audit interceptor via DI (required for DbContext pooling)
@@ -53,6 +57,7 @@ try
             var interceptor = serviceProvider.GetRequiredService<AuditSaveChangesInterceptor>();
             options.AddInterceptors(interceptor);
         });
+#pragma warning restore ASP0000
         Log.Information("Using Aspire-orchestrated PostgreSQL connection");
     }
     else

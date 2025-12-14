@@ -354,7 +354,7 @@
         Navigation.NavigateTo($"/reports/edit/{reportId}");
     }
 
-    private string GetEstadoBadgeClass(int estado)
+    private static string GetEstadoBadgeClass(int estado)
     {
         return estado switch
         {
@@ -364,7 +364,7 @@
         };
     }
 
-    private string GetEstadoText(int estado)
+    private static string GetEstadoText(int estado)
     {
         return estado switch
         {

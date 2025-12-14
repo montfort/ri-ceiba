@@ -199,7 +199,7 @@
         get => Model.HoraGeneracion.ToString(@"hh\:mm");
         set
         {
-            if (TimeSpan.TryParse(value, out var time))
+            if (TimeSpan.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, out var time))
             {
                 Model.HoraGeneracion = time;
             }

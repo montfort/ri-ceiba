@@ -247,7 +247,7 @@
         EditingTemplate = null;
         FormNombre = string.Empty;
         FormDescripcion = null;
-        FormContenido = GetDefaultTemplateContent();
+        FormContenido = DefaultTemplateContent;
         FormActivo = true;
         FormEsDefault = false;
         ErrorMessage = null;
@@ -362,9 +362,7 @@
         }
     }
 
-    private string GetDefaultTemplateContent()
-    {
-        return @"# Reporte de Incidencias de Género
+    private const string DefaultTemplateContent = @"# Reporte de Incidencias de Género
 ## Período: {{fecha_inicio}} - {{fecha_fin}}
 
 ---
@@ -392,5 +390,4 @@
 ---
 
 *Reporte generado automáticamente por el Sistema Ceiba*";
-    }
 }

@@ -384,7 +384,7 @@
     /// <summary>
     /// Form model for user creation/editing
     /// </summary>
-    private class UserFormModel
+    private sealed class UserFormModel
     {
         [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "El email es requerido")]
         [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "El email no es válido")]

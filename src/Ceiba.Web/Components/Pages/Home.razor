@@ -208,7 +208,7 @@
 </AuthorizeView>
 
 @code {
-    private string GetUserRoles(AuthenticationState authState)
+    private static string GetUserRoles(AuthenticationState authState)
     {
         var roles = authState.User.Claims
             .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)

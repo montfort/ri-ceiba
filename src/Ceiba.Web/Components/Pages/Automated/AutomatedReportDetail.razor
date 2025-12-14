@@ -345,7 +345,7 @@
     private void SetViewModePreview() => ViewMode = "preview";
     private void SetViewModeMarkdown() => ViewMode = "markdown";
 
-    private string RenderMarkdown(string markdown)
+    private static string RenderMarkdown(string markdown)
     {
         if (string.IsNullOrEmpty(markdown))
             return string.Empty;
