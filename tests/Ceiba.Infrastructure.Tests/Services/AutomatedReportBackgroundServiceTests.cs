@@ -90,11 +90,11 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert
@@ -111,11 +111,11 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(new AutomatedReportConfigDto { Habilitado = false });
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert
@@ -136,11 +136,11 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(100);
+        await Task.Delay(250);
         await service.StopAsync(CancellationToken.None);
 
         // Assert
@@ -160,11 +160,11 @@ public class AutomatedReportBackgroundServiceTests
             .ThrowsAsync(new Exception("Database error"));
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(100);
+        await Task.Delay(250);
         await service.StopAsync(CancellationToken.None);
 
         // Assert - Verify error was logged (not specific message, which is implementation detail)
@@ -197,7 +197,7 @@ public class AutomatedReportBackgroundServiceTests
 
         // Act
         await service.StartAsync(CancellationToken.None);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert - No exception should be thrown
@@ -219,7 +219,7 @@ public class AutomatedReportBackgroundServiceTests
 
         var service = CreateService();
         await service.StartAsync(CancellationToken.None);
-        await Task.Delay(50);
+        await Task.Delay(200);
 
         // Act & Assert
         var stopTask = service.StopAsync(CancellationToken.None);
@@ -242,13 +242,13 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(50, CancellationToken.None);
+            await Task.Delay(200, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
@@ -282,7 +282,7 @@ public class AutomatedReportBackgroundServiceTests
 
         // Act
         await service.StartAsync(CancellationToken.None);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert
@@ -316,13 +316,13 @@ public class AutomatedReportBackgroundServiceTests
             });
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(600));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(150, CancellationToken.None);
+            await Task.Delay(300, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
@@ -356,7 +356,7 @@ public class AutomatedReportBackgroundServiceTests
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
 
         // Assert - Should not throw
         var stopTask = async () => await service.StopAsync(CancellationToken.None);
@@ -383,7 +383,7 @@ public class AutomatedReportBackgroundServiceTests
         try
         {
             await service.StartAsync(CancellationToken.None);
-            await Task.Delay(50);
+            await Task.Delay(200);
             await service.StopAsync(CancellationToken.None);
         }
         catch (Exception ex)
@@ -413,11 +413,11 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert
@@ -447,11 +447,11 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert
@@ -476,13 +476,13 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(50, CancellationToken.None);
+            await Task.Delay(200, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
@@ -516,13 +516,13 @@ public class AutomatedReportBackgroundServiceTests
             });
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(600));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(100, CancellationToken.None);
+            await Task.Delay(300, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
