@@ -69,7 +69,7 @@ jobs:
             /o:"montfort" \
             /d:sonar.token="${SONAR_TOKEN}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="./coverage/coverage.opencover.xml,./TestResults/**/coverage.opencover.xml" \
+            /d:sonar.cs.opencover.reportsPaths="./TestResults/**/coverage.opencover.xml" \
             /d:sonar.cs.vstest.reportsPaths="**/TestResults/**/*.trx" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/Tests/**,**/*.Designer.cs,**/obj/**/System.Text.RegularExpressions.Generator/**,**/Data/Configurations/**,**/Interfaces/**,**/DTOs/**,**/Enums/**,**/Entities/**,**/Exceptions/**,**/Program.cs,**/GlobalUsings.cs" \
             /d:sonar.cpd.exclusions="**/Migrations/**,**/Data/Configurations/**" \
@@ -92,57 +92,13 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
-      - name: Merge coverage reports
+      - name: List coverage files
         run: |
           echo "=== Coverage files generated ==="
-          find . -name "coverage.opencover.xml" -type f
-          echo ""
-
-          # Count coverage files
+          find ./TestResults -name "coverage.opencover.xml" -type f
           COVERAGE_COUNT=$(find ./TestResults -name "coverage.opencover.xml" -type f | wc -l)
-          echo "Found $COVERAGE_COUNT coverage file(s)"
-
-          if [ "$COVERAGE_COUNT" -gt 0 ]; then
-            # Show content sample from first coverage file for debugging
-            echo ""
-            echo "=== Sample from first coverage file (checking file paths) ==="
-            FIRST_FILE=$(find ./TestResults -name "coverage.opencover.xml" -type f | head -1)
-            head -50 "$FIRST_FILE" | grep -E "(fullPath|SequencePoint)" | head -10 || true
-
-            # Merge all coverage files into one OpenCover format
-            reportgenerator \
-              "-reports:./TestResults/**/coverage.opencover.xml" \
-              "-targetdir:./coverage" \
-              "-reporttypes:OpenCover" \
-              "-verbosity:Warning"
-
-            echo ""
-            echo "=== Merged coverage report ==="
-            if [ -f ./coverage/OpenCover.xml ]; then
-              # Rename to expected name
-              mv ./coverage/OpenCover.xml ./coverage/coverage.opencover.xml
-              echo "Coverage file ready at ./coverage/coverage.opencover.xml"
-              # Show file size to verify content
-              ls -la ./coverage/coverage.opencover.xml
-              # Show sample of merged file
-              echo ""
-              echo "=== Merged file header ==="
-              head -30 ./coverage/coverage.opencover.xml
-              echo ""
-              echo "=== File path samples from merged report ==="
-              grep -oP 'fullPath="[^"]*"' ./coverage/coverage.opencover.xml | head -5 || true
-            fi
-
-          else
-            echo "WARNING: No coverage files found!"
-          fi
-
           echo ""
-          echo "=== All coverage files for SonarCloud ==="
-          find . -name "coverage.opencover.xml" | head -20
+          echo "Found $COVERAGE_COUNT coverage file(s) for SonarCloud"
 
       - name: End SonarQube analysis
         env:
@@ -155,7 +111,6 @@ jobs:
         with:
           name: coverage-reports
           path: |
-            ./coverage/coverage.opencover.xml
             ./TestResults/**/coverage.opencover.xml
             ./TestResults/**/*.trx
           retention-days: 7
