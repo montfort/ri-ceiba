@@ -615,4 +615,456 @@ public class AiConfigurationServiceTests : IDisposable
     }
 
     #endregion
+
+    #region Additional Coverage Tests
+
+    [Fact]
+    public async Task TestConnectionAsync_Timeout_ReturnsTimeoutMessage()
+    {
+        // Arrange
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ThrowsAsync(new TaskCanceledException("The request was cancelled"));
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("timeout", message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_GenericException_ReturnsUnexpectedError()
+    {
+        // Arrange
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .ThrowsAsync(new InvalidOperationException("Unexpected error"));
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("inesperado", message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_AzureOpenAI_NoApiKey_ReturnsFailure()
+    {
+        // Arrange
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "AzureOpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "",
+            AzureEndpoint = "https://myresource.openai.azure.com"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("API Key", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_AzureOpenAI_Failure_ReturnsError()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.Forbidden, @"{""error"":{""message"":""Access denied""}}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "AzureOpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key",
+            AzureEndpoint = "https://myresource.openai.azure.com/openai/deployments/gpt-4/chat/completions"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("Azure", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_DeepSeek_NoApiKey_ReturnsFailure()
+    {
+        // Arrange
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "DeepSeek",
+            Modelo = "deepseek-chat",
+            ApiKey = null
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("API Key", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_DeepSeek_Failure_ReturnsError()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.BadRequest, @"{""error"":{""message"":""Invalid model""}}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "DeepSeek",
+            Modelo = "invalid-model",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("DeepSeek", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_Gemini_Failure_ReturnsError()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.BadRequest, @"{""error"":{""message"":""Invalid API key"",""status"":""INVALID_ARGUMENT""}}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "Gemini",
+            Modelo = "gemini-pro",
+            ApiKey = "invalid-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("Gemini", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_Gemini_ErrorWithStatusOnly_ReturnsStatus()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.BadRequest, @"{""error"":{""status"":""PERMISSION_DENIED""}}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "Gemini",
+            Modelo = "gemini-pro",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("PERMISSION_DENIED", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_LocalLlm_NonOllama_Success()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.OK, @"{""choices"":[]}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "Local",
+            Modelo = "llama2",
+            LocalEndpoint = "http://localhost:8080/v1/chat/completions" // Non-Ollama endpoint
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.True(success);
+        Assert.Contains("LLM local", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_LocalLlm_NonOllama_Failure()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.ServiceUnavailable, @"Service unavailable");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "Local",
+            Modelo = "llama2",
+            LocalEndpoint = "http://localhost:8080/v1/chat/completions"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("LLM local", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_Ollama_Failure_ReturnsError()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.NotFound, @"model not found");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "Ollama",
+            Modelo = "nonexistent-model",
+            LocalEndpoint = "http://localhost:11434/api/generate"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("Ollama", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_OpenAI_CustomEndpoint_UsesIt()
+    {
+        // Arrange
+        HttpRequestMessage? capturedRequest = null;
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => capturedRequest = req)
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(@"{""choices"":[]}")
+            });
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key",
+            Endpoint = "https://custom.openai-api.com/v1/chat/completions"
+        };
+
+        // Act
+        await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.NotNull(capturedRequest);
+        Assert.Equal("https://custom.openai-api.com/v1/chat/completions", capturedRequest!.RequestUri?.ToString());
+    }
+
+    [Fact]
+    public async Task SaveConfigurationAsync_UpdateTrackedEntity_UpdatesCorrectly()
+    {
+        // Arrange
+        var existingConfig = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-3.5",
+            ApiKey = "old-key",
+            Activo = true,
+            CreatedAt = DateTime.UtcNow.AddDays(-1)
+        };
+        _context.ConfiguracionesIA.Add(existingConfig);
+        await _context.SaveChangesAsync();
+        // Don't detach - keep it tracked
+
+        var service = CreateService();
+
+        // Modify the tracked entity directly
+        existingConfig.Modelo = "gpt-4-turbo";
+        existingConfig.ApiKey = "new-key";
+
+        // Act
+        var result = await service.SaveConfigurationAsync(existingConfig, _testUserId);
+
+        // Assert
+        Assert.Equal(existingConfig.Id, result.Id);
+        Assert.Equal("gpt-4-turbo", result.Modelo);
+        Assert.True(result.Activo);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_ErrorResponseWithInvalidJson_ReturnsRawResponse()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.InternalServerError, "Not a JSON response");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("Not a JSON response", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_ErrorWithNestedErrorObject_ExtractsMessage()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.BadRequest, @"{""error"":{""code"":""invalid_model"",""message"":""The model is invalid""}}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "invalid",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("The model is invalid", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_ErrorObjectWithoutMessage_ReturnsErrorString()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.BadRequest, @"{""error"":""Simple error string""}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.False(success);
+        Assert.Contains("Simple error string", message);
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_AzureOpenAI_UsesDefaultApiVersion()
+    {
+        // Arrange
+        HttpRequestMessage? capturedRequest = null;
+        var mockHandler = new Mock<HttpMessageHandler>();
+        mockHandler
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>())
+            .Callback<HttpRequestMessage, CancellationToken>((req, _) => capturedRequest = req)
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(@"{""choices"":[]}")
+            });
+
+        var httpClient = new HttpClient(mockHandler.Object);
+        _httpClientFactoryMock.Setup(x => x.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "AzureOpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key",
+            AzureEndpoint = "https://myresource.openai.azure.com/openai/deployments/gpt-4/chat/completions",
+            AzureApiVersion = null // Should use default
+        };
+
+        // Act
+        await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.NotNull(capturedRequest);
+        Assert.Contains("api-version=2024-02-15-preview", capturedRequest!.RequestUri?.ToString());
+    }
+
+    [Fact]
+    public async Task TestConnectionAsync_Success_IncludesResponseTime()
+    {
+        // Arrange
+        SetupMockHttpClient(HttpStatusCode.OK, @"{""choices"":[]}");
+        var service = CreateService();
+        var config = new ConfiguracionIA
+        {
+            Proveedor = "OpenAI",
+            Modelo = "gpt-4",
+            ApiKey = "test-key"
+        };
+
+        // Act
+        var (success, message) = await service.TestConnectionAsync(config);
+
+        // Assert
+        Assert.True(success);
+        Assert.Contains("Tiempo de respuesta", message);
+        Assert.Contains("ms", message);
+    }
+
+    #endregion
 }

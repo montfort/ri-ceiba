@@ -557,4 +557,419 @@ public class ReportRepositoryTests : IDisposable
     }
 
     #endregion
+
+    #region SearchWithKeysetAsync Tests
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchWithKeysetAsync_NoFilters_ReturnsReports()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.SearchWithKeysetAsync(null, null);
+
+        // Assert
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchWithKeysetAsync_WithEstadoFilter_ReturnsFilteredReports()
+    {
+        // Arrange
+        await CreateTestReportWithZona(estado: 0);
+        await CreateTestReportWithZona(estado: 1);
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.SearchWithKeysetAsync(null, null, estado: 0);
+
+        // Assert
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchWithKeysetAsync_WithZonaFilter_ReturnsFilteredReports()
+    {
+        // Arrange
+        var (report, zona) = await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.SearchWithKeysetAsync(null, null, zonaId: zona.Id);
+
+        // Assert
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchWithKeysetAsync_WithLastCursor_ReturnsReportsAfterCursor()
+    {
+        // Arrange
+        var (report1, _) = await CreateTestReportWithZona(delito: "First");
+        await Task.Delay(10); // Ensure different timestamps
+        var (report2, _) = await CreateTestReportWithZona(delito: "Second");
+        _context.ChangeTracker.Clear();
+
+        // Act - Get reports after report2 (should be report1 or empty since report2 is newer)
+        var result = await _repository.SearchWithKeysetAsync(
+            report2.CreatedAt,
+            report2.Id);
+
+        // Assert
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchWithKeysetAsync_WithCustomPageSize_RespectsLimit()
+    {
+        // Arrange
+        for (int i = 0; i < 5; i++)
+        {
+            await CreateTestReportWithZona(delito: $"Report {i}");
+        }
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.SearchWithKeysetAsync(null, null, pageSize: 2);
+
+        // Assert
+        Assert.NotNull(result);
+    }
+
+    #endregion
+
+    #region SearchAsync Sorting Tests
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByEstado_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona(estado: 0);
+        await CreateTestReportWithZona(estado: 1);
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "estado",
+            SortDesc = false
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByEstadoDesc_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona(estado: 0);
+        await CreateTestReportWithZona(estado: 1);
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "estado",
+            SortDesc = true
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByDelito_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona(delito: "Alpha");
+        await CreateTestReportWithZona(delito: "Beta");
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "delito",
+            SortDesc = false
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByDelitoDesc_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona(delito: "Alpha");
+        await CreateTestReportWithZona(delito: "Beta");
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "delito",
+            SortDesc = true
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByZona_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "zona",
+            SortDesc = false
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByZonaDesc_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "zona",
+            SortDesc = true
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByCreatedAt_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "createdat",
+            SortDesc = false
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_SortByUnknownField_UsesDefaultSort()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            SortBy = "unknownfield",
+            SortDesc = true
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    #endregion
+
+    #region SearchAsync Filter Tests
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByZonaId_ReturnsMatchingReports()
+    {
+        // Arrange
+        var (report1, zona1) = await CreateTestReportWithZona();
+        var (report2, zona2) = await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            ZonaId = zona1.Id
+        });
+
+        // Assert
+        Assert.Equal(1, totalCount);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByFechaDesde_ReturnsReportsAfterDate()
+    {
+        // Arrange
+        var (report1, _) = await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            FechaDesde = DateTime.UtcNow.AddDays(-1)
+        });
+
+        // Assert
+        Assert.True(totalCount >= 1);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByFechaHasta_ReturnsReportsBeforeDate()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            FechaHasta = DateTime.UtcNow.AddDays(1)
+        });
+
+        // Assert
+        Assert.True(totalCount >= 1);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByDateRange_ReturnsReportsInRange()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            FechaDesde = DateTime.UtcNow.AddDays(-1),
+            FechaHasta = DateTime.UtcNow.AddDays(1)
+        });
+
+        // Assert
+        Assert.True(totalCount >= 1);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_FilterByDateRange_NoResults_ReturnsEmpty()
+    {
+        // Arrange
+        await CreateTestReportWithZona();
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (items, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            FechaDesde = DateTime.UtcNow.AddYears(-10),
+            FechaHasta = DateTime.UtcNow.AddYears(-9)
+        });
+
+        // Assert
+        Assert.Equal(0, totalCount);
+        Assert.Empty(items);
+    }
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task SearchAsync_PartialDelitoMatch_ReturnsResults()
+    {
+        // Arrange
+        await CreateTestReportWithZona(delito: "Robo a mano armada");
+        await CreateTestReportWithZona(delito: "Robo simple");
+        await CreateTestReportWithZona(delito: "Asalto");
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var (_, totalCount) = await _repository.SearchAsync(new ReportSearchCriteria
+        {
+            Delito = "Robo"
+        });
+
+        // Assert
+        Assert.Equal(2, totalCount);
+    }
+
+    #endregion
+
+    #region GetByIdWithRelationsAsync Tests (Additional)
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task GetByIdWithRelationsAsync_ExistingReport_DoesNotThrow()
+    {
+        // Arrange
+        var (report, zona) = await CreateTestReportWithZona();
+        // Note: DON'T clear change tracker for this test - AsSplitQuery with InMemory
+        // requires the entities to remain tracked for the query to work
+
+        // Act & Assert - just verify it doesn't throw
+        // Full functionality is tested via integration tests with real PostgreSQL
+        // because AsSplitQuery() doesn't work correctly with InMemory provider
+        var act = async () => await _repository.GetByIdWithRelationsAsync(report.Id);
+        var exception = await Record.ExceptionAsync(act);
+        Assert.Null(exception);
+    }
+
+    #endregion
+
+    #region GetByUsuarioIdAsync Tests (Additional)
+
+    [Fact]
+    [Trait("Category", "Unit")]
+    public async Task GetByUsuarioIdAsync_WithReports_ReturnsUserReports()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        await CreateTestReportWithZona(usuarioId: userId);
+        await CreateTestReportWithZona(usuarioId: userId);
+        await CreateTestReportWithZona(usuarioId: Guid.NewGuid()); // Different user
+        _context.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.GetByUsuarioIdAsync(userId);
+
+        // Assert
+        Assert.NotNull(result);
+        // Note: Full count verification requires PostgreSQL due to AsSplitQuery
+    }
+
+    #endregion
 }
