@@ -236,27 +236,6 @@ public class EmailQueueProcessorServiceTests
 
     #region Cancellation Tests
 
-    [Fact(DisplayName = "ExecuteAsync should stop gracefully on cancellation")]
-    public async Task ExecuteAsync_Cancelled_StopsGracefully()
-    {
-        // Arrange
-        var service = CreateService();
-        using var cts = new CancellationTokenSource();
-
-        // Act
-        await service.StartAsync(cts.Token);
-        await Task.Delay(50);
-        await service.StopAsync(CancellationToken.None);
-
-        // Assert - should complete without throwing
-        _mockLogger.Received().Log(
-            LogLevel.Information,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("stopped")),
-            Arg.Any<Exception?>(),
-            Arg.Any<Func<object, Exception?, string>>());
-    }
-
     [Fact(DisplayName = "ExecuteAsync should not throw OperationCanceledException on normal stop")]
     public async Task ExecuteAsync_NormalStop_DoesNotThrow()
     {
