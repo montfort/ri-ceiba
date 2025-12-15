@@ -363,4 +363,566 @@ public class ExportServiceTests
         result.FileName.Should().Contain(DateTime.UtcNow.ToString("yyyyMMdd"));
         result.FileName.Should().StartWith("reporte_");
     }
+
+    #region Export Limits Tests (T052a)
+
+    [Fact(DisplayName = "T052a: ExportReports exceeding PDF limit should throw ArgumentException")]
+    public async Task ExportReportsAsync_ExceedingPdfLimit_ThrowsArgumentException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var reportIds = Enumerable.Range(1, ExportService.MaxPdfReports + 1).ToArray();
+        var request = new ExportRequestDto
+        {
+            ReportIds = reportIds,
+            Format = ExportFormat.PDF
+        };
+
+        // Act & Assert
+        var act = async () => await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage($"*{ExportService.MaxPdfReports}*");
+    }
+
+    [Fact(DisplayName = "T052a: ExportReports exceeding JSON limit should throw ArgumentException")]
+    public async Task ExportReportsAsync_ExceedingJsonLimit_ThrowsArgumentException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var reportIds = Enumerable.Range(1, ExportService.MaxJsonReports + 1).ToArray();
+        var request = new ExportRequestDto
+        {
+            ReportIds = reportIds,
+            Format = ExportFormat.JSON
+        };
+
+        // Act & Assert
+        var act = async () => await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        await act.Should().ThrowAsync<ArgumentException>()
+            .WithMessage($"*{ExportService.MaxJsonReports}*");
+    }
+
+    [Fact(DisplayName = "T052a: ExportReports at exact PDF limit should succeed")]
+    public async Task ExportReportsAsync_AtExactPdfLimit_Succeeds()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var reportIds = Enumerable.Range(1, ExportService.MaxPdfReports).ToArray();
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        foreach (var id in reportIds)
+        {
+            _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(id))
+                .ReturnsAsync(CreateTestReport(id));
+        }
+
+        _mockPdfGenerator.Setup(p => p.GenerateMultipleReports(It.IsAny<IEnumerable<ReportExportDto>>()))
+            .Returns(pdfBytes);
+
+        var request = new ExportRequestDto
+        {
+            ReportIds = reportIds,
+            Format = ExportFormat.PDF
+        };
+
+        // Act
+        var result = await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ReportCount.Should().Be(ExportService.MaxPdfReports);
+    }
+
+    #endregion
+
+    #region Multiple Reports JSON Export Tests
+
+    [Fact(DisplayName = "ExportReports with multiple IDs should generate multi-report JSON")]
+    public async Task ExportReportsAsync_WithMultipleIds_GeneratesMultiReportJson()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var reportIds = new[] { 1, 2, 3 };
+        var reports = reportIds.Select(id => CreateTestReport(id)).ToList();
+        var jsonBytes = System.Text.Encoding.UTF8.GetBytes("[{\"id\":1},{\"id\":2},{\"id\":3}]");
+
+        foreach (var report in reports)
+        {
+            _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+                .ReturnsAsync(report);
+        }
+
+        _mockJsonExporter.Setup(j => j.ExportMultipleReports(It.IsAny<IEnumerable<ReportExportDto>>(), It.IsAny<ExportOptions>()))
+            .Returns(jsonBytes);
+
+        var request = new ExportRequestDto
+        {
+            ReportIds = reportIds,
+            Format = ExportFormat.JSON
+        };
+
+        // Act
+        var result = await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Data.Should().Equal(jsonBytes);
+        result.ContentType.Should().Be("application/json");
+        result.ReportCount.Should().Be(3);
+        result.FileName.Should().Contain("reportes_3_");
+
+        _mockJsonExporter.Verify(j => j.ExportMultipleReports(
+            It.Is<IEnumerable<ReportExportDto>>(list => list.Count() == 3),
+            It.IsAny<ExportOptions>()
+        ), Times.Once);
+    }
+
+    [Fact(DisplayName = "ExportReports with single ID should use single report generator")]
+    public async Task ExportReportsAsync_WithSingleId_UsesSingleReportGenerator()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport(1);
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Returns(pdfBytes);
+
+        var request = new ExportRequestDto
+        {
+            ReportIds = new[] { 1 },
+            Format = ExportFormat.PDF
+        };
+
+        // Act
+        var result = await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ReportCount.Should().Be(1);
+        _mockPdfGenerator.Verify(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()), Times.Once);
+        _mockPdfGenerator.Verify(p => p.GenerateMultipleReports(It.IsAny<IEnumerable<ReportExportDto>>()), Times.Never);
+    }
+
+    #endregion
+
+    #region Authorization Tests
+
+    [Fact(DisplayName = "ExportReports as non-REVISOR should throw UnauthorizedAccessException")]
+    public async Task ExportReportsAsync_AsNonRevisor_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var request = new ExportRequestDto
+        {
+            ReportIds = new[] { 1 },
+            Format = ExportFormat.PDF
+        };
+
+        // Act & Assert
+        var act = async () => await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: false
+        );
+
+        await act.Should().ThrowAsync<UnauthorizedAccessException>()
+            .WithMessage("*REVISOR*");
+    }
+
+    #endregion
+
+    #region Report Not Found Tests
+
+    [Fact(DisplayName = "ExportReports with all non-existent reports should throw KeyNotFoundException")]
+    public async Task ExportReportsAsync_WithAllNonExistentReports_ThrowsKeyNotFoundException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var request = new ExportRequestDto
+        {
+            ReportIds = new[] { 999, 998, 997 },
+            Format = ExportFormat.PDF
+        };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(It.IsAny<int>()))
+            .ReturnsAsync((ReporteIncidencia?)null);
+
+        // Act & Assert
+        var act = async () => await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        await act.Should().ThrowAsync<KeyNotFoundException>()
+            .WithMessage("*No reports found*");
+    }
+
+    [Fact(DisplayName = "ExportReports with some non-existent reports should export found reports only")]
+    public async Task ExportReportsAsync_WithSomeNonExistentReports_ExportsFoundReportsOnly()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var request = new ExportRequestDto
+        {
+            ReportIds = new[] { 1, 999, 2 }, // 999 doesn't exist
+            Format = ExportFormat.PDF
+        };
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(1))
+            .ReturnsAsync(CreateTestReport(1));
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(2))
+            .ReturnsAsync(CreateTestReport(2));
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(999))
+            .ReturnsAsync((ReporteIncidencia?)null);
+
+        _mockPdfGenerator.Setup(p => p.GenerateMultipleReports(It.IsAny<IEnumerable<ReportExportDto>>()))
+            .Returns(pdfBytes);
+
+        // Act
+        var result = await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ReportCount.Should().Be(2); // Only 2 reports found
+    }
+
+    #endregion
+
+    #region DTO Mapping Tests
+
+    [Fact(DisplayName = "MapToExportDto should use user email when available")]
+    public async Task ExportReportsAsync_WithUserEmail_UsesEmailInDto()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        var userEmail = "usuario@ceiba.local";
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        _mockUserService.Setup(u => u.GetUserByIdAsync(report.UsuarioId))
+            .ReturnsAsync(new Ceiba.Shared.DTOs.UserDto { Id = report.UsuarioId, Email = userEmail });
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        capturedDto!.UsuarioCreador.Should().Be(userEmail);
+    }
+
+    [Fact(DisplayName = "MapToExportDto should fallback to GUID when user lookup fails")]
+    public async Task ExportReportsAsync_WhenUserLookupFails_FallsBackToGuid()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        _mockUserService.Setup(u => u.GetUserByIdAsync(report.UsuarioId))
+            .ThrowsAsync(new Exception("User service unavailable"));
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        Guid.TryParse(capturedDto!.UsuarioCreador, out _).Should().BeTrue();
+    }
+
+    [Theory(DisplayName = "MapTipoDeAccion should map all values correctly")]
+    [InlineData(1, "Orientación")]
+    [InlineData(2, "Capacitación")]
+    [InlineData(3, "Prevención")]
+    [InlineData(99, "Desconocido")]
+    public async Task ExportReportsAsync_MapsTipoDeAccionCorrectly(short tipoDeAccion, string expected)
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        report.TipoDeAccion = tipoDeAccion;
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        capturedDto!.TipoDeAccion.Should().Be(expected);
+    }
+
+    [Theory(DisplayName = "MapTurnoCeiba should map all values correctly")]
+    [InlineData(1, "Matutino")]
+    [InlineData(2, "Vespertino")]
+    [InlineData(3, "Nocturno")]
+    [InlineData(99, "Desconocido")]
+    public async Task ExportReportsAsync_MapsTurnoCeibaCorrectly(int turnoCeiba, string expected)
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        report.TurnoCeiba = turnoCeiba;
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        capturedDto!.TurnoCeiba.Should().Be(expected);
+    }
+
+    [Theory(DisplayName = "MapTraslados should map all values correctly")]
+    [InlineData((short)0, "Sin traslados")]
+    [InlineData((short)1, "Con traslados")]
+    [InlineData((short)2, "No aplica")]
+    [InlineData((short)99, "Desconocido")]
+    public async Task ExportReportsAsync_MapsTrasladosCorrectly(short traslados, string expected)
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        report.Traslados = traslados;
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        capturedDto!.Traslados.Should().Be(expected);
+    }
+
+    [Fact(DisplayName = "MapToExportDto should map Estado Borrador correctly")]
+    public async Task ExportReportsAsync_MapsEstadoBorradorCorrectly()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        report.Estado = 0; // Borrador
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        capturedDto!.Estado.Should().Be("Borrador");
+        capturedDto.FechaEntrega.Should().BeNull();
+    }
+
+    [Fact(DisplayName = "MapToExportDto should handle null geographic relations")]
+    public async Task ExportReportsAsync_HandlesNullGeographicRelations()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var report = CreateTestReport();
+        report.Zona = null;
+        report.Region = null;
+        report.Sector = null;
+        report.Cuadrante = null;
+        var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
+            .ReturnsAsync(report);
+
+        ReportExportDto? capturedDto = null;
+        _mockPdfGenerator.Setup(p => p.GenerateSingleReport(It.IsAny<ReportExportDto>()))
+            .Callback<ReportExportDto>(dto => capturedDto = dto)
+            .Returns(pdfBytes);
+
+        // Act
+        await _exportService.ExportSingleReportAsync(
+            report.Id,
+            ExportFormat.PDF,
+            userId,
+            isRevisor: true
+        );
+
+        // Assert
+        capturedDto.Should().NotBeNull();
+        capturedDto!.Zona.Should().BeEmpty();
+        capturedDto.Region.Should().BeEmpty();
+        capturedDto.Sector.Should().BeEmpty();
+        capturedDto.Cuadrante.Should().BeEmpty();
+    }
+
+    #endregion
+
+    #region Cancellation Tests
+
+    [Fact(DisplayName = "ExportReports should respect cancellation token")]
+    public async Task ExportReportsAsync_WithCancellation_ThrowsOperationCanceledException()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var request = new ExportRequestDto
+        {
+            ReportIds = new[] { 1, 2, 3 },
+            Format = ExportFormat.PDF
+        };
+        var cts = new CancellationTokenSource();
+
+        _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(It.IsAny<int>()))
+            .ReturnsAsync((int id) =>
+            {
+                if (id == 2) cts.Cancel(); // Cancel on second report
+                return CreateTestReport(id);
+            });
+
+        // Act & Assert
+        var act = async () => await _exportService.ExportReportsAsync(
+            request,
+            userId,
+            isRevisor: true,
+            cts.Token
+        );
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+    }
+
+    #endregion
+
+    #region Constants Tests
+
+    [Fact(DisplayName = "MaxPdfReports should be 50")]
+    public void MaxPdfReports_ShouldBe50()
+    {
+        ExportService.MaxPdfReports.Should().Be(50);
+    }
+
+    [Fact(DisplayName = "MaxJsonReports should be 100")]
+    public void MaxJsonReports_ShouldBe100()
+    {
+        ExportService.MaxJsonReports.Should().Be(100);
+    }
+
+    [Fact(DisplayName = "BackgroundExportThreshold should be 50")]
+    public void BackgroundExportThreshold_ShouldBe50()
+    {
+        ExportService.BackgroundExportThreshold.Should().Be(50);
+    }
+
+    [Fact(DisplayName = "AlertDurationSeconds should be 30")]
+    public void AlertDurationSeconds_ShouldBe30()
+    {
+        ExportService.AlertDurationSeconds.Should().Be(30);
+    }
+
+    [Fact(DisplayName = "AlertFileSizeBytes should be 500MB")]
+    public void AlertFileSizeBytes_ShouldBe500MB()
+    {
+        ExportService.AlertFileSizeBytes.Should().Be(500 * 1024 * 1024);
+    }
+
+    #endregion
 }
