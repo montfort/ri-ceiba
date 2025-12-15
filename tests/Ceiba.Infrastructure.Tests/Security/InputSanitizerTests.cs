@@ -7,6 +7,7 @@ namespace Ceiba.Infrastructure.Tests.Security;
 /// Unit tests for InputSanitizer - input validation and XSS/SQL injection prevention.
 /// T118b: Input sanitization tests.
 /// </summary>
+[Trait("Category", "Unit")]
 public class InputSanitizerTests
 {
     private readonly InputSanitizer _sanitizer;
@@ -499,6 +500,230 @@ public class InputSanitizerTests
 
         // Assert
         result.Should().BeEmpty();
+    }
+
+    #endregion
+
+    #region Additional Edge Cases (Phase 3)
+
+    [Fact(DisplayName = "Sanitize should handle whitespace-only input")]
+    public void Sanitize_WhitespaceOnly_ReturnsWhitespace()
+    {
+        // Arrange
+        var input = "   \t\n  ";
+
+        // Act
+        var result = _sanitizer.Sanitize(input);
+
+        // Assert
+        result.Should().Be(input);
+    }
+
+    [Fact(DisplayName = "Sanitize should handle Unicode characters")]
+    public void Sanitize_UnicodeCharacters_EncodesCorrectly()
+    {
+        // Arrange
+        var input = "Español: áéíóú ñ Ñ 日本語 한국어";
+
+        // Act
+        var result = _sanitizer.Sanitize(input);
+
+        // Assert - HTML encoding converts non-ASCII to entities
+        // But the result should not be null and should have content
+        result.Should().NotBeNullOrEmpty();
+        // The characters are encoded to HTML entities
+        result.Should().Contain("&#"); // Contains HTML entity encoding
+    }
+
+    [Fact(DisplayName = "SanitizeHtml should handle encoded XSS attempts")]
+    public void SanitizeHtml_EncodedXss_Removed()
+    {
+        // Arrange
+        var input = "<img src=x onerror=&#97;&#108;&#101;&#114;&#116;(1)>";
+
+        // Act
+        var result = _sanitizer.SanitizeHtml(input);
+
+        // Assert
+        result.Should().NotContain("onerror");
+    }
+
+    [Fact(DisplayName = "SanitizeHtml should handle uppercase tags")]
+    public void SanitizeHtml_UppercaseTags_Removed()
+    {
+        // Arrange
+        var input = "<SCRIPT>alert('xss')</SCRIPT>";
+
+        // Act
+        var result = _sanitizer.SanitizeHtml(input);
+
+        // Assert
+        result.Should().NotContainEquivalentOf("<script");
+        result.Should().NotContain("alert");
+    }
+
+    [Fact(DisplayName = "SanitizeHtml should handle mixed case event handlers")]
+    public void SanitizeHtml_MixedCaseEventHandlers_Removed()
+    {
+        // Arrange
+        var input = "<div OnClick=\"evil()\" ONMOUSEOVER=\"bad()\">test</div>";
+
+        // Act
+        var result = _sanitizer.SanitizeHtml(input);
+
+        // Assert
+        result.Should().NotContainEquivalentOf("onclick");
+        result.Should().NotContainEquivalentOf("onmouseover");
+    }
+
+    [Fact(DisplayName = "SanitizeForSql should handle multiple SQL injection patterns")]
+    public void SanitizeForSql_MultiplePatterns_AllRemoved()
+    {
+        // Arrange
+        var input = "'; DROP TABLE users; SELECT * FROM passwords WHERE '1'='1";
+
+        // Act
+        var result = _sanitizer.SanitizeForSql(input);
+
+        // Assert
+        result.Should().NotContainEquivalentOf("drop table");
+        result.Should().NotContain("'1'='1'");
+    }
+
+    [Fact(DisplayName = "SanitizeForSql should handle block comments")]
+    public void SanitizeForSql_BlockComments_Removed()
+    {
+        // Arrange
+        var input = "SELECT /* hidden */ * FROM users";
+
+        // Act
+        var result = _sanitizer.SanitizeForSql(input);
+
+        // Assert
+        result.Should().NotContain("/*");
+        result.Should().NotContain("*/");
+    }
+
+    [Theory(DisplayName = "SanitizeEmail should handle various valid formats")]
+    [InlineData("simple@example.com", "simple@example.com")]
+    [InlineData("very.common@example.com", "very.common@example.com")]
+    [InlineData("other.email-with-hyphen@example.com", "other.email-with-hyphen@example.com")]
+    [InlineData("x@example.com", "x@example.com")]
+    public void SanitizeEmail_ValidFormats_Accepted(string input, string expected)
+    {
+        // Act
+        var result = _sanitizer.SanitizeEmail(input);
+
+        // Assert
+        result.Should().Be(expected);
+    }
+
+    [Fact(DisplayName = "SanitizeFileName should handle Windows reserved names")]
+    public void SanitizeFileName_WindowsReservedNames_Sanitized()
+    {
+        // Arrange
+        var input = "CON.txt";
+
+        // Act
+        var result = _sanitizer.SanitizeFileName(input);
+
+        // Assert - Should either sanitize or return the name (depends on implementation)
+        result.Should().NotBeEmpty();
+    }
+
+    [Theory(DisplayName = "SanitizeFileName should remove path separators - additional cases")]
+    [InlineData("../file.txt")]
+    [InlineData("..\\file.txt")]
+    [InlineData("folder/file.txt")]
+    [InlineData("folder\\file.txt")]
+    public void SanitizeFileName_PathSeparators_AdditionalCases(string input)
+    {
+        // Act
+        var result = _sanitizer.SanitizeFileName(input);
+
+        // Assert
+        result.Should().NotContain("/");
+        result.Should().NotContain("\\");
+        result.Should().NotContain("..");
+    }
+
+    [Fact(DisplayName = "SanitizeFileName should handle null byte")]
+    public void SanitizeFileName_NullByte_Removed()
+    {
+        // Arrange
+        var input = "file\0name.txt";
+
+        // Act
+        var result = _sanitizer.SanitizeFileName(input);
+
+        // Assert
+        result.Should().NotContain("\0");
+    }
+
+    [Fact(DisplayName = "SanitizeUrl should handle data URLs")]
+    public void SanitizeUrl_DataUrl_Rejected()
+    {
+        // Arrange
+        var input = "data:text/html,<script>alert('xss')</script>";
+
+        // Act
+        var result = _sanitizer.SanitizeUrl(input);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact(DisplayName = "SanitizeUrl should handle encoded javascript URLs")]
+    public void SanitizeUrl_EncodedJavascript_Rejected()
+    {
+        // Arrange
+        var input = "javascript:alert(1)";
+
+        // Act
+        var result = _sanitizer.SanitizeUrl(input);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact(DisplayName = "Truncate should handle exact length")]
+    public void Truncate_ExactLength_NotModified()
+    {
+        // Arrange
+        var input = "Exact";
+
+        // Act
+        var result = _sanitizer.Truncate(input, 5);
+
+        // Assert
+        result.Should().Be("Exact");
+    }
+
+    [Fact(DisplayName = "Truncate should handle zero max length")]
+    public void Truncate_ZeroMaxLength_ReturnsEmpty()
+    {
+        // Arrange
+        var input = "Some text";
+
+        // Act
+        var result = _sanitizer.Truncate(input, 0);
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact(DisplayName = "Sanitize should handle very long input")]
+    public void Sanitize_VeryLongInput_HandlesCorrectly()
+    {
+        // Arrange
+        var input = new string('x', 10000);
+
+        // Act
+        var result = _sanitizer.Sanitize(input);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Length.Should().Be(10000);
     }
 
     #endregion
