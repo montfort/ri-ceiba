@@ -60,13 +60,13 @@ public class EmailQueueProcessorServiceTests
     {
         // Arrange
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(50, CancellationToken.None);
+            await Task.Delay(200, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
@@ -92,7 +92,7 @@ public class EmailQueueProcessorServiceTests
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert - verify stop log was called
@@ -115,13 +115,13 @@ public class EmailQueueProcessorServiceTests
         var service = CreateService();
         _mockResilientEmailService.QueuedEmailCount.Returns(5);
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act - Start and immediately stop before interval completes
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(50, CancellationToken.None);
+            await Task.Delay(200, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (OperationCanceledException)
@@ -129,7 +129,7 @@ public class EmailQueueProcessorServiceTests
             // Expected
         }
 
-        // Assert - Since the interval is 5 minutes, no processing should occur in 50ms
+        // Assert - Since the interval is 5 minutes, no processing should occur in 200ms
         // The service should start without processing immediately
         await _mockResilientEmailService.DidNotReceive().ProcessQueueAsync(Arg.Any<CancellationToken>());
     }
@@ -143,7 +143,7 @@ public class EmailQueueProcessorServiceTests
 
         // Act
         await service.StartAsync(CancellationToken.None);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert - No exception should be thrown
@@ -159,7 +159,7 @@ public class EmailQueueProcessorServiceTests
 
         // Act
         await service.StartAsync(CancellationToken.None);
-        await Task.Delay(50);
+        await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
         // Assert - Verify startup logging
@@ -184,14 +184,14 @@ public class EmailQueueProcessorServiceTests
         _mockResilientEmailService.ProcessQueueAsync(Arg.Any<CancellationToken>())
             .Returns<int>(_ => throw new Exception("Processing error"));
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act - should not throw
         Exception? caughtException = null;
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(50, CancellationToken.None);
+            await Task.Delay(200, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch (Exception ex)
@@ -214,13 +214,13 @@ public class EmailQueueProcessorServiceTests
             .Returns<int>(_ => throw new Exception("Test processing error"));
 
         // Start the service briefly to trigger potential error handling
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(150));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(100, CancellationToken.None);
+            await Task.Delay(250, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch
@@ -245,7 +245,7 @@ public class EmailQueueProcessorServiceTests
 
         // Act & Assert
         await service.StartAsync(cts.Token);
-        await Task.Delay(50);
+        await Task.Delay(200);
 
         var act = async () => await service.StopAsync(CancellationToken.None);
         await act.Should().NotThrowAsync<OperationCanceledException>();
@@ -301,7 +301,7 @@ public class EmailQueueProcessorServiceTests
         await service.StartAsync(CancellationToken.None);
 
         // Brief delay to ensure task starts
-        await Task.Delay(50);
+        await Task.Delay(200);
 
         // Assert - service is running (ExecuteTask is not null/completed)
         // Stop the service to clean up
@@ -314,7 +314,7 @@ public class EmailQueueProcessorServiceTests
         // Arrange
         var service = CreateService();
         await service.StartAsync(CancellationToken.None);
-        await Task.Delay(50);
+        await Task.Delay(200);
 
         // Act & Assert - should complete without hanging
         var stopTask = service.StopAsync(CancellationToken.None);
@@ -332,13 +332,13 @@ public class EmailQueueProcessorServiceTests
     {
         // Arrange
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
 
         // Act
         try
         {
             await service.StartAsync(cts.Token);
-            await Task.Delay(50, CancellationToken.None);
+            await Task.Delay(200, CancellationToken.None);
             await service.StopAsync(CancellationToken.None);
         }
         catch
