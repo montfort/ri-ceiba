@@ -9,12 +9,34 @@
 </p>
 
 <p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=montfort_ri-ceiba">
+    <img src="https://sonarcloud.io/api/project_badges/quality_gate?project=montfort_ri-ceiba&token=7fdf5d3c3105b47b2629a78dc7e8103915109b22" alt="Quality Gate Status" />
+  </a>
+</p>
+
+<p align="center">
   <a href="#características-principales">Características</a> •
   <a href="#arquitectura">Arquitectura</a> •
   <a href="#tecnologías">Tecnologías</a> •
   <a href="#instalación">Instalación</a> •
   <a href="#documentación">Documentación</a>
 </p>
+
+---
+
+## 🛡️ Calidad de Código
+
+Este proyecto ha sido analizado y **aprobado** por **SonarCloud**, una plataforma líder en análisis estático de código. El badge de "Quality Gate Passed" certifica que el código cumple con estándares profesionales de calidad en las siguientes dimensiones:
+
+| Dimensión | Descripción |
+|-----------|-------------|
+| **Fiabilidad** | Código libre de bugs que podrían causar comportamiento inesperado |
+| **Seguridad** | Sin vulnerabilidades conocidas (OWASP, inyección SQL, XSS, etc.) |
+| **Mantenibilidad** | Código limpio, sin "code smells" críticos ni deuda técnica excesiva |
+| **Cobertura** | Pruebas unitarias que validan la funcionalidad del sistema |
+| **Duplicación** | Bajo nivel de código duplicado, promoviendo reutilización |
+
+Este análisis continuo garantiza que cada cambio en el código mantiene los estándares de calidad requeridos para sistemas críticos de seguridad pública.
 
 ---
 
