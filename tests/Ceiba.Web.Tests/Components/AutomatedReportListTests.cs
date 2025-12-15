@@ -275,15 +275,27 @@ public class AutomatedReportListTests : TestContext
         // Arrange
         var cut = Render<AutomatedReportList>();
 
-        // Act
-        var viewButton = cut.FindAll("button.btn-outline-primary").FirstOrDefault();
-        if (viewButton != null)
-        {
-            await cut.InvokeAsync(() => viewButton.Click());
+        // Wait for table to render with rows (reports loaded)
+        cut.WaitForAssertion(() => cut.FindAll("table tbody tr").Count.Should().BeGreaterThan(0));
 
-            // Assert
-            _navigationManager.Uri.Should().Contain("/automated/reports/");
-        }
+        // Debug: output the rows to understand what's rendered
+        var rows = cut.FindAll("table tbody tr");
+        var buttonsInTable = cut.FindAll("table tbody button");
+
+        // Act - Find the first view button (it has title="Ver detalle" and icon bi-eye)
+        var viewButtons = cut.FindAll("button[title='Ver detalle']");
+        viewButtons.Should().NotBeEmpty("View buttons should exist in the table");
+
+        var viewButton = viewButtons.First();
+
+        // Record the initial URI
+        var initialUri = _navigationManager.Uri;
+
+        await cut.InvokeAsync(() => viewButton.Click());
+
+        // Assert - the URI should change to contain /automated/reports/
+        _navigationManager.Uri.Should().NotBe(initialUri, "Navigation should have occurred");
+        _navigationManager.Uri.Should().Contain("/automated/reports/");
     }
 
     #endregion
