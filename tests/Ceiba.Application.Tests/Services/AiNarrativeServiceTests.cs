@@ -727,10 +727,10 @@ public class AiNarrativeServiceTests
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .Callback<HttpRequestMessage, CancellationToken>(async (req, _) =>
+            .Callback<HttpRequestMessage, CancellationToken>(async (req, ct) =>
             {
                 if (req.Content != null)
-                    capturedBody = await req.Content.ReadAsStringAsync();
+                    capturedBody = await req.Content.ReadAsStringAsync(ct);
             })
             .ReturnsAsync(new HttpResponseMessage
             {
@@ -776,10 +776,10 @@ public class AiNarrativeServiceTests
                 "SendAsync",
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>())
-            .Callback<HttpRequestMessage, CancellationToken>(async (req, _) =>
+            .Callback<HttpRequestMessage, CancellationToken>(async (req, ct) =>
             {
                 if (req.Content != null)
-                    capturedBody = await req.Content.ReadAsStringAsync();
+                    capturedBody = await req.Content.ReadAsStringAsync(ct);
             })
             .ReturnsAsync(new HttpResponseMessage
             {

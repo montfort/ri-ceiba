@@ -423,6 +423,7 @@ public class ErrorHandlingMiddlewareTests
     }
 
     [Fact(DisplayName = "InvokeAsync should handle ArgumentNullException as BadRequest")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "S3928:Parameter names used into ArgumentException constructors should match an existing one", Justification = "Test intentionally uses arbitrary parameter name")]
     public async Task InvokeAsync_ArgumentNullException_Returns400()
     {
         // Arrange

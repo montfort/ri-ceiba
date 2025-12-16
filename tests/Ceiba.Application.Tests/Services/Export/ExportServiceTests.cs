@@ -826,10 +826,10 @@ public class ExportServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var report = CreateTestReport();
-        report.Zona = null;
-        report.Region = null;
-        report.Sector = null;
-        report.Cuadrante = null;
+        report.Zona = null!;
+        report.Region = null!;
+        report.Sector = null!;
+        report.Cuadrante = null!;
         var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46 };
 
         _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(report.Id))
@@ -870,7 +870,7 @@ public class ExportServiceTests
             ReportIds = new[] { 1, 2, 3 },
             Format = ExportFormat.PDF
         };
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
         _mockReportRepo.Setup(r => r.GetByIdWithRelationsAsync(It.IsAny<int>()))
             .ReturnsAsync((int id) =>
