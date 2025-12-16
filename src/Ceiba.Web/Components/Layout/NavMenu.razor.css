@@ -16,12 +16,26 @@
 }
 
 .top-row {
-    min-height: 3.5rem;
+    min-height: auto;
+    padding: 1rem 0;
     background-color: rgba(0,0,0,0.4);
 }
 
 .navbar-brand {
     font-size: 1.1rem;
+    color: #efb810;
+    text-align: center;
+    width: 100%;
+}
+
+.navbar-brand:hover {
+    color: #efb810;
+}
+
+.navbar-insignia {
+    width: 60px;
+    height: auto;
+    margin-bottom: 0.25rem;
 }
 
 .navbar-brand .bi {
