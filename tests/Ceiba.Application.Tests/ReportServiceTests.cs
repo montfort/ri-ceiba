@@ -557,5 +557,713 @@ public class ReportServiceTests
         );
     }
 
+    [Fact(DisplayName = "T024: SubmitReportAsync on non-existent report should throw NotFoundException")]
+    public async Task SubmitReportAsync_NonExistentReport_ThrowsNotFoundException()
+    {
+        // Arrange
+        var reportId = 999;
+        var usuarioId = Guid.NewGuid();
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync((ReporteIncidencia?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _sut.SubmitReportAsync(reportId, usuarioId)
+        );
+    }
+
+    #endregion
+
+    #region Update Report Additional Tests
+
+    [Fact(DisplayName = "UpdateReportAsync with invalid age should throw ValidationException")]
+    public async Task UpdateReportAsync_WithInvalidAge_ThrowsValidationException()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var existingReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Test",
+            AccionesRealizadas = "Test",
+            Traslados = "No"
+        };
+
+        var updateDto = new UpdateReportDto
+        {
+            Edad = 200 // Invalid age > 149
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(existingReport);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.UpdateReportAsync(reportId, updateDto, usuarioId)
+        );
+    }
+
+    [Fact(DisplayName = "UpdateReportAsync with age below minimum should throw ValidationException")]
+    public async Task UpdateReportAsync_WithAgeBelowMinimum_ThrowsValidationException()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var existingReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Test",
+            AccionesRealizadas = "Test",
+            Traslados = "No"
+        };
+
+        var updateDto = new UpdateReportDto
+        {
+            Edad = 0 // Invalid age < 1
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(existingReport);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.UpdateReportAsync(reportId, updateDto, usuarioId)
+        );
+    }
+
+    [Fact(DisplayName = "UpdateReportAsync with all additional fields should update correctly")]
+    public async Task UpdateReportAsync_WithAllAdditionalFields_UpdatesCorrectly()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var existingReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow.AddHours(-3),
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Original",
+            AccionesRealizadas = "Original",
+            Traslados = "No",
+            Observaciones = null
+        };
+
+        var updateDto = new UpdateReportDto
+        {
+            TurnoCeiba = "Balderas 2",
+            TipoDeAtencion = "Telefónica",
+            TipoDeAccion = "Reactiva",
+            HechosReportados = "Nuevos hechos",
+            AccionesRealizadas = "Nuevas acciones",
+            Traslados = "Sí",
+            Observaciones = "Nuevas observaciones"
+        };
+
+        var updatedReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 2",
+            TipoDeAtencion = "Telefónica",
+            TipoDeAccion = "Reactiva",
+            HechosReportados = "Nuevos hechos",
+            AccionesRealizadas = "Nuevas acciones",
+            Traslados = "Sí",
+            Observaciones = "Nuevas observaciones",
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(existingReport);
+
+        _mockRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<ReporteIncidencia>()))
+            .ReturnsAsync((ReporteIncidencia r) => r);
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(updatedReport);
+
+        // Act
+        var result = await _sut.UpdateReportAsync(reportId, updateDto, usuarioId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TurnoCeiba.Should().Be("Balderas 2");
+        result.TipoDeAtencion.Should().Be("Telefónica");
+        result.TipoDeAccion.Should().Be("Reactiva");
+        result.HechosReportados.Should().Be("Nuevos hechos");
+        result.AccionesRealizadas.Should().Be("Nuevas acciones");
+        result.Traslados.Should().Be("Sí");
+        result.Observaciones.Should().Be("Nuevas observaciones");
+    }
+
+    [Fact(DisplayName = "UpdateReportAsync with all basic fields should update correctly")]
+    public async Task UpdateReportAsync_WithAllBasicFields_UpdatesCorrectly()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var existingReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow.AddDays(-1),
+            Sexo = "Femenino",
+            Edad = 28,
+            LgbtttiqPlus = false,
+            SituacionCalle = false,
+            Migrante = false,
+            Discapacidad = false,
+            Delito = "Robo",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Original",
+            AccionesRealizadas = "Original",
+            Traslados = "No"
+        };
+
+        var newDateTime = DateTime.UtcNow.AddHours(-2);
+        var updateDto = new UpdateReportDto
+        {
+            DatetimeHechos = newDateTime,
+            Sexo = "Masculino",
+            Edad = 35,
+            LgbtttiqPlus = true,
+            SituacionCalle = true,
+            Migrante = true,
+            Discapacidad = true,
+            Delito = "Violencia familiar"
+        };
+
+        var updatedReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = newDateTime,
+            Sexo = "Masculino",
+            Edad = 35,
+            LgbtttiqPlus = true,
+            SituacionCalle = true,
+            Migrante = true,
+            Discapacidad = true,
+            Delito = "Violencia familiar",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Original",
+            AccionesRealizadas = "Original",
+            Traslados = "No",
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(existingReport);
+
+        _mockRepository
+            .Setup(r => r.UpdateAsync(It.IsAny<ReporteIncidencia>()))
+            .ReturnsAsync((ReporteIncidencia r) => r);
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(updatedReport);
+
+        // Act
+        var result = await _sut.UpdateReportAsync(reportId, updateDto, usuarioId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Sexo.Should().Be("Masculino");
+        result.Edad.Should().Be(35);
+        result.LgbtttiqPlus.Should().BeTrue();
+        result.SituacionCalle.Should().BeTrue();
+        result.Migrante.Should().BeTrue();
+        result.Discapacidad.Should().BeTrue();
+        result.Delito.Should().Be("Violencia familiar");
+    }
+
+    [Fact(DisplayName = "UpdateReportAsync with invalid geographic hierarchy should throw")]
+    public async Task UpdateReportAsync_WithInvalidGeographicHierarchy_ThrowsValidationException()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var existingReport = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Test",
+            AccionesRealizadas = "Test",
+            Traslados = "No"
+        };
+
+        var updateDto = new UpdateReportDto
+        {
+            ZonaId = 2,
+            RegionId = 99 // Invalid region not in zona 2
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(existingReport);
+
+        _mockCatalogService
+            .Setup(c => c.ValidateHierarchyAsync(2, 99, 1, 1))
+            .ReturnsAsync(false);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
+            () => _sut.UpdateReportAsync(reportId, updateDto, usuarioId)
+        );
+    }
+
+    [Fact(DisplayName = "UpdateReportAsync on non-existent report should throw NotFoundException")]
+    public async Task UpdateReportAsync_NonExistentReport_ThrowsNotFoundException()
+    {
+        // Arrange
+        var reportId = 999;
+        var usuarioId = Guid.NewGuid();
+        var updateDto = new UpdateReportDto { Sexo = "Masculino" };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync((ReporteIncidencia?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _sut.UpdateReportAsync(reportId, updateDto, usuarioId)
+        );
+    }
+
+    #endregion
+
+    #region Get Report Tests
+
+    [Fact(DisplayName = "GetReportByIdAsync should return report for owner")]
+    public async Task GetReportByIdAsync_AsOwner_ReturnsReport()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var report = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act
+        var result = await _sut.GetReportByIdAsync(reportId, usuarioId);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(reportId);
+    }
+
+    [Fact(DisplayName = "GetReportByIdAsync as REVISOR should return any report")]
+    public async Task GetReportByIdAsync_AsRevisor_ReturnsAnyReport()
+    {
+        // Arrange
+        var reportId = 1;
+        var ownerId = Guid.NewGuid();
+        var revisorId = Guid.NewGuid();
+        var report = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = ownerId, // Different user
+            Estado = 1,
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+            Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+            Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
+            Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act
+        var result = await _sut.GetReportByIdAsync(reportId, revisorId, isRevisor: true);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(reportId);
+    }
+
+    [Fact(DisplayName = "GetReportByIdAsync as CREADOR on other user's report should throw")]
+    public async Task GetReportByIdAsync_AsCreadorOnOtherUsersReport_ThrowsForbiddenException()
+    {
+        // Arrange
+        var reportId = 1;
+        var ownerId = Guid.NewGuid();
+        var otherId = Guid.NewGuid();
+        var report = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = ownerId, // Different user
+            Estado = 0
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ForbiddenException>(
+            () => _sut.GetReportByIdAsync(reportId, otherId, isRevisor: false)
+        );
+    }
+
+    [Fact(DisplayName = "GetReportByIdAsync on non-existent report should throw NotFoundException")]
+    public async Task GetReportByIdAsync_NonExistentReport_ThrowsNotFoundException()
+    {
+        // Arrange
+        var reportId = 999;
+        var usuarioId = Guid.NewGuid();
+
+        _mockRepository
+            .Setup(r => r.GetByIdWithRelationsAsync(reportId))
+            .ReturnsAsync((ReporteIncidencia?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _sut.GetReportByIdAsync(reportId, usuarioId)
+        );
+    }
+
+    #endregion
+
+    #region Delete Report Tests
+
+    [Fact(DisplayName = "DeleteReportAsync should delete own draft report")]
+    public async Task DeleteReportAsync_OwnDraftReport_DeletesSuccessfully()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var report = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 0 // Borrador
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        _mockRepository
+            .Setup(r => r.DeleteAsync(reportId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteReportAsync(reportId, usuarioId);
+
+        // Assert
+        _mockRepository.Verify(r => r.DeleteAsync(reportId), Times.Once);
+        _mockAuditService.Verify(
+            a => a.LogAsync(
+                "REPORT_DELETE",
+                reportId,
+                "REPORTE_INCIDENCIA",
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<CancellationToken>()
+            ),
+            Times.Once
+        );
+    }
+
+    [Fact(DisplayName = "DeleteReportAsync on non-existent report should throw")]
+    public async Task DeleteReportAsync_NonExistentReport_ThrowsNotFoundException()
+    {
+        // Arrange
+        var reportId = 999;
+        var usuarioId = Guid.NewGuid();
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync((ReporteIncidencia?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _sut.DeleteReportAsync(reportId, usuarioId)
+        );
+    }
+
+    [Fact(DisplayName = "DeleteReportAsync on other user's report should throw")]
+    public async Task DeleteReportAsync_OtherUsersReport_ThrowsForbiddenException()
+    {
+        // Arrange
+        var reportId = 1;
+        var ownerId = Guid.NewGuid();
+        var otherId = Guid.NewGuid();
+        var report = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = ownerId, // Different user
+            Estado = 0
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ForbiddenException>(
+            () => _sut.DeleteReportAsync(reportId, otherId)
+        );
+    }
+
+    [Fact(DisplayName = "DeleteReportAsync on submitted report should throw")]
+    public async Task DeleteReportAsync_SubmittedReport_ThrowsBadRequestException()
+    {
+        // Arrange
+        var reportId = 1;
+        var usuarioId = Guid.NewGuid();
+        var report = new ReporteIncidencia
+        {
+            Id = reportId,
+            UsuarioId = usuarioId,
+            Estado = 1 // Entregado - cannot delete
+        };
+
+        _mockRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<BadRequestException>(
+            () => _sut.DeleteReportAsync(reportId, usuarioId)
+        );
+    }
+
+    #endregion
+
+    #region List Reports Tests
+
+    [Fact(DisplayName = "ListReportsAsync as CREADOR should only show own reports")]
+    public async Task ListReportsAsync_AsCreador_ShowsOnlyOwnReports()
+    {
+        // Arrange
+        var usuarioId = Guid.NewGuid();
+        var filter = new ReportFilterDto { Page = 1, PageSize = 10 };
+        var reports = new List<ReporteIncidencia>
+        {
+            new()
+            {
+                Id = 1,
+                UsuarioId = usuarioId,
+                Estado = 0,
+                TipoReporte = "A",
+                DatetimeHechos = DateTime.UtcNow,
+                Sexo = "Femenino",
+                Edad = 28,
+                Delito = "Test",
+                ZonaId = 1,
+                RegionId = 1,
+                SectorId = 1,
+                CuadranteId = 1,
+                Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+                Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+                Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
+                Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+            }
+        };
+
+        _mockRepository
+            .Setup(r => r.SearchAsync(It.Is<ReportSearchCriteria>(c => c.UsuarioId == usuarioId)))
+            .ReturnsAsync((reports, 1));
+
+        // Act
+        var result = await _sut.ListReportsAsync(filter, usuarioId, isRevisor: false);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.TotalCount.Should().Be(1);
+        _mockRepository.Verify(
+            r => r.SearchAsync(It.Is<ReportSearchCriteria>(c => c.UsuarioId == usuarioId)),
+            Times.Once
+        );
+    }
+
+    [Fact(DisplayName = "ListReportsAsync as REVISOR should show all reports")]
+    public async Task ListReportsAsync_AsRevisor_ShowsAllReports()
+    {
+        // Arrange
+        var revisorId = Guid.NewGuid();
+        var filter = new ReportFilterDto { Page = 1, PageSize = 10 };
+        var reports = new List<ReporteIncidencia>
+        {
+            new()
+            {
+                Id = 1,
+                UsuarioId = Guid.NewGuid(),
+                Estado = 1,
+                TipoReporte = "A",
+                DatetimeHechos = DateTime.UtcNow,
+                Sexo = "Femenino",
+                Edad = 28,
+                Delito = "Test",
+                ZonaId = 1,
+                RegionId = 1,
+                SectorId = 1,
+                CuadranteId = 1,
+                Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
+                Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
+                Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
+                Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1-A", SectorId = 1 }
+            }
+        };
+
+        _mockRepository
+            .Setup(r => r.SearchAsync(It.Is<ReportSearchCriteria>(c => c.UsuarioId == null)))
+            .ReturnsAsync((reports, 1));
+
+        // Act
+        var result = await _sut.ListReportsAsync(filter, revisorId, isRevisor: true);
+
+        // Assert
+        result.Should().NotBeNull();
+        _mockRepository.Verify(
+            r => r.SearchAsync(It.Is<ReportSearchCriteria>(c => c.UsuarioId == null)),
+            Times.Once
+        );
+    }
+
+    [Fact(DisplayName = "ListReportsAsync should limit page size to 500")]
+    public async Task ListReportsAsync_WithLargePageSize_LimitsTo500()
+    {
+        // Arrange
+        var usuarioId = Guid.NewGuid();
+        var filter = new ReportFilterDto { Page = 1, PageSize = 1000 }; // Request more than max
+        var reports = new List<ReporteIncidencia>();
+
+        _mockRepository
+            .Setup(r => r.SearchAsync(It.Is<ReportSearchCriteria>(c => c.PageSize == 500)))
+            .ReturnsAsync((reports, 0));
+
+        // Act
+        await _sut.ListReportsAsync(filter, usuarioId, isRevisor: true);
+
+        // Assert
+        _mockRepository.Verify(
+            r => r.SearchAsync(It.Is<ReportSearchCriteria>(c => c.PageSize == 500)),
+            Times.Once
+        );
+    }
+
     #endregion
 }
