@@ -199,26 +199,50 @@ public class ReportRepository : IReportRepository
 
     public async Task<ReporteIncidencia> UpdateAsync(ReporteIncidencia report)
     {
-        // Check if entity is already being tracked
-        var entry = _context.Entry(report);
-        if (entry.State == EntityState.Detached)
+        // Check if there's already a tracked entity with the same ID
+        var trackedEntity = _context.ChangeTracker
+            .Entries<ReporteIncidencia>()
+            .FirstOrDefault(e => e.Entity.Id == report.Id);
+
+        if (trackedEntity != null)
         {
-            // Only call Update if not already tracked
+            // Update the tracked entity's values from the incoming entity
+            trackedEntity.CurrentValues.SetValues(report);
+        }
+        else
+        {
+            // No tracked entity, attach and update normally
             _context.ReportesIncidencia.Update(report);
         }
-        // If already tracked, just save - EF will detect changes automatically
 
         await _context.SaveChangesAsync();
-        return report;
+
+        // Return the tracked entity or the updated one
+        return trackedEntity?.Entity ?? report;
     }
 
     public async Task DeleteAsync(int id)
     {
-        var report = await GetByIdAsync(id);
-        if (report != null)
+        // Check if there's already a tracked entity with the same ID
+        var trackedEntity = _context.ChangeTracker
+            .Entries<ReporteIncidencia>()
+            .FirstOrDefault(e => e.Entity.Id == id);
+
+        if (trackedEntity != null)
         {
-            _context.ReportesIncidencia.Remove(report);
-            await _context.SaveChangesAsync();
+            // Remove the already tracked entity
+            _context.ReportesIncidencia.Remove(trackedEntity.Entity);
         }
+        else
+        {
+            // Fetch and remove
+            var report = await GetByIdAsync(id);
+            if (report != null)
+            {
+                _context.ReportesIncidencia.Remove(report);
+            }
+        }
+
+        await _context.SaveChangesAsync();
     }
 }
