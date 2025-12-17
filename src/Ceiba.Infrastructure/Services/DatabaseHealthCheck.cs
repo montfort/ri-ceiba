@@ -53,23 +53,22 @@ public class DatabaseHealthCheck : IServiceHealthCheck
                 };
             }
 
-            // Determine status based on response time
-            var status = responseTime switch
+            // Determine status and details based on response time
+            var (status, details, isHealthy) = responseTime switch
             {
-                <= HealthyResponseTimeMs => ServiceStatus.Healthy,
-                <= DegradedResponseTimeMs => ServiceStatus.Degraded,
-                _ => ServiceStatus.Unhealthy // > DegradedResponseTimeMs
+                <= HealthyResponseTimeMs => (
+                    ServiceStatus.Healthy,
+                    "Database responding normally",
+                    true),
+                <= DegradedResponseTimeMs => (
+                    ServiceStatus.Degraded,
+                    $"Database responding slowly ({responseTime}ms)",
+                    true),
+                _ => (
+                    ServiceStatus.Unhealthy,
+                    $"Database response time critical ({responseTime}ms)",
+                    false)
             };
-
-            var details = status switch
-            {
-                ServiceStatus.Healthy => "Database responding normally",
-                ServiceStatus.Degraded => $"Database responding slowly ({responseTime}ms)",
-                ServiceStatus.Unhealthy => $"Database response time critical ({responseTime}ms)",
-                _ => throw new InvalidOperationException($"Unexpected ServiceStatus value: {status}")
-            };
-
-            var isHealthy = status is ServiceStatus.Healthy or ServiceStatus.Degraded;
 
             _logger.LogDebug(
                 "Database health check: {Status} in {ResponseTime}ms",
