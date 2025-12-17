@@ -102,10 +102,10 @@
 </div>
 
 @code {
-    private CreateFirstAdminDto _model = new();
-    private List<string> _errors = new();
-    private bool _processing = false;
-    private bool _isSetupComplete = false;
+    private readonly CreateFirstAdminDto _model = new();
+    private readonly List<string> _errors = [];
+    private bool _processing;
+    private bool _isSetupComplete;
 
     protected override async Task OnInitializedAsync()
     {
@@ -129,7 +129,7 @@
             }
             else
             {
-                _errors = result.Errors;
+                _errors.AddRange(result.Errors);
             }
         }
         catch (Exception ex)

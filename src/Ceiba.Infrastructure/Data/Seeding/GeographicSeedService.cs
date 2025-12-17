@@ -79,10 +79,11 @@ public class GeographicSeedService : IGeographicSeedService
         {
             _logger.LogWarning(ex, "regiones.json not found. Geographic catalogs will not be seeded.");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not FileNotFoundException)
         {
             _logger.LogError(ex, "Failed to seed geographic catalogs from regiones.json");
-            throw;
+            throw new InvalidOperationException(
+                $"Failed to seed geographic catalogs. Check that regiones.json is valid JSON and contains the expected structure.", ex);
         }
     }
 
