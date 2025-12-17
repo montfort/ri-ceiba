@@ -323,7 +323,8 @@
 
     private CreateReportDto Model { get; set; } = new();
     private ReportDto? ExistingReport { get; set; }
-    private bool IsEditMode => ReportId.HasValue;
+    private bool IsEditMode => ReportId.HasValue || _createdReportId.HasValue;
+    private int? _createdReportId;
     private bool IsLoading { get; set; } = true;
     private bool IsSaving { get; set; } = false;
     private bool IsLoadingCatalogs { get; set; } = true;
@@ -561,11 +562,14 @@
 
         try
         {
-            if (IsEditMode)
+            // Use _createdReportId if ReportId is not set (report was just created)
+            var reportId = ReportId ?? _createdReportId;
+
+            if (reportId.HasValue)
             {
                 // Update existing report
                 var updateDto = MapToUpdateDto();
-                await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, IsRevisor);
+                await ReportService.UpdateReportAsync(reportId.Value, updateDto, CurrentUserId, IsRevisor);
                 SuccessMessage = IsRevisor ? "Reporte actualizado exitosamente." : "Reporte actualizado exitosamente como borrador.";
             }
             else
@@ -574,8 +578,12 @@
                 var report = await ReportService.CreateReportAsync(Model, CurrentUserId);
                 SuccessMessage = "Reporte creado exitosamente como borrador.";
 
-                // Navigate to edit mode
-                Navigation.NavigateTo($"/reports/edit/{report.Id}");
+                // Stay on the same page but enable edit mode
+                _createdReportId = report.Id;
+                ExistingReport = report;
+
+                // Update URL without full page reload
+                Navigation.NavigateTo($"/reports/edit/{report.Id}", forceLoad: false, replace: true);
             }
         }
         catch (ValidationException ex)
@@ -601,14 +609,17 @@
         IsSaving = true;
         ErrorMessage = null;
 
+        // Use _createdReportId if ReportId is not set (report was just created)
+        var reportId = ReportId ?? _createdReportId!.Value;
+
         try
         {
             // First update the report
             var updateDto = MapToUpdateDto();
-            await ReportService.UpdateReportAsync(ReportId!.Value, updateDto, CurrentUserId, IsRevisor);
+            await ReportService.UpdateReportAsync(reportId, updateDto, CurrentUserId, IsRevisor);
 
             // Then submit it
-            await ReportService.SubmitReportAsync(ReportId!.Value, CurrentUserId);
+            await ReportService.SubmitReportAsync(reportId, CurrentUserId);
 
             // Navigate to list
             Navigation.NavigateTo("/reports");
