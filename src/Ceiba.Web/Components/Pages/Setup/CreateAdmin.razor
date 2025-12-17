@@ -1,0 +1,144 @@
+@page "/setup/admin"
+@layout SetupLayout
+@inject ISetupService SetupService
+@inject NavigationManager Navigation
+
+<div class="setup-card">
+    <h2 class="text-center mb-4">
+        <i class="bi bi-person-plus-fill text-primary"></i> Crear Administrador
+    </h2>
+
+    @if (_isSetupComplete)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            <strong>Configuración ya completada</strong>
+            <p class="mb-0 mt-2">Ya existe un usuario administrador en el sistema.</p>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/auth/login" class="btn btn-primary">
+                <i class="bi bi-box-arrow-in-right"></i> Ir a Iniciar Sesión
+            </a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted text-center mb-4">
+            Cree el primer usuario administrador del sistema.
+            Este usuario tendrá acceso completo a todas las funcionalidades.
+        </p>
+
+        <EditForm Model="_model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            @if (_errors.Count > 0)
+            {
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Error al crear usuario</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach (var error in _errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label for="email" class="form-label">
+                    <i class="bi bi-envelope"></i> Correo Electrónico
+                </label>
+                <InputText id="email" class="form-control" @bind-Value="_model.Email"
+                           placeholder="admin@ejemplo.com" disabled="@_processing" />
+                <ValidationMessage For="@(() => _model.Email)" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">
+                    <i class="bi bi-lock"></i> Contraseña
+                </label>
+                <InputText id="password" type="password" class="form-control" @bind-Value="_model.Password"
+                           placeholder="Mínimo 10 caracteres, una mayúscula y un número"
+                           disabled="@_processing" />
+                <ValidationMessage For="@(() => _model.Password)" class="text-danger" />
+                <div class="form-text">
+                    La contraseña debe tener al menos 10 caracteres, una mayúscula y un número.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="confirmPassword" class="form-label">
+                    <i class="bi bi-lock-fill"></i> Confirmar Contraseña
+                </label>
+                <InputText id="confirmPassword" type="password" class="form-control"
+                           @bind-Value="_model.ConfirmPassword" placeholder="Repita la contraseña"
+                           disabled="@_processing" />
+                <ValidationMessage For="@(() => _model.ConfirmPassword)" class="text-danger" />
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg" disabled="@_processing">
+                    @if (_processing)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span> Creando usuario...</span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-check-lg"></i>
+                        <span> Crear Administrador</span>
+                    }
+                </button>
+            </div>
+        </EditForm>
+
+        <div class="text-center mt-3">
+            <a href="/setup" class="text-muted">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    private CreateFirstAdminDto _model = new();
+    private List<string> _errors = new();
+    private bool _processing = false;
+    private bool _isSetupComplete = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if setup is already complete
+        _isSetupComplete = !await SetupService.IsSetupRequiredAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        _errors.Clear();
+        _processing = true;
+
+        try
+        {
+            var result = await SetupService.CreateFirstAdminAsync(_model);
+
+            if (result.Success)
+            {
+                // Redirect to completion page
+                Navigation.NavigateTo("/setup/complete");
+            }
+            else
+            {
+                _errors = result.Errors;
+            }
+        }
+        catch (Exception ex)
+        {
+            _errors.Add($"Error inesperado: {ex.Message}");
+        }
+        finally
+        {
+            _processing = false;
+        }
+    }
+}

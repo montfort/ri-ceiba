@@ -1,0 +1,77 @@
+@inherits LayoutComponentBase
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configuración Inicial - Ceiba</title>
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="Ceiba.Web.styles.css" />
+    <HeadOutlet />
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header text-center py-4">
+            <h1 class="text-primary">
+                <i class="bi bi-shield-check"></i> Ceiba
+            </h1>
+            <p class="text-muted">Sistema de Reportes de Incidencias</p>
+        </div>
+
+        <div class="setup-content">
+            @Body
+        </div>
+
+        <div class="setup-footer text-center py-3 text-muted">
+            <small>&copy; @DateTime.Now.Year Ceiba - Configuración Inicial</small>
+        </div>
+    </div>
+</body>
+</html>
+
+<style>
+    .setup-container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: #f8f9fa;
+    }
+
+    .setup-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+    }
+
+    .setup-header h1 {
+        color: white;
+        margin: 0;
+    }
+
+    .setup-header p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0;
+    }
+
+    .setup-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .setup-footer {
+        background-color: #e9ecef;
+    }
+
+    .setup-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        width: 100%;
+        padding: 2rem;
+    }
+</style>

@@ -62,6 +62,9 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IGeographicSeedService, GeographicSeedService>();
             services.AddScoped<IDevelopmentSeedService, DevelopmentSeedService>();
             services.AddScoped<ISeedOrchestrator, SeedOrchestrator>();
+
+            // Register setup service
+            services.AddScoped<Ceiba.Core.Interfaces.ISetupService, Ceiba.Infrastructure.Services.SetupService>();
         });
 
         builder.UseEnvironment("Testing");

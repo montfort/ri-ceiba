@@ -118,6 +118,9 @@ try
 
     // Orchestrator to coordinate all seed services
     builder.Services.AddScoped<ISeedOrchestrator, SeedOrchestrator>();
+
+    // Setup Wizard Service - handles first-run configuration
+    builder.Services.AddScoped<ISetupService, Ceiba.Infrastructure.Services.SetupService>();
     // Note: AddHttpContextAccessor already called above for AuditSaveChangesInterceptor
 
     // Registrar servicios de User Story 1 (T045)
@@ -261,6 +264,9 @@ try
 
     // Enrutamiento obligatorio antes de autenticación/antiforgery y antes de MapEndpoints
     app.UseRouting();
+
+    // Setup Wizard redirect - must be before authentication so unauthenticated users can access /setup
+    app.UseSetupRedirect();
 
     // Autenticación y autorización
     app.UseAuthentication();

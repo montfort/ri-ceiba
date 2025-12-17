@@ -1,0 +1,134 @@
+@page "/setup"
+@layout SetupLayout
+@inject ISetupService SetupService
+@inject NavigationManager Navigation
+
+<div class="setup-card">
+    <h2 class="text-center mb-4">
+        <i class="bi bi-gear-fill text-primary"></i> Configuración Inicial
+    </h2>
+
+    @if (_loading)
+    {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Verificando estado del sistema...</p>
+        </div>
+    }
+    else if (_status != null)
+    {
+        @if (_status.IsComplete)
+        {
+            <div class="alert alert-success">
+                <i class="bi bi-check-circle-fill"></i>
+                <strong>Configuración Completa</strong>
+                <p class="mb-0 mt-2">@_status.Message</p>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/" class="btn btn-primary">
+                    <i class="bi bi-house-door"></i> Ir al Inicio
+                </a>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center mb-4">
+                Bienvenido al asistente de configuración de Ceiba.
+                Complete los siguientes pasos para configurar el sistema.
+            </p>
+
+            <div class="setup-status mb-4">
+                <h5>Estado del Sistema</h5>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Roles del sistema
+                        @if (_status.HasRoles)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check"></i> Listo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>
+                        }
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Usuario administrador
+                        @if (_status.HasUsers)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check"></i> Listo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger"><i class="bi bi-x"></i> Requerido</span>
+                        }
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Catálogos geográficos
+                        @if (_status.HasGeographicCatalogs)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check"></i> Listo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>
+                        }
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Sugerencias de campos
+                        @if (_status.HasSuggestions)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check"></i> Listo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clock"></i> Pendiente</span>
+                        }
+                    </li>
+                </ul>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary btn-lg" @onclick="NavigateToCreateAdmin">
+                    <i class="bi bi-person-plus"></i> Crear Administrador
+                </button>
+            </div>
+        }
+    }
+    else if (!string.IsNullOrEmpty(_error))
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>Error</strong>
+            <p class="mb-0 mt-2">@_error</p>
+        </div>
+    }
+</div>
+
+@code {
+    private SetupStatus? _status;
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _status = await SetupService.GetStatusAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error al verificar el estado: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void NavigateToCreateAdmin()
+    {
+        Navigation.NavigateTo("/setup/admin");
+    }
+}

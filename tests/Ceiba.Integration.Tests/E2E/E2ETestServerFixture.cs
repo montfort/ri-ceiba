@@ -6,11 +6,11 @@ using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Caching;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Data.Seeding;
+using Ceiba.Infrastructure.Services;
 using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Repositories;
 using Ceiba.Infrastructure.Security;
-using Ceiba.Infrastructure.Services;
 using Ceiba.Web.Components;
 using Ceiba.Web.Configuration;
 using Ceiba.Web.Middleware;
@@ -130,6 +130,9 @@ public class E2ETestServerFixture : IAsyncLifetime
         services.AddScoped<IGeographicSeedService, GeographicSeedService>();
         services.AddScoped<IDevelopmentSeedService, DevelopmentSeedService>();
         services.AddScoped<ISeedOrchestrator, SeedOrchestrator>();
+
+        // Setup Wizard Service
+        services.AddScoped<ISetupService, Ceiba.Infrastructure.Services.SetupService>();
 
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<ICatalogService, CatalogService>();
