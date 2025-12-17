@@ -61,37 +61,58 @@ public class AutomatedReportBackgroundService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation("Automated report background service starting...");
+
         // Initial configuration load
         await LoadConfigurationAsync(stoppingToken);
 
-        if (!_isEnabled)
-        {
-            _logger.LogInformation("Automated report generation is disabled.");
-            return;
-        }
+        _logger.LogInformation(
+            "Automated report background service started. Initial state: Enabled={Enabled}, Time={Time}",
+            _isEnabled,
+            _generationTime);
 
-        _logger.LogInformation("Automated report background service started.");
+        // Configuration check interval when disabled (check every 1 minute for quick testing, 5 minutes in production)
+        var disabledCheckInterval = TimeSpan.FromMinutes(1);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                // Reload configuration before each run to pick up changes
+                // Reload configuration to pick up changes from UI
                 await LoadConfigurationAsync(stoppingToken);
 
                 if (!_isEnabled)
                 {
-                    _logger.LogInformation("Automated report generation has been disabled. Service will check again in 1 hour.");
-                    await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                    _logger.LogInformation(
+                        "Automated report generation is disabled. Will check again in {Interval}.",
+                        disabledCheckInterval);
+                    await Task.Delay(disabledCheckInterval, stoppingToken);
                     continue;
                 }
 
                 var delay = CalculateDelayUntilNextRun();
-                _logger.LogDebug("Next automated report generation in {Delay}", delay);
+
+                // If delay is very long (> 1 min), check configuration more frequently
+                // to pick up changes from the UI (every 1 minute)
+                var maxWait = TimeSpan.FromMinutes(1);
+                if (delay > maxWait)
+                {
+                    _logger.LogDebug(
+                        "Next run in {Hours}h {Minutes}m, will recheck config in {MaxWait}",
+                        (int)delay.TotalHours, delay.Minutes, maxWait);
+                    await Task.Delay(maxWait, stoppingToken);
+                    continue;
+                }
+
+                _logger.LogInformation(
+                    "Waiting {Minutes}m {Seconds}s until next automated report generation",
+                    (int)delay.TotalMinutes, delay.Seconds);
 
                 await Task.Delay(delay, stoppingToken);
 
-                if (!stoppingToken.IsCancellationRequested)
+                // Verify configuration is still enabled before running
+                await LoadConfigurationAsync(stoppingToken);
+                if (!stoppingToken.IsCancellationRequested && _isEnabled)
                 {
                     await GenerateDailyReportAsync(stoppingToken);
                 }
@@ -103,8 +124,8 @@ public class AutomatedReportBackgroundService : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in automated report background service. Will retry in 1 hour.");
-                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                _logger.LogError(ex, "Error in automated report background service. Will retry in 1 minute.");
+                await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);
             }
         }
 
@@ -113,7 +134,8 @@ public class AutomatedReportBackgroundService : BackgroundService
 
     private TimeSpan CalculateDelayUntilNextRun()
     {
-        var now = DateTime.Now;
+        // Use UTC since _generationTime is stored in UTC
+        var now = DateTime.UtcNow;
         var nextRun = now.Date.Add(_generationTime);
 
         // If the time has already passed today, schedule for tomorrow
@@ -122,7 +144,16 @@ public class AutomatedReportBackgroundService : BackgroundService
             nextRun = nextRun.AddDays(1);
         }
 
-        return nextRun - now;
+        var delay = nextRun - now;
+
+        _logger.LogInformation(
+            "Calculated next run: {NextRun} UTC (in {Hours}h {Minutes}m). Current UTC: {Now}",
+            nextRun.ToString("yyyy-MM-dd HH:mm:ss"),
+            (int)delay.TotalHours,
+            delay.Minutes,
+            now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+        return delay;
     }
 
     private async Task GenerateDailyReportAsync(CancellationToken cancellationToken)

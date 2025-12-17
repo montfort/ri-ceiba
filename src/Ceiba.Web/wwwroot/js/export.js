@@ -43,3 +43,19 @@ window.downloadFileFromUrl = function (url, fileName) {
     link.click();
     document.body.removeChild(link);
 };
+
+/**
+ * Gets the browser's timezone offset in minutes
+ * @returns {number} The timezone offset in minutes (negative for UTC+, positive for UTC-)
+ */
+window.getTimezoneOffsetMinutes = function () {
+    return new Date().getTimezoneOffset();
+};
+
+/**
+ * Gets the browser's timezone name (IANA format)
+ * @returns {string} The timezone name (e.g., "America/Mexico_City")
+ */
+window.getTimezoneName = function () {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};

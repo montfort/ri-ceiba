@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @inject IAutomatedReportConfigService ConfigService
 @inject ILogger<AutomatedReportConfig> Logger
+@inject IJSRuntime JSRuntime
 @attribute [Authorize(Roles = "ADMIN")]
 
 <PageTitle>Configuración de Reportes Automatizados</PageTitle>
@@ -70,16 +71,20 @@
                             <!-- Hora de Generación -->
                             <div class="mb-4">
                                 <label for="horaGeneracion" class="form-label">
-                                    <i class="bi bi-clock me-1"></i>Hora de Generación
+                                    <i class="bi bi-clock me-1"></i>Hora de Generación (hora local)
                                 </label>
                                 <input type="time"
                                        class="form-control"
                                        id="horaGeneracion"
-                                       value="@HoraGeneracionString"
-                                       @onchange="@((ChangeEventArgs e) => HoraGeneracionString = e.Value?.ToString() ?? "")"
+                                       value="@HoraGeneracionLocalString"
+                                       @onchange="@((ChangeEventArgs e) => HoraGeneracionLocalString = e.Value?.ToString() ?? "")"
                                        disabled="@(!Model.Habilitado)" />
                                 <small class="text-muted">
-                                    Hora del día en que se generarán los reportes automáticamente (formato 24 horas).
+                                    Hora local en que se generarán los reportes automáticamente (formato 24 horas).
+                                    @if (!string.IsNullOrEmpty(_timezoneName))
+                                    {
+                                        <br /><span class="text-info">Zona horaria detectada: @_timezoneName</span>
+                                    }
                                 </small>
                             </div>
 
@@ -157,7 +162,10 @@
                         @if (Config != null)
                         {
                             <p class="mb-2">
-                                <strong>Hora de Generación:</strong> @Config.HoraGeneracion.ToString(@"hh\:mm")
+                                <strong>Hora de Generación:</strong> @GetLocalTimeDisplay() (hora local)
+                            </p>
+                            <p class="mb-2 text-muted small">
+                                (UTC: @Config.HoraGeneracion.ToString(@"hh\:mm"))
                             </p>
                             <p class="mb-2">
                                 <strong>Destinatarios:</strong> @Config.Destinatarios.Length
@@ -175,10 +183,36 @@
                         <h6>Notas Importantes</h6>
                         <ul class="small">
                             <li>Los cambios se aplican inmediatamente</li>
-                            <li>Los reportes se generan a la hora especificada en UTC</li>
+                            <li>La hora se ingresa en hora local y se convierte automáticamente</li>
                             <li>Se requiere al menos un destinatario para habilitar la generación automática</li>
                             <li>Los reportes también pueden generarse manualmente desde la sección de REVISOR</li>
                         </ul>
+
+                        <!-- Debug Panel -->
+                        <hr />
+                        <details>
+                            <summary class="text-muted small"><i class="bi bi-bug me-1"></i>Información de Depuración</summary>
+                            <div class="mt-2 small font-monospace bg-light p-2 rounded">
+                                <div><strong>Zona horaria cargada:</strong> @(_timezoneLoaded ? "Sí" : "No")</div>
+                                <div><strong>Nombre TZ (navegador):</strong> @(_timezoneName ?? "N/A")</div>
+                                <div><strong>Offset (minutos):</strong> @_timezoneOffsetMinutes</div>
+                                <div><strong>Offset (horas):</strong> @(TimeSpan.FromMinutes(_timezoneOffsetMinutes).ToString(@"hh\:mm"))</div>
+                                <div><strong>TZ servidor:</strong> @TimeZoneInfo.Local.Id</div>
+                                <div><strong>UTC servidor:</strong> @DateTime.UtcNow.ToString("HH:mm:ss")</div>
+                                <div><strong>Local servidor:</strong> @DateTime.Now.ToString("HH:mm:ss")</div>
+                                <hr class="my-1" />
+                                <div><strong>Model.HoraGeneracion:</strong> @Model.HoraGeneracion.ToString(@"hh\:mm\:ss")</div>
+                                @if (Config != null)
+                                {
+                                    <div><strong>Config.HoraGeneracion:</strong> @Config.HoraGeneracion.ToString(@"hh\:mm\:ss")</div>
+                                }
+                                @if (!string.IsNullOrEmpty(_lastConversionDebug))
+                                {
+                                    <hr class="my-1" />
+                                    <div class="text-warning"><strong>Última conversión:</strong> @_lastConversionDebug</div>
+                                }
+                            </div>
+                        </details>
                     </div>
                 </div>
             </div>
@@ -194,14 +228,62 @@
     private string? ErrorMessage { get; set; }
     private string? SuccessMessage { get; set; }
 
-    private string HoraGeneracionString
+    // Timezone handling
+    private int _timezoneOffsetMinutes;
+    private string? _timezoneName;
+    private bool _timezoneLoaded;
+
+    // Debug info for last conversion
+    private string _lastConversionDebug = "";
+
+    // Local time displayed/edited in UI - converts to/from UTC in Model.HoraGeneracion
+    private string HoraGeneracionLocalString
     {
-        get => Model.HoraGeneracion.ToString(@"hh\:mm");
+        get
+        {
+            if (!_timezoneLoaded)
+            {
+                return Model.HoraGeneracion.ToString(@"hh\:mm");
+            }
+            // Convert UTC to local: subtract offset (since getTimezoneOffset returns negative for UTC+)
+            var localTime = Model.HoraGeneracion.Add(TimeSpan.FromMinutes(-_timezoneOffsetMinutes));
+            // Handle day wraparound
+            if (localTime < TimeSpan.Zero)
+            {
+                localTime = localTime.Add(TimeSpan.FromDays(1));
+            }
+            else if (localTime >= TimeSpan.FromDays(1))
+            {
+                localTime = localTime.Subtract(TimeSpan.FromDays(1));
+            }
+            return localTime.ToString(@"hh\:mm");
+        }
         set
         {
-            if (TimeSpan.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, out var time))
+            if (TimeSpan.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, out var localTime))
             {
-                Model.HoraGeneracion = time;
+                if (!_timezoneLoaded)
+                {
+                    _lastConversionDebug = $"TZ no cargada: {localTime:hh\\:mm} → {localTime:hh\\:mm} (sin conversión)";
+                    Logger.LogWarning("Timezone not loaded when setting time, no conversion applied");
+                    Model.HoraGeneracion = localTime;
+                    return;
+                }
+                // Convert local to UTC: add offset (since getTimezoneOffset returns negative for UTC+)
+                var utcTime = localTime.Add(TimeSpan.FromMinutes(_timezoneOffsetMinutes));
+                // Handle day wraparound
+                if (utcTime < TimeSpan.Zero)
+                {
+                    utcTime = utcTime.Add(TimeSpan.FromDays(1));
+                }
+                else if (utcTime >= TimeSpan.FromDays(1))
+                {
+                    utcTime = utcTime.Subtract(TimeSpan.FromDays(1));
+                }
+                _lastConversionDebug = $"Local {localTime:hh\\:mm} + offset {_timezoneOffsetMinutes}min = UTC {utcTime:hh\\:mm}";
+                Logger.LogInformation("Time conversion: Local {LocalTime} + {Offset} min = UTC {UtcTime}",
+                    localTime, _timezoneOffsetMinutes, utcTime);
+                Model.HoraGeneracion = utcTime;
             }
         }
     }
@@ -222,6 +304,49 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadConfiguration();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _timezoneOffsetMinutes = await JSRuntime.InvokeAsync<int>("getTimezoneOffsetMinutes");
+                _timezoneName = await JSRuntime.InvokeAsync<string>("getTimezoneName");
+                _timezoneLoaded = true;
+                Logger.LogInformation("Timezone loaded: {TimezoneName}, Offset: {Offset} minutes",
+                    _timezoneName, _timezoneOffsetMinutes);
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Could not load timezone information, using UTC");
+                _timezoneLoaded = true;
+                _timezoneOffsetMinutes = 0;
+            }
+        }
+    }
+
+    private string GetLocalTimeDisplay()
+    {
+        if (Config == null) return "--:--";
+
+        if (!_timezoneLoaded)
+        {
+            return Config.HoraGeneracion.ToString(@"hh\:mm");
+        }
+
+        var localTime = Config.HoraGeneracion.Add(TimeSpan.FromMinutes(-_timezoneOffsetMinutes));
+        if (localTime < TimeSpan.Zero)
+        {
+            localTime = localTime.Add(TimeSpan.FromDays(1));
+        }
+        else if (localTime >= TimeSpan.FromDays(1))
+        {
+            localTime = localTime.Subtract(TimeSpan.FromDays(1));
+        }
+        return localTime.ToString(@"hh\:mm");
     }
 
     private async Task LoadConfiguration()

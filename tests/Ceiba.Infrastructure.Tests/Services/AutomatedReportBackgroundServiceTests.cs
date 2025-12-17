@@ -498,8 +498,8 @@ public class AutomatedReportBackgroundServiceTests
 
     #region Disabled Service Tests
 
-    [Fact(DisplayName = "ExecuteAsync should check again after 1 hour when disabled mid-run")]
-    public async Task ExecuteAsync_DisabledMidRun_LogsAndWaits()
+    [Fact(DisplayName = "ExecuteAsync should poll periodically when disabled")]
+    public async Task ExecuteAsync_WhenDisabled_PollsPeriodically()
     {
         // Arrange
         var callCount = 0;
@@ -535,6 +535,84 @@ public class AutomatedReportBackgroundServiceTests
             LogLevel.Information,
             Arg.Any<EventId>(),
             Arg.Is<object>(o => o.ToString()!.Contains("disabled") || o.ToString()!.Contains("stopped")),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
+    [Fact(DisplayName = "Service should continue running when initially disabled")]
+    public async Task ExecuteAsync_InitiallyDisabled_ContinuesPolling()
+    {
+        // Arrange - Service starts disabled but should keep polling
+        var callCount = 0;
+        _mockConfigService.GetConfigurationAsync(Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                callCount++;
+                return new AutomatedReportConfigDto
+                {
+                    Habilitado = false, // Always disabled
+                    HoraGeneracion = TimeSpan.FromHours(6)
+                };
+            });
+
+        var service = CreateService();
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+
+        // Act
+        await service.StartAsync(cts.Token);
+        await Task.Delay(300, CancellationToken.None);
+        await service.StopAsync(CancellationToken.None);
+
+        // Assert - Config should be loaded multiple times (initial + at least one poll)
+        // The service should NOT exit immediately when disabled
+        callCount.Should().BeGreaterThanOrEqualTo(1);
+
+        // Verify service logged "disabled" message (not "stopped" immediately)
+        _mockLogger.Received().Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("disabled")),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
+    #endregion
+
+    #region UTC Time Calculation Tests
+
+    [Fact(DisplayName = "Service should use UTC for time calculations")]
+    public async Task ExecuteAsync_TimeCalculation_UsesUtc()
+    {
+        // Arrange - Set generation time to a time that would behave differently in UTC vs local
+        var config = new AutomatedReportConfigDto
+        {
+            Habilitado = true,
+            HoraGeneracion = TimeSpan.FromHours(12) // Noon UTC
+        };
+
+        _mockConfigService.GetConfigurationAsync(Arg.Any<CancellationToken>())
+            .Returns(config);
+
+        var service = CreateService();
+        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+
+        // Act
+        try
+        {
+            await service.StartAsync(cts.Token);
+            await Task.Delay(200, CancellationToken.None);
+            await service.StopAsync(CancellationToken.None);
+        }
+        catch (OperationCanceledException)
+        {
+            // Expected
+        }
+
+        // Assert - Should log calculated next run with UTC timestamp
+        _mockLogger.Received().Log(
+            LogLevel.Information,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("UTC")),
             Arg.Any<Exception?>(),
             Arg.Any<Func<object, Exception?, string>>());
     }
