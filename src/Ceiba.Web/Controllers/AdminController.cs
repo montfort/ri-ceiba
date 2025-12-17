@@ -1,5 +1,6 @@
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
+using Ceiba.Infrastructure.Data.Seeding;
 using Ceiba.Shared.DTOs;
 using Ceiba.Web.Filters;
 using Microsoft.AspNetCore.Mvc;
@@ -19,20 +20,20 @@ public class AdminController : ControllerBase
 {
     private readonly IUserManagementService _userService;
     private readonly ICatalogAdminService _catalogService;
-    private readonly ISeedDataService _seedDataService;
+    private readonly ISeedOrchestrator _seedOrchestrator;
     private readonly IRegionDataLoader _regionDataLoader;
     private readonly ILogger<AdminController> _logger;
 
     public AdminController(
         IUserManagementService userService,
         ICatalogAdminService catalogService,
-        ISeedDataService seedDataService,
+        ISeedOrchestrator seedOrchestrator,
         IRegionDataLoader regionDataLoader,
         ILogger<AdminController> logger)
     {
         _userService = userService;
         _catalogService = catalogService;
-        _seedDataService = seedDataService;
+        _seedOrchestrator = seedOrchestrator;
         _regionDataLoader = regionDataLoader;
         _logger = logger;
     }
@@ -280,7 +281,7 @@ public class AdminController : ControllerBase
         try
         {
             _logger.LogWarning("Admin {AdminId} initiated geographic catalog reload", GetAdminId());
-            await _seedDataService.ReloadGeographicCatalogsAsync();
+            await _seedOrchestrator.ReloadGeographicCatalogsAsync();
 
             // Get the new stats
             var stats = await _regionDataLoader.GetCurrentStatsAsync();

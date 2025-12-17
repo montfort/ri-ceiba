@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ceiba.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -435,12 +435,12 @@ namespace Ceiba.Infrastructure.Migrations
                     region_id = table.Column<int>(type: "integer", nullable: false),
                     sector_id = table.Column<int>(type: "integer", nullable: false),
                     cuadrante_id = table.Column<int>(type: "integer", nullable: false),
-                    turno_ceiba = table.Column<int>(type: "integer", nullable: false),
+                    turno_ceiba = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     tipo_de_atencion = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    tipo_de_accion = table.Column<short>(type: "smallint", nullable: false),
+                    tipo_de_accion = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     hechos_reportados = table.Column<string>(type: "text", nullable: false),
                     acciones_realizadas = table.Column<string>(type: "text", nullable: false),
-                    traslados = table.Column<short>(type: "smallint", nullable: false),
+                    traslados = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     observaciones = table.Column<string>(type: "text", nullable: true),
                     updated_at = table.Column<DateTime>(type: "timestamptz", nullable: true),
                     campos_adicionales = table.Column<string>(type: "jsonb", nullable: true),
@@ -453,8 +453,6 @@ namespace Ceiba.Infrastructure.Migrations
                     table.PrimaryKey("PK_REPORTE_INCIDENCIA", x => x.id);
                     table.CheckConstraint("CK_REPORTE_EDAD", "edad > 0 AND edad < 150");
                     table.CheckConstraint("CK_REPORTE_ESTADO", "estado IN (0, 1)");
-                    table.CheckConstraint("CK_REPORTE_TIPO_ACCION", "tipo_de_accion IN (1, 2, 3)");
-                    table.CheckConstraint("CK_REPORTE_TRASLADOS", "traslados IN (0, 1, 2)");
                     table.ForeignKey(
                         name: "FK_REPORTE_CUADRANTE",
                         column: x => x.cuadrante_id,

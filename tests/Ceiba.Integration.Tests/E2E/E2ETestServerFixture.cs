@@ -5,6 +5,7 @@ using Ceiba.Application.Services.Export;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Caching;
 using Ceiba.Infrastructure.Data;
+using Ceiba.Infrastructure.Data.Seeding;
 using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Repositories;
@@ -123,7 +124,13 @@ public class E2ETestServerFixture : IAsyncLifetime
         // Register application services
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<IRegionDataLoader, RegionDataLoader>();
-        services.AddScoped<ISeedDataService, SeedDataService>();
+
+        // Seed Data Services
+        services.AddScoped<IProductionSeedService, ProductionSeedService>();
+        services.AddScoped<IGeographicSeedService, GeographicSeedService>();
+        services.AddScoped<IDevelopmentSeedService, DevelopmentSeedService>();
+        services.AddScoped<ISeedOrchestrator, SeedOrchestrator>();
+
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IReportRepository, ReportRepository>();
@@ -253,8 +260,8 @@ public class E2ETestServerFixture : IAsyncLifetime
         await db.Database.EnsureCreatedAsync();
 
         // Seed basic test data
-        var seedService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
-        await seedService.SeedAsync();
+        var seedOrchestrator = scope.ServiceProvider.GetRequiredService<ISeedOrchestrator>();
+        await seedOrchestrator.SeedAllAsync();
     }
 
     public async Task DisposeAsync()

@@ -1,4 +1,5 @@
 using Ceiba.Infrastructure.Data;
+using Ceiba.Infrastructure.Data.Seeding;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -55,7 +56,12 @@ public class CeibaWebApplicationFactory : WebApplicationFactory<Program>
 
             // Re-register services that depend on DbContext with the new in-memory context
             services.AddScoped<IRegionDataLoader, RegionDataLoader>();
-            services.AddScoped<ISeedDataService, SeedDataService>();
+
+            // Register new seeding services
+            services.AddScoped<IProductionSeedService, ProductionSeedService>();
+            services.AddScoped<IGeographicSeedService, GeographicSeedService>();
+            services.AddScoped<IDevelopmentSeedService, DevelopmentSeedService>();
+            services.AddScoped<ISeedOrchestrator, SeedOrchestrator>();
         });
 
         builder.UseEnvironment("Testing");

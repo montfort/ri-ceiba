@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
+using Ceiba.Infrastructure.Data.Seeding;
 using Ceiba.Shared.DTOs;
 using Ceiba.Web.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +19,7 @@ public class AdminControllerTests
 {
     private readonly Mock<IUserManagementService> _userServiceMock;
     private readonly Mock<ICatalogAdminService> _catalogServiceMock;
-    private readonly Mock<ISeedDataService> _seedDataServiceMock;
+    private readonly Mock<ISeedOrchestrator> _seedOrchestratorMock;
     private readonly Mock<IRegionDataLoader> _regionDataLoaderMock;
     private readonly Mock<ILogger<AdminController>> _loggerMock;
     private readonly AdminController _controller;
@@ -28,14 +29,14 @@ public class AdminControllerTests
     {
         _userServiceMock = new Mock<IUserManagementService>();
         _catalogServiceMock = new Mock<ICatalogAdminService>();
-        _seedDataServiceMock = new Mock<ISeedDataService>();
+        _seedOrchestratorMock = new Mock<ISeedOrchestrator>();
         _regionDataLoaderMock = new Mock<IRegionDataLoader>();
         _loggerMock = new Mock<ILogger<AdminController>>();
 
         _controller = new AdminController(
             _userServiceMock.Object,
             _catalogServiceMock.Object,
-            _seedDataServiceMock.Object,
+            _seedOrchestratorMock.Object,
             _regionDataLoaderMock.Object,
             _loggerMock.Object);
 
@@ -739,7 +740,7 @@ public class AdminControllerTests
     public async Task ReloadGeographicCatalogs_Success_ReturnsOkWithStats()
     {
         // Arrange
-        _seedDataServiceMock.Setup(x => x.ReloadGeographicCatalogsAsync())
+        _seedOrchestratorMock.Setup(x => x.ReloadGeographicCatalogsAsync())
             .Returns(Task.CompletedTask);
 
         var mockStats = new RegionDataLoader.SeedingStats
@@ -767,7 +768,7 @@ public class AdminControllerTests
     public async Task ReloadGeographicCatalogs_FileNotFound_Returns500()
     {
         // Arrange
-        _seedDataServiceMock.Setup(x => x.ReloadGeographicCatalogsAsync())
+        _seedOrchestratorMock.Setup(x => x.ReloadGeographicCatalogsAsync())
             .ThrowsAsync(new FileNotFoundException("regiones.json not found"));
 
         // Act
@@ -782,7 +783,7 @@ public class AdminControllerTests
     public async Task ReloadGeographicCatalogs_Exception_Returns500()
     {
         // Arrange
-        _seedDataServiceMock.Setup(x => x.ReloadGeographicCatalogsAsync())
+        _seedOrchestratorMock.Setup(x => x.ReloadGeographicCatalogsAsync())
             .ThrowsAsync(new Exception("Database error"));
 
         // Act

@@ -3,6 +3,7 @@ using Ceiba.Application.Services.Export;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Caching;
 using Ceiba.Infrastructure.Data;
+using Ceiba.Infrastructure.Data.Seeding;
 using Ceiba.Infrastructure.Identity;
 using Ceiba.Infrastructure.Logging;
 using Ceiba.Infrastructure.Repositories;
@@ -103,7 +104,20 @@ try
     // Registrar servicios de aplicación (T016)
     builder.Services.AddScoped<IAuditService, AuditService>();
     builder.Services.AddScoped<IRegionDataLoader, RegionDataLoader>(); // Geographic catalog loader
-    builder.Services.AddScoped<ISeedDataService, SeedDataService>(); // T020
+
+    // Seed Data Services (T020)
+    // Production services (always registered)
+    builder.Services.AddScoped<IProductionSeedService, ProductionSeedService>();
+    builder.Services.AddScoped<IGeographicSeedService, GeographicSeedService>();
+
+    // Development services (only in Development environment)
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.AddScoped<IDevelopmentSeedService, DevelopmentSeedService>();
+    }
+
+    // Orchestrator to coordinate all seed services
+    builder.Services.AddScoped<ISeedOrchestrator, SeedOrchestrator>();
     // Note: AddHttpContextAccessor already called above for AuditSaveChangesInterceptor
 
     // Registrar servicios de User Story 1 (T045)
@@ -290,8 +304,8 @@ try
                 Log.Information("Database migrations applied successfully");
 
                 // Seed initial data (T020)
-                var seedService = scope.ServiceProvider.GetRequiredService<ISeedDataService>();
-                await seedService.SeedAsync();
+                var seedOrchestrator = scope.ServiceProvider.GetRequiredService<ISeedOrchestrator>();
+                await seedOrchestrator.SeedAllAsync();
                 Log.Information("Database seeded successfully");
             }
             else
