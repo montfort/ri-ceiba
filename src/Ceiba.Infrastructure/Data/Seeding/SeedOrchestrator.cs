@@ -47,21 +47,12 @@ public class SeedOrchestrator : ISeedOrchestrator
         // 2. Always seed geographic catalogs
         await _geographicSeedService.SeedAsync();
 
-        // 3. In development, seed test users and suggestions with their ID
-        if (_environment.IsDevelopment() && _developmentSeedService != null)
-        {
-            await _developmentSeedService.SeedAsync();
+        // 3. Users and suggestions are NOT seeded automatically.
+        //    The Setup Wizard handles first admin creation and seeds suggestions.
+        //    This ensures consistent behavior across all environments.
 
-            // Get admin user ID for suggestions
-            var adminUser = await _userManager.FindByEmailAsync("admin@ceiba.local");
-            if (adminUser != null)
-            {
-                await _productionSeedService.SeedSugerenciasAsync(adminUser.Id);
-            }
-        }
-        // 4. In production, suggestions are seeded when first admin is created via Setup Wizard
-
-        _logger.LogInformation("Database seeding completed");
+        _logger.LogInformation("Database seeding completed (roles and geographic catalogs only)");
+        _logger.LogInformation("First administrator should be created via Setup Wizard at /setup");
     }
 
     /// <inheritdoc />
@@ -83,5 +74,39 @@ public class SeedOrchestrator : ISeedOrchestrator
         }
 
         _logger.LogInformation("Geographic catalogs reloaded");
+    }
+
+    /// <summary>
+    /// Seeds test users for development purposes.
+    /// This method should be called manually (e.g., via admin endpoint) when test users are needed.
+    /// Only available in Development environment.
+    /// </summary>
+    /// <returns>True if test users were seeded, false if not available.</returns>
+    public async Task<bool> SeedTestUsersAsync()
+    {
+        if (!_environment.IsDevelopment())
+        {
+            _logger.LogWarning("Test user seeding is only available in Development environment");
+            return false;
+        }
+
+        if (_developmentSeedService == null)
+        {
+            _logger.LogWarning("DevelopmentSeedService is not registered");
+            return false;
+        }
+
+        _logger.LogWarning("Manually seeding test users for development...");
+        await _developmentSeedService.SeedAsync();
+
+        // Get admin user ID for suggestions
+        var adminUser = await _userManager.FindByEmailAsync("admin@ceiba.local");
+        if (adminUser != null)
+        {
+            await _productionSeedService.SeedSugerenciasAsync(adminUser.Id);
+        }
+
+        _logger.LogWarning("Test users seeded successfully");
+        return true;
     }
 }

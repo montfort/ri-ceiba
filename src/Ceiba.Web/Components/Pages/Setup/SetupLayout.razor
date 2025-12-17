@@ -1,35 +1,23 @@
 @inherits LayoutComponentBase
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Configuración Inicial - Ceiba</title>
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="stylesheet" href="Ceiba.Web.styles.css" />
-    <HeadOutlet />
-</head>
-<body>
-    <div class="setup-container">
-        <div class="setup-header text-center py-4">
-            <h1 class="text-primary">
-                <i class="bi bi-shield-check"></i> Ceiba
-            </h1>
-            <p class="text-muted">Sistema de Reportes de Incidencias</p>
-        </div>
+<PageTitle>Configuración Inicial - Ceiba</PageTitle>
 
-        <div class="setup-content">
-            @Body
-        </div>
-
-        <div class="setup-footer text-center py-3 text-muted">
-            <small>&copy; @DateTime.Now.Year Ceiba - Configuración Inicial</small>
-        </div>
+<div class="setup-container">
+    <div class="setup-header text-center py-4">
+        <h1 class="text-white">
+            <i class="bi bi-shield-check"></i> Ceiba
+        </h1>
+        <p class="setup-subtitle">Sistema de Reportes de Incidencias</p>
     </div>
-</body>
-</html>
+
+    <div class="setup-content">
+        @Body
+    </div>
+
+    <div class="setup-footer text-center py-3 text-muted">
+        <small>&copy; @DateTime.Now.Year Ceiba - Configuración Inicial</small>
+    </div>
+</div>
 
 <style>
     .setup-container {
@@ -49,7 +37,7 @@
         margin: 0;
     }
 
-    .setup-header p {
+    .setup-subtitle {
         color: rgba(255, 255, 255, 0.8);
         margin: 0;
     }

@@ -61,6 +61,8 @@ public interface ISeedOrchestrator
 {
     /// <summary>
     /// Runs all appropriate seed services for the current environment.
+    /// Seeds roles and geographic catalogs only.
+    /// Users should be created via Setup Wizard.
     /// </summary>
     Task SeedAllAsync();
 
@@ -68,4 +70,11 @@ public interface ISeedOrchestrator
     /// Reloads geographic catalogs from regiones.json.
     /// </summary>
     Task ReloadGeographicCatalogsAsync();
+
+    /// <summary>
+    /// Manually seeds test users for development purposes.
+    /// Only available in Development environment.
+    /// </summary>
+    /// <returns>True if test users were seeded, false otherwise.</returns>
+    Task<bool> SeedTestUsersAsync();
 }
