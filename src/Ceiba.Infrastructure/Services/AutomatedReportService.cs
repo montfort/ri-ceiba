@@ -612,19 +612,13 @@ public class AutomatedReportService : IAutomatedReportService
 
         // Action types
         stats.PorTipoAccion = reports
-            .GroupBy(r => r.TipoDeAccion switch
-            {
-                1 => "ATOS",
-                2 => "Capacitación",
-                3 => "Prevención",
-                _ => "Otro"
-            })
+            .GroupBy(r => string.IsNullOrWhiteSpace(r.TipoDeAccion) ? "Sin especificar" : r.TipoDeAccion)
             .ToDictionary(g => g.Key, g => g.Count());
 
         // Transfers
-        stats.ConTraslado = reports.Count(r => r.Traslados == 1);
-        stats.SinTraslado = reports.Count(r => r.Traslados == 0);
-        stats.TrasladoNoAplica = reports.Count(r => r.Traslados == 2);
+        stats.ConTraslado = reports.Count(r => r.Traslados == "Sí");
+        stats.SinTraslado = reports.Count(r => r.Traslados == "No");
+        stats.TrasladoNoAplica = reports.Count(r => r.Traslados == "No aplica");
 
         return stats;
     }

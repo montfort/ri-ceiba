@@ -72,9 +72,8 @@ public class CatalogService : ICatalogService
 
     public async Task<List<string>> GetSuggestionsAsync(string campo)
     {
-        // Validate campo
-        var allowedFields = new[] { "sexo", "delito", "tipo_de_atencion" };
-        if (!allowedFields.Contains(campo.ToLower()))
+        // Validate campo - use SugerenciaCampos.All for allowed fields
+        if (!SugerenciaCampos.All.Contains(campo.ToLower()))
         {
             return new List<string>();
         }

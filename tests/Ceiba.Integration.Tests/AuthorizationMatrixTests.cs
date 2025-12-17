@@ -93,12 +93,12 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
             ZonaId = zona.Id,
             SectorId = sector.Id,
             CuadranteId = cuadrante.Id,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test hechos",
             AccionesRealizadas = "Test acciones",
-            Traslados = 0,
+            Traslados = "No",
             Estado = 0,
             SchemaVersion = "1.0"
         };

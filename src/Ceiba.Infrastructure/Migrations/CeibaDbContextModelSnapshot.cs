@@ -744,8 +744,10 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("situacion_calle");
 
-                    b.Property<short>("TipoDeAccion")
-                        .HasColumnType("smallint")
+                    b.Property<string>("TipoDeAccion")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
                         .HasColumnName("tipo_de_accion");
 
                     b.Property<string>("TipoDeAtencion")
@@ -762,12 +764,16 @@ namespace Ceiba.Infrastructure.Migrations
                         .HasDefaultValue("A")
                         .HasColumnName("tipo_reporte");
 
-                    b.Property<short>("Traslados")
-                        .HasColumnType("smallint")
+                    b.Property<string>("Traslados")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("traslados");
 
-                    b.Property<int>("TurnoCeiba")
-                        .HasColumnType("integer")
+                    b.Property<string>("TurnoCeiba")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
                         .HasColumnName("turno_ceiba");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -831,10 +837,6 @@ namespace Ceiba.Infrastructure.Migrations
                             t.HasCheckConstraint("CK_REPORTE_EDAD", "edad > 0 AND edad < 150");
 
                             t.HasCheckConstraint("CK_REPORTE_ESTADO", "estado IN (0, 1)");
-
-                            t.HasCheckConstraint("CK_REPORTE_TIPO_ACCION", "tipo_de_accion IN (1, 2, 3)");
-
-                            t.HasCheckConstraint("CK_REPORTE_TRASLADOS", "traslados IN (0, 1, 2)");
                         });
                 });
 

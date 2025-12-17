@@ -47,15 +47,16 @@ public class CreateReportDto
     public int CuadranteId { get; set; }
 
     [Required(ErrorMessage = "El turno CEIBA es requerido")]
-    public int TurnoCeiba { get; set; }
+    [StringLength(100, ErrorMessage = "El turno CEIBA no puede exceder 100 caracteres")]
+    public string TurnoCeiba { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El tipo de atención es requerido")]
     [StringLength(100)]
     public string TipoDeAtencion { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El tipo de acción es requerido")]
-    [Range(1, 3, ErrorMessage = "El tipo de acción debe ser 1, 2 o 3")]
-    public int TipoDeAccion { get; set; }
+    [StringLength(500, ErrorMessage = "El tipo de acción no puede exceder 500 caracteres")]
+    public string TipoDeAccion { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Los hechos reportados son requeridos")]
     [MinLength(10, ErrorMessage = "Los hechos reportados deben tener al menos 10 caracteres")]
@@ -66,8 +67,8 @@ public class CreateReportDto
     public string AccionesRealizadas { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El estado de traslados es requerido")]
-    [Range(0, 2, ErrorMessage = "Traslados debe ser 0, 1 o 2")]
-    public int Traslados { get; set; }
+    [StringLength(100, ErrorMessage = "Traslados no puede exceder 100 caracteres")]
+    public string Traslados { get; set; } = string.Empty;
 
     public string? Observaciones { get; set; }
 }
@@ -107,13 +108,14 @@ public class UpdateReportDto
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un cuadrante válido")]
     public int? CuadranteId { get; set; }
 
-    public int? TurnoCeiba { get; set; }
+    [StringLength(100, ErrorMessage = "El turno CEIBA no puede exceder 100 caracteres")]
+    public string? TurnoCeiba { get; set; }
 
     [StringLength(100)]
     public string? TipoDeAtencion { get; set; }
 
-    [Range(1, 3, ErrorMessage = "El tipo de acción debe ser 1, 2 o 3")]
-    public int? TipoDeAccion { get; set; }
+    [StringLength(500, ErrorMessage = "El tipo de acción no puede exceder 500 caracteres")]
+    public string? TipoDeAccion { get; set; }
 
     [MinLength(10, ErrorMessage = "Los hechos reportados deben tener al menos 10 caracteres")]
     public string? HechosReportados { get; set; }
@@ -121,8 +123,8 @@ public class UpdateReportDto
     [MinLength(10, ErrorMessage = "Las acciones realizadas deben tener al menos 10 caracteres")]
     public string? AccionesRealizadas { get; set; }
 
-    [Range(0, 2, ErrorMessage = "Traslados debe ser 0, 1 o 2")]
-    public int? Traslados { get; set; }
+    [StringLength(100, ErrorMessage = "Traslados no puede exceder 100 caracteres")]
+    public string? Traslados { get; set; }
 
     public string? Observaciones { get; set; }
 }
@@ -152,12 +154,12 @@ public class ReportDto
     public CatalogItemDto Region { get; set; } = null!;
     public CatalogItemDto Sector { get; set; } = null!;
     public CatalogItemDto Cuadrante { get; set; } = null!;
-    public int TurnoCeiba { get; set; }
+    public string TurnoCeiba { get; set; } = string.Empty;
     public string TipoDeAtencion { get; set; } = string.Empty;
-    public int TipoDeAccion { get; set; }
+    public string TipoDeAccion { get; set; } = string.Empty;
     public string HechosReportados { get; set; } = string.Empty;
     public string AccionesRealizadas { get; set; } = string.Empty;
-    public int Traslados { get; set; }
+    public string Traslados { get; set; } = string.Empty;
     public string? Observaciones { get; set; }
 }
 

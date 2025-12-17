@@ -58,12 +58,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Descripción detallada de los hechos reportados.",
             AccionesRealizadas = "Acciones realizadas por el oficial.",
-            Traslados = 0,
+            Traslados = "No",
             Observaciones = "Observaciones adicionales"
         };
 
@@ -81,12 +81,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Descripción detallada de los hechos reportados.",
             AccionesRealizadas = "Acciones realizadas por el oficial.",
-            Traslados = 0,
+            Traslados = "No",
             Observaciones = "Observaciones adicionales",
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
             Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
@@ -148,12 +148,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 99, // Invalid sector not belonging to region 1
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test",
             AccionesRealizadas = "Test",
-            Traslados = 0
+            Traslados = "No"
         };
 
         _mockCatalogService
@@ -182,12 +182,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test",
             AccionesRealizadas = "Test",
-            Traslados = 0
+            Traslados = "No"
         };
 
         // Act & Assert
@@ -220,12 +220,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Original",
             AccionesRealizadas = "Original",
-            Traslados = 0
+            Traslados = "No"
         };
 
         var updateDto = new UpdateReportDto
@@ -237,7 +237,7 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Actualizado con más detalles",
             AccionesRealizadas = "Acciones actualizadas"
         };
@@ -256,12 +256,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Actualizado con más detalles",
             AccionesRealizadas = "Acciones actualizadas",
-            Traslados = 0,
+            Traslados = "No",
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
             Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
             Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },
@@ -350,7 +350,18 @@ public class ReportServiceTests
             Estado = 1, // Entregado
             TipoReporte = "A",
             Sexo = "Femenino",
-            Edad = 28
+            Edad = 28,
+            Delito = "Robo",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Hechos originales",
+            AccionesRealizadas = "Acciones originales",
+            Traslados = "No"
         };
 
         var updateDto = new UpdateReportDto
@@ -362,7 +373,7 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Hechos reportados",
             AccionesRealizadas = "Acciones realizadas",
             Observaciones = "Modificado por supervisor"
@@ -382,12 +393,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Hechos reportados",
             AccionesRealizadas = "Acciones realizadas",
-            Traslados = 0,
+            Traslados = "No",
             Observaciones = "Modificado por supervisor",
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
             Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
@@ -454,12 +465,12 @@ public class ReportServiceTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test hechos",
             AccionesRealizadas = "Test acciones",
-            Traslados = 0,
+            Traslados = "No",
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
             Region = new Region { Id = 1, Nombre = "Región Centro", ZonaId = 1 },
             Sector = new Sector { Id = 1, Nombre = "Sector 1", RegionId = 1 },

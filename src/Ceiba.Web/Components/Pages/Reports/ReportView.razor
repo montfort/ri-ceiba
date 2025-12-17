@@ -184,13 +184,13 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <p><strong>Turno CEIBA:</strong> @GetTurnoText(Report.TurnoCeiba)</p>
+                                <p><strong>Turno CEIBA:</strong> @Report.TurnoCeiba</p>
                             </div>
                             <div class="col-md-4">
-                                <p><strong>Tipo de Accion:</strong> @GetTipoAccionText(Report.TipoDeAccion)</p>
+                                <p><strong>Tipo de Accion:</strong> @Report.TipoDeAccion</p>
                             </div>
                             <div class="col-md-4">
-                                <p><strong>Traslados:</strong> @GetTrasladosText(Report.Traslados)</p>
+                                <p><strong>Traslados:</strong> @Report.Traslados</p>
                             </div>
                         </div>
                     </div>
@@ -476,27 +476,4 @@
         _ => "Desconocido"
     };
 
-    private static string GetTurnoText(int turno) => turno switch
-    {
-        1 => "Turno 1 (Matutino)",
-        2 => "Turno 2 (Vespertino)",
-        3 => "Turno 3 (Nocturno)",
-        _ => "No especificado"
-    };
-
-    private static string GetTipoAccionText(int tipoAccion) => tipoAccion switch
-    {
-        1 => "Preventiva",
-        2 => "Reactiva",
-        3 => "Seguimiento",
-        _ => "No especificado"
-    };
-
-    private static string GetTrasladosText(int traslados) => traslados switch
-    {
-        0 => "Sin traslado",
-        1 => "Hospital",
-        2 => "Ministerio Publico",
-        _ => "No especificado"
-    };
 }

@@ -232,51 +232,92 @@ public class SeedDataService : ISeedDataService
 
     private async Task SeedSugerenciasAsync(Guid adminUserId)
     {
-        // Check if sugerencias already seeded
-        if (await _context.CatalogosSugerencia.AnyAsync())
-        {
-            _logger.LogInformation("Sugerencias already exist. Skipping seed.");
-            return;
-        }
+        // Get existing sugerencias to enable incremental seeding
+        var existingSugerencias = await _context.CatalogosSugerencia
+            .Select(s => new { s.Campo, s.Valor })
+            .ToListAsync();
+        var existingSet = existingSugerencias
+            .Select(s => $"{s.Campo}:{s.Valor}")
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        var sugerencias = new[]
+        var allSugerencias = new[]
         {
             // Sexo
             new Core.Entities.CatalogoSugerencia
-            { Campo = "sexo", Valor = "Masculino", Orden = 1, Activo = true, UsuarioId = adminUserId },
+            { Campo = "sexo", Valor = "Hombre", Orden = 1, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "sexo", Valor = "Femenino", Orden = 2, Activo = true, UsuarioId = adminUserId },
+            { Campo = "sexo", Valor = "Mujer", Orden = 2, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
             { Campo = "sexo", Valor = "No binario", Orden = 3, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "sexo", Valor = "Prefiero no decir", Orden = 4, Activo = true, UsuarioId = adminUserId },
+            { Campo = "sexo", Valor = "Prefiere no decir", Orden = 4, Activo = true, UsuarioId = adminUserId },
 
-            // Delito
+            // Tipo de Delito
             new Core.Entities.CatalogoSugerencia
-            { Campo = "delito", Valor = "Robo", Orden = 1, Activo = true, UsuarioId = adminUserId },
+            { Campo = "delito", Valor = "Violencia familiar", Orden = 1, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "delito", Valor = "Violencia familiar", Orden = 2, Activo = true, UsuarioId = adminUserId },
+            { Campo = "delito", Valor = "Abuso sexual", Orden = 2, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
             { Campo = "delito", Valor = "Acoso sexual", Orden = 3, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "delito", Valor = "Lesiones", Orden = 4, Activo = true, UsuarioId = adminUserId },
+            { Campo = "delito", Valor = "Violación", Orden = 4, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "delito", Valor = "Amenazas", Orden = 5, Activo = true, UsuarioId = adminUserId },
+            { Campo = "delito", Valor = "Tentativa de feminicidio", Orden = 5, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "delito", Valor = "Feminicidio", Orden = 6, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "delito", Valor = "Violencia vicaria", Orden = 7, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "delito", Valor = "Amenazas", Orden = 8, Activo = true, UsuarioId = adminUserId },
+
+            // Turno Ceiba
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "turno_ceiba", Valor = "Balderas 1", Orden = 1, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "turno_ceiba", Valor = "Balderas 2", Orden = 2, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "turno_ceiba", Valor = "Balderas 3", Orden = 3, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "turno_ceiba", Valor = "Nonoalco 1", Orden = 4, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "turno_ceiba", Valor = "Nonoalco 2", Orden = 5, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "turno_ceiba", Valor = "Nonoalco 3", Orden = 6, Activo = true, UsuarioId = adminUserId },
 
             // Tipo de Atención
             new Core.Entities.CatalogoSugerencia
-            { Campo = "tipo_de_atencion", Valor = "Orientación", Orden = 1, Activo = true, UsuarioId = adminUserId },
+            { Campo = "tipo_de_atencion", Valor = "Llamada telefónica", Orden = 1, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "tipo_de_atencion", Valor = "Canalización", Orden = 2, Activo = true, UsuarioId = adminUserId },
+            { Campo = "tipo_de_atencion", Valor = "Mensaje de texto", Orden = 2, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "tipo_de_atencion", Valor = "Acompañamiento", Orden = 3, Activo = true, UsuarioId = adminUserId },
+            { Campo = "tipo_de_atencion", Valor = "Radio", Orden = 3, Activo = true, UsuarioId = adminUserId },
             new Core.Entities.CatalogoSugerencia
-            { Campo = "tipo_de_atencion", Valor = "Intervención en crisis", Orden = 4, Activo = true, UsuarioId = adminUserId }
+            { Campo = "tipo_de_atencion", Valor = "Primer respondiente", Orden = 4, Activo = true, UsuarioId = adminUserId },
+
+            // Traslados
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "traslados", Valor = "Sí", Orden = 1, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "traslados", Valor = "No", Orden = 2, Activo = true, UsuarioId = adminUserId },
+            new Core.Entities.CatalogoSugerencia
+            { Campo = "traslados", Valor = "No aplica", Orden = 3, Activo = true, UsuarioId = adminUserId }
         };
 
-        _context.CatalogosSugerencia.AddRange(sugerencias);
+        // Filter to only new sugerencias (incremental seeding)
+        var newSugerencias = allSugerencias
+            .Where(s => !existingSet.Contains($"{s.Campo}:{s.Valor}"))
+            .ToList();
+
+        if (newSugerencias.Count == 0)
+        {
+            _logger.LogInformation("All sugerencias already exist. Nothing to seed.");
+            return;
+        }
+
+        _context.CatalogosSugerencia.AddRange(newSugerencias);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("Seeded {Count} sugerencias", sugerencias.Length);
+        _logger.LogInformation("Seeded {NewCount} new sugerencias ({ExistingCount} already existed)",
+            newSugerencias.Count, existingSugerencias.Count);
     }
 
     /// <summary>

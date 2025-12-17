@@ -199,7 +199,7 @@ public class ReportsControllerTests
         var createDto = new CreateReportDto
         {
             DatetimeHechos = DateTime.Today,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             Sexo = "Masculino",
             Edad = 30,
             Delito = "Robo",
@@ -207,7 +207,7 @@ public class ReportsControllerTests
             SectorId = 1,
             CuadranteId = 1,
             TipoDeAtencion = "Inmediata",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Descripción de los hechos reportados",
             AccionesRealizadas = "Descripción de las acciones realizadas"
         };
@@ -266,8 +266,8 @@ public class ReportsControllerTests
     public async Task UpdateReport_ValidData_ReturnsOk()
     {
         // Arrange
-        var updateDto = new UpdateReportDto { TurnoCeiba = 2 };
-        var updatedReport = new ReportDto { Id = 1, TurnoCeiba = 2 };
+        var updateDto = new UpdateReportDto { TurnoCeiba = "Balderas 2" };
+        var updatedReport = new ReportDto { Id = 1, TurnoCeiba = "Balderas 2" };
 
         _reportServiceMock.Setup(x => x.UpdateReportAsync(1, updateDto, _testUserId, false))
             .ReturnsAsync(updatedReport);
@@ -278,7 +278,7 @@ public class ReportsControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedReport = Assert.IsType<ReportDto>(okResult.Value);
-        Assert.Equal(2, returnedReport.TurnoCeiba);
+        Assert.Equal("Balderas 2", returnedReport.TurnoCeiba);
     }
 
     [Fact]

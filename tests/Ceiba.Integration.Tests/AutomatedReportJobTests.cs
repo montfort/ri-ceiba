@@ -70,13 +70,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = 30,
                 TipoDeAtencion = "Presencial",
-                TipoDeAccion = 1,
+                TipoDeAccion = "Preventiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = true,
                 Migrante = false,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 0,
+                Traslados = "No",
                 CreatedAt = DateTime.UtcNow
             },
             new ReporteIncidencia
@@ -88,13 +88,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = 25,
                 TipoDeAtencion = "Telefónica",
-                TipoDeAccion = 2,
+                TipoDeAccion = "Reactiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = false,
                 Migrante = true,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 1,
+                Traslados = "Sí",
                 CreatedAt = DateTime.UtcNow
             }
         };
@@ -139,13 +139,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = 22,
                 TipoDeAtencion = "Presencial",
-                TipoDeAccion = 1,
+                TipoDeAccion = "Preventiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = true,
                 Migrante = false,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 0,
+                Traslados = "No",
                 CreatedAt = DateTime.UtcNow
             },
             new ReporteIncidencia
@@ -157,13 +157,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = 35,
                 TipoDeAtencion = "Presencial",
-                TipoDeAccion = 1,
+                TipoDeAccion = "Preventiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = false,
                 Migrante = true,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 0,
+                Traslados = "No",
                 CreatedAt = DateTime.UtcNow
             }
         );
@@ -517,13 +517,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = age,
                 TipoDeAtencion = "Presencial",
-                TipoDeAccion = 1,
+                TipoDeAccion = "Preventiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = false,
                 Migrante = false,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 0,
+                Traslados = "No",
                 CreatedAt = DateTime.UtcNow
             });
         }
@@ -566,13 +566,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = 30,
                 TipoDeAtencion = "Presencial",
-                TipoDeAccion = 1,
+                TipoDeAccion = "Preventiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = false,
                 Migrante = false,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 0,
+                Traslados = "No",
                 CreatedAt = DateTime.UtcNow
             });
         }
@@ -616,13 +616,13 @@ public class AutomatedReportJobTests : IClassFixture<CeibaWebApplicationFactory>
                 Sexo = "Mujer",
                 Edad = 30,
                 TipoDeAtencion = "Presencial",
-                TipoDeAccion = 1,
+                TipoDeAccion = "Preventiva",
                 ZonaId = zona.Id,
                 LgbtttiqPlus = false,
                 Migrante = false,
                 SituacionCalle = false,
                 Discapacidad = false,
-                Traslados = 0,
+                Traslados = "No",
                 CreatedAt = DateTime.UtcNow
             });
         }

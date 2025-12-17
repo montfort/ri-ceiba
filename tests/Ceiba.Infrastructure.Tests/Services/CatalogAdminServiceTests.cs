@@ -221,7 +221,6 @@ public class CatalogAdminServiceTests : IDisposable
     [InlineData("delito")]
     [InlineData("tipo_de_atencion")]
     [InlineData("turno_ceiba")]
-    [InlineData("tipo_de_accion")]
     [InlineData("traslados")]
     public async Task CreateSugerenciaAsync_ValidCampos_Succeeds(string campo)
     {

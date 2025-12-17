@@ -435,9 +435,9 @@ public class ReportListTests : TestContext
             Cuadrante = new CatalogItemDto { Id = 1, Nombre = "Cuadrante A" },
             Sexo = "Femenino",
             Edad = 25,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Descripción de hechos",
             AccionesRealizadas = "Acciones realizadas"
         };

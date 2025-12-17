@@ -538,9 +538,9 @@ public class ReportViewTests : TestContext
             Cuadrante = new CatalogItemDto { Id = 1, Nombre = "Cuadrante A" },
             Sexo = "Femenino",
             Edad = 25,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             TipoReporte = "A",
             HechosReportados = "Descripcion detallada de los hechos ocurridos durante el incidente.",
             AccionesRealizadas = "Se brindo atencion a la victima y se levanto el reporte correspondiente."

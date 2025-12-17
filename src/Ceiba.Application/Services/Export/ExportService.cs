@@ -320,19 +320,19 @@ public class ExportService : IExportService
             // Classification
             Delito = report.Delito,
             TipoDeAtencion = report.TipoDeAtencion,
-            TipoDeAccion = MapTipoDeAccion(report.TipoDeAccion),
+            TipoDeAccion = report.TipoDeAccion,
 
             // Geographic Location (Zona → Región → Sector → Cuadrante)
             Zona = report.Zona?.Nombre ?? string.Empty,
             Region = report.Region?.Nombre ?? string.Empty,
             Sector = report.Sector?.Nombre ?? string.Empty,
             Cuadrante = report.Cuadrante?.Nombre ?? string.Empty,
-            TurnoCeiba = MapTurnoCeiba(report.TurnoCeiba),
+            TurnoCeiba = report.TurnoCeiba,
 
             // Incident Details
             HechosReportados = report.HechosReportados,
             AccionesRealizadas = report.AccionesRealizadas,
-            Traslados = MapTraslados(report.Traslados),
+            Traslados = report.Traslados,
             Observaciones = report.Observaciones,
 
             // Audit Information (uses GUID for technical identification)
@@ -341,45 +341,4 @@ public class ExportService : IExportService
         };
     }
 
-    /// <summary>
-    /// Maps TipoDeAccion numeric code to string
-    /// </summary>
-    private static string MapTipoDeAccion(short tipoDeAccion)
-    {
-        return tipoDeAccion switch
-        {
-            1 => "Orientación",
-            2 => "Capacitación",
-            3 => "Prevención",
-            _ => "Desconocido"
-        };
-    }
-
-    /// <summary>
-    /// Maps TurnoCeiba numeric code to string
-    /// </summary>
-    private static string MapTurnoCeiba(int turnoCeiba)
-    {
-        return turnoCeiba switch
-        {
-            1 => "Matutino",
-            2 => "Vespertino",
-            3 => "Nocturno",
-            _ => "Desconocido"
-        };
-    }
-
-    /// <summary>
-    /// Maps Traslados numeric code to string
-    /// </summary>
-    private static string MapTraslados(short traslados)
-    {
-        return traslados switch
-        {
-            0 => "Sin traslados",
-            1 => "Con traslados",
-            2 => "No aplica",
-            _ => "Desconocido"
-        };
-    }
 }

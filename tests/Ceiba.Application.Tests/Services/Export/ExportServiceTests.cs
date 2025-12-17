@@ -56,10 +56,10 @@ public class ExportServiceTests
             Discapacidad = false,
             Delito = "Violencia familiar",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Incidente reportado",
             AccionesRealizadas = "Acciones tomadas",
-            Traslados = 0,
+            Traslados = "No",
             Observaciones = "Observaciones del caso",
             ZonaId = 1,
             Zona = new Zona { Id = 1, Nombre = "Zona Centro" },
@@ -67,7 +67,7 @@ public class ExportServiceTests
             Sector = new Sector { Id = 1, Nombre = "Sector A", RegionId = 1 },
             CuadranteId = 1,
             Cuadrante = new Cuadrante { Id = 1, Nombre = "Cuadrante 1", SectorId = 1 },
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             UsuarioId = Guid.NewGuid(),
             CreatedAt = new DateTime(2025, 11, 27, 10, 0, 0, DateTimeKind.Utc),
             UpdatedAt = new DateTime(2025, 11, 27, 15, 30, 0, DateTimeKind.Utc)
@@ -687,12 +687,12 @@ public class ExportServiceTests
         Guid.TryParse(capturedDto!.UsuarioCreador, out _).Should().BeTrue();
     }
 
-    [Theory(DisplayName = "MapTipoDeAccion should map all values correctly")]
-    [InlineData(1, "Orientación")]
-    [InlineData(2, "Capacitación")]
-    [InlineData(3, "Prevención")]
-    [InlineData(99, "Desconocido")]
-    public async Task ExportReportsAsync_MapsTipoDeAccionCorrectly(short tipoDeAccion, string expected)
+    [Theory(DisplayName = "TipoDeAccion should be passed through directly")]
+    [InlineData("Preventiva")]
+    [InlineData("Reactiva")]
+    [InlineData("Seguimiento")]
+    [InlineData("Orientación y apoyo")]
+    public async Task ExportReportsAsync_PassesTipoDeAccionDirectly(string tipoDeAccion)
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -718,15 +718,14 @@ public class ExportServiceTests
 
         // Assert
         capturedDto.Should().NotBeNull();
-        capturedDto!.TipoDeAccion.Should().Be(expected);
+        capturedDto!.TipoDeAccion.Should().Be(tipoDeAccion);
     }
 
-    [Theory(DisplayName = "MapTurnoCeiba should map all values correctly")]
-    [InlineData(1, "Matutino")]
-    [InlineData(2, "Vespertino")]
-    [InlineData(3, "Nocturno")]
-    [InlineData(99, "Desconocido")]
-    public async Task ExportReportsAsync_MapsTurnoCeibaCorrectly(int turnoCeiba, string expected)
+    [Theory(DisplayName = "TurnoCeiba should be passed through correctly")]
+    [InlineData("Balderas 1")]
+    [InlineData("Balderas 2")]
+    [InlineData("Nonoalco 1")]
+    public async Task ExportReportsAsync_PassesTurnoCeibaCorrectly(string turnoCeiba)
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -752,15 +751,14 @@ public class ExportServiceTests
 
         // Assert
         capturedDto.Should().NotBeNull();
-        capturedDto!.TurnoCeiba.Should().Be(expected);
+        capturedDto!.TurnoCeiba.Should().Be(turnoCeiba);
     }
 
-    [Theory(DisplayName = "MapTraslados should map all values correctly")]
-    [InlineData((short)0, "Sin traslados")]
-    [InlineData((short)1, "Con traslados")]
-    [InlineData((short)2, "No aplica")]
-    [InlineData((short)99, "Desconocido")]
-    public async Task ExportReportsAsync_MapsTrasladosCorrectly(short traslados, string expected)
+    [Theory(DisplayName = "Traslados should be passed through correctly")]
+    [InlineData("Sí")]
+    [InlineData("No")]
+    [InlineData("No aplica")]
+    public async Task ExportReportsAsync_PassesTrasladosCorrectly(string traslados)
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -786,7 +784,7 @@ public class ExportServiceTests
 
         // Assert
         capturedDto.Should().NotBeNull();
-        capturedDto!.Traslados.Should().Be(expected);
+        capturedDto!.Traslados.Should().Be(traslados);
     }
 
     [Fact(DisplayName = "MapToExportDto should map Estado Borrador correctly")]

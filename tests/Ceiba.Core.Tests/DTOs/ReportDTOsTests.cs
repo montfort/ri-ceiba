@@ -123,15 +123,14 @@ public class ReportDTOsTests
         results.Should().Contain(r => r.MemberNames.Contains("CuadranteId"));
     }
 
-    [Theory(DisplayName = "CreateReportDto validation should enforce TipoDeAccion range")]
-    [InlineData(0)]
-    [InlineData(4)]
-    [InlineData(-1)]
-    public void CreateReportDto_Validation_ShouldEnforceTipoDeAccionRange(int invalidValue)
+    [Theory(DisplayName = "CreateReportDto validation should enforce TipoDeAccion is not empty")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void CreateReportDto_Validation_ShouldEnforceTipoDeAccionNotEmpty(string? invalidValue)
     {
         // Arrange
         var dto = CreateValidReportDto();
-        dto.TipoDeAccion = invalidValue;
+        dto.TipoDeAccion = invalidValue ?? string.Empty;
 
         // Act
         var results = ValidateModel(dto);
@@ -140,15 +139,12 @@ public class ReportDTOsTests
         results.Should().Contain(r => r.MemberNames.Contains("TipoDeAccion"));
     }
 
-    [Theory(DisplayName = "CreateReportDto validation should enforce Traslados range")]
-    [InlineData(-1)]
-    [InlineData(3)]
-    [InlineData(10)]
-    public void CreateReportDto_Validation_ShouldEnforceTrasladosRange(int invalidValue)
+    [Fact(DisplayName = "CreateReportDto validation should require Traslados")]
+    public void CreateReportDto_Validation_ShouldRequireTraslados()
     {
         // Arrange
         var dto = CreateValidReportDto();
-        dto.Traslados = invalidValue;
+        dto.Traslados = "";
 
         // Act
         var results = ValidateModel(dto);
@@ -333,12 +329,12 @@ public class ReportDTOsTests
             Region = new CatalogItemDto { Id = 2, Nombre = "Región Centro" },
             Sector = new CatalogItemDto { Id = 3, Nombre = "Sector A" },
             Cuadrante = new CatalogItemDto { Id = 4, Nombre = "Cuadrante 1" },
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Orientación",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Se reporta robo en vía pública",
             AccionesRealizadas = "Se brindó orientación a la víctima",
-            Traslados = 0
+            Traslados = "No"
         };
 
         // Assert
@@ -516,12 +512,12 @@ public class ReportDTOsTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Orientación",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Se reporta un robo en vía pública cerca del parque central",
             AccionesRealizadas = "Se brindó orientación a la víctima y se canalizó al MP",
-            Traslados = 0
+            Traslados = "No"
         };
     }
 

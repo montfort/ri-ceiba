@@ -277,14 +277,13 @@ public static class SugerenciaCampos
 
     // Detalles Operativos
     public const string TurnoCeiba = "turno_ceiba";
-    public const string TipoDeAccion = "tipo_de_accion";
     public const string Traslados = "traslados";
 
-    public static readonly string[] All = { Sexo, Delito, TipoDeAtencion, TurnoCeiba, TipoDeAccion, Traslados };
+    public static readonly string[] All = { Sexo, Delito, TipoDeAtencion, TurnoCeiba, Traslados };
 
     // Grupos para la UI
     public static readonly string[] DatosPersona = { Sexo, Delito, TipoDeAtencion };
-    public static readonly string[] DetallesOperativos = { TurnoCeiba, TipoDeAccion, Traslados };
+    public static readonly string[] DetallesOperativos = { TurnoCeiba, Traslados };
 
     public static string GetDisplayName(string campo) => campo switch
     {
@@ -292,7 +291,6 @@ public static class SugerenciaCampos
         Delito => "Tipo de Delito",
         TipoDeAtencion => "Tipo de Atención",
         TurnoCeiba => "Turno CEIBA",
-        TipoDeAccion => "Tipo de Acción",
         Traslados => "Traslados",
         _ => campo
     };

@@ -51,11 +51,11 @@ public class ReportRepositoryTests : IDisposable
             Sexo = "M",
             Edad = 30,
             TipoDeAtencion = "Inmediata",
-            TipoDeAccion = (short)1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test hechos",
             AccionesRealizadas = "Test acciones",
             DatetimeHechos = DateTime.UtcNow,
-            TurnoCeiba = (short)1,
+            TurnoCeiba = "Balderas 1",
             CreatedAt = DateTime.UtcNow
         };
 
@@ -176,11 +176,11 @@ public class ReportRepositoryTests : IDisposable
             Sexo = "M",
             Edad = 25,
             TipoDeAtencion = "Test",
-            TipoDeAccion = (short)1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test",
             AccionesRealizadas = "Test",
             DatetimeHechos = DateTime.UtcNow,
-            TurnoCeiba = (short)1
+            TurnoCeiba = "Balderas 1"
         };
 
         // Act
@@ -208,11 +208,11 @@ public class ReportRepositoryTests : IDisposable
             Sexo = "M",
             Edad = 25,
             TipoDeAtencion = "Test",
-            TipoDeAccion = (short)1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test",
             AccionesRealizadas = "Test",
             DatetimeHechos = DateTime.UtcNow,
-            TurnoCeiba = (short)1
+            TurnoCeiba = "Balderas 1"
         };
         var originalId = report.Id;
 
@@ -548,11 +548,11 @@ public class ReportRepositoryTests : IDisposable
             Sexo = "M",
             Edad = 25,
             TipoDeAtencion = "Test",
-            TipoDeAccion = (short)1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test hechos",
             AccionesRealizadas = "Test acciones",
             DatetimeHechos = DateTime.UtcNow,
-            TurnoCeiba = (short)1
+            TurnoCeiba = "Balderas 1"
         };
     }
 

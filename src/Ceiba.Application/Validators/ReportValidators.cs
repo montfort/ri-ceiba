@@ -39,14 +39,16 @@ public class CreateReportDtoValidator : AbstractValidator<CreateReportDto>
             .GreaterThan(0).WithMessage("Debe seleccionar un cuadrante válido");
 
         RuleFor(x => x.TurnoCeiba)
-            .GreaterThan(0).WithMessage("El turno CEIBA es requerido");
+            .NotEmpty().WithMessage("El turno CEIBA es requerido")
+            .MaximumLength(100).WithMessage("El turno CEIBA no puede exceder 100 caracteres");
 
         RuleFor(x => x.TipoDeAtencion)
             .NotEmpty().WithMessage("El tipo de atención es requerido")
             .MaximumLength(100).WithMessage("El tipo de atención no puede exceder 100 caracteres");
 
         RuleFor(x => x.TipoDeAccion)
-            .InclusiveBetween(1, 3).WithMessage("El tipo de acción debe ser 1 (ATOS), 2 (Capacitación) o 3 (Prevención)");
+            .NotEmpty().WithMessage("El tipo de acción es requerido")
+            .MaximumLength(500).WithMessage("El tipo de acción no puede exceder 500 caracteres");
 
         RuleFor(x => x.HechosReportados)
             .NotEmpty().WithMessage("Los hechos reportados son requeridos")
@@ -59,7 +61,8 @@ public class CreateReportDtoValidator : AbstractValidator<CreateReportDto>
             .MaximumLength(10000).WithMessage("Las acciones realizadas no pueden exceder 10,000 caracteres");
 
         RuleFor(x => x.Traslados)
-            .InclusiveBetween(0, 2).WithMessage("Traslados debe ser 0 (Sin), 1 (Con) o 2 (No aplica)");
+            .NotEmpty().WithMessage("El estado de traslados es requerido")
+            .MaximumLength(100).WithMessage("Traslados no puede exceder 100 caracteres");
 
         RuleFor(x => x.Observaciones)
             .MaximumLength(5000).WithMessage("Las observaciones no pueden exceder 5,000 caracteres")
@@ -108,16 +111,16 @@ public class UpdateReportDtoValidator : AbstractValidator<UpdateReportDto>
             .When(x => x.CuadranteId.HasValue);
 
         RuleFor(x => x.TurnoCeiba)
-            .GreaterThan(0).WithMessage("El turno CEIBA debe ser mayor que 0")
-            .When(x => x.TurnoCeiba.HasValue);
+            .MaximumLength(100).WithMessage("El turno CEIBA no puede exceder 100 caracteres")
+            .When(x => !string.IsNullOrWhiteSpace(x.TurnoCeiba));
 
         RuleFor(x => x.TipoDeAtencion)
             .MaximumLength(100).WithMessage("El tipo de atención no puede exceder 100 caracteres")
             .When(x => !string.IsNullOrWhiteSpace(x.TipoDeAtencion));
 
         RuleFor(x => x.TipoDeAccion)
-            .InclusiveBetween(1, 3).WithMessage("El tipo de acción debe ser 1, 2 o 3")
-            .When(x => x.TipoDeAccion.HasValue);
+            .MaximumLength(500).WithMessage("El tipo de acción no puede exceder 500 caracteres")
+            .When(x => !string.IsNullOrWhiteSpace(x.TipoDeAccion));
 
         RuleFor(x => x.HechosReportados)
             .MinimumLength(10).WithMessage("Los hechos reportados deben tener al menos 10 caracteres")
@@ -130,8 +133,8 @@ public class UpdateReportDtoValidator : AbstractValidator<UpdateReportDto>
             .When(x => !string.IsNullOrWhiteSpace(x.AccionesRealizadas));
 
         RuleFor(x => x.Traslados)
-            .InclusiveBetween(0, 2).WithMessage("Traslados debe ser 0, 1 o 2")
-            .When(x => x.Traslados.HasValue);
+            .MaximumLength(100).WithMessage("Traslados no puede exceder 100 caracteres")
+            .When(x => !string.IsNullOrWhiteSpace(x.Traslados));
 
         RuleFor(x => x.Observaciones)
             .MaximumLength(5000).WithMessage("Las observaciones no pueden exceder 5,000 caracteres")

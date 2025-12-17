@@ -510,39 +510,25 @@ public class UpdateReportDtoValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.TurnoCeiba);
     }
 
-    [Fact(DisplayName = "TurnoCeiba should be greater than 0 when provided")]
-    public void TurnoCeiba_WhenZero_ShouldHaveValidationError()
+    [Fact(DisplayName = "TurnoCeiba should not exceed max length when provided")]
+    public void TurnoCeiba_WhenTooLong_ShouldHaveValidationError()
     {
         // Arrange
-        var dto = new UpdateReportDto { TurnoCeiba = 0 };
+        var dto = new UpdateReportDto { TurnoCeiba = new string('x', 101) };
 
         // Act
         var result = _validator.TestValidate(dto);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.TurnoCeiba)
-            .WithErrorMessage("El turno CEIBA debe ser mayor que 0");
+            .WithErrorMessage("El turno CEIBA no puede exceder 100 caracteres");
     }
 
-    [Fact(DisplayName = "TurnoCeiba should not be negative")]
-    public void TurnoCeiba_WhenNegative_ShouldHaveValidationError()
+    [Fact(DisplayName = "TurnoCeiba should accept valid value when provided")]
+    public void TurnoCeiba_WhenValid_ShouldNotHaveValidationError()
     {
         // Arrange
-        var dto = new UpdateReportDto { TurnoCeiba = -1 };
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.TurnoCeiba)
-            .WithErrorMessage("El turno CEIBA debe ser mayor que 0");
-    }
-
-    [Fact(DisplayName = "TurnoCeiba should accept positive values")]
-    public void TurnoCeiba_WhenPositive_ShouldNotHaveValidationError()
-    {
-        // Arrange
-        var dto = new UpdateReportDto { TurnoCeiba = 2 };
+        var dto = new UpdateReportDto { TurnoCeiba = "Balderas 1" };
 
         // Act
         var result = _validator.TestValidate(dto);
@@ -625,53 +611,26 @@ public class UpdateReportDtoValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.TipoDeAccion);
     }
 
-    [Fact(DisplayName = "TipoDeAccion should be between 1 and 3 when provided")]
-    public void TipoDeAccion_WhenZero_ShouldHaveValidationError()
+    [Fact(DisplayName = "TipoDeAccion should not exceed 500 characters when provided")]
+    public void TipoDeAccion_WhenTooLong_ShouldHaveValidationError()
     {
         // Arrange
-        var dto = new UpdateReportDto { TipoDeAccion = 0 };
+        var dto = new UpdateReportDto { TipoDeAccion = new string('x', 501) };
 
         // Act
         var result = _validator.TestValidate(dto);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.TipoDeAccion)
-            .WithErrorMessage("El tipo de acción debe ser 1, 2 o 3");
+            .WithErrorMessage("El tipo de acción no puede exceder 500 caracteres");
     }
 
-    [Fact(DisplayName = "TipoDeAccion should not be negative")]
-    public void TipoDeAccion_WhenNegative_ShouldHaveValidationError()
-    {
-        // Arrange
-        var dto = new UpdateReportDto { TipoDeAccion = -1 };
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.TipoDeAccion)
-            .WithErrorMessage("El tipo de acción debe ser 1, 2 o 3");
-    }
-
-    [Fact(DisplayName = "TipoDeAccion should not exceed 3")]
-    public void TipoDeAccion_WhenGreaterThan3_ShouldHaveValidationError()
-    {
-        // Arrange
-        var dto = new UpdateReportDto { TipoDeAccion = 4 };
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.TipoDeAccion)
-            .WithErrorMessage("El tipo de acción debe ser 1, 2 o 3");
-    }
-
-    [Theory(DisplayName = "TipoDeAccion should accept values 1, 2, and 3")]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    public void TipoDeAccion_WhenValidValue_ShouldNotHaveValidationError(int tipoDeAccion)
+    [Theory(DisplayName = "TipoDeAccion should accept valid text values")]
+    [InlineData("Preventiva")]
+    [InlineData("Reactiva")]
+    [InlineData("Seguimiento")]
+    [InlineData("Orientación y apoyo")]
+    public void TipoDeAccion_WhenValidValue_ShouldNotHaveValidationError(string tipoDeAccion)
     {
         // Arrange
         var dto = new UpdateReportDto { TipoDeAccion = tipoDeAccion };
@@ -900,39 +859,25 @@ public class UpdateReportDtoValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.Traslados);
     }
 
-    [Fact(DisplayName = "Traslados should be between 0 and 2 when provided")]
-    public void Traslados_WhenNegative_ShouldHaveValidationError()
+    [Fact(DisplayName = "Traslados should not exceed max length when provided")]
+    public void Traslados_WhenTooLong_ShouldHaveValidationError()
     {
         // Arrange
-        var dto = new UpdateReportDto { Traslados = -1 };
+        var dto = new UpdateReportDto { Traslados = new string('x', 101) };
 
         // Act
         var result = _validator.TestValidate(dto);
 
         // Assert
         result.ShouldHaveValidationErrorFor(x => x.Traslados)
-            .WithErrorMessage("Traslados debe ser 0, 1 o 2");
+            .WithErrorMessage("Traslados no puede exceder 100 caracteres");
     }
 
-    [Fact(DisplayName = "Traslados should not exceed 2")]
-    public void Traslados_WhenGreaterThan2_ShouldHaveValidationError()
-    {
-        // Arrange
-        var dto = new UpdateReportDto { Traslados = 3 };
-
-        // Act
-        var result = _validator.TestValidate(dto);
-
-        // Assert
-        result.ShouldHaveValidationErrorFor(x => x.Traslados)
-            .WithErrorMessage("Traslados debe ser 0, 1 o 2");
-    }
-
-    [Theory(DisplayName = "Traslados should accept values 0, 1, and 2")]
-    [InlineData(0)]
-    [InlineData(1)]
-    [InlineData(2)]
-    public void Traslados_WhenValidValue_ShouldNotHaveValidationError(int traslados)
+    [Theory(DisplayName = "Traslados should accept valid values")]
+    [InlineData("Sí")]
+    [InlineData("No")]
+    [InlineData("No aplica")]
+    public void Traslados_WhenValidValue_ShouldNotHaveValidationError(string traslados)
     {
         // Arrange
         var dto = new UpdateReportDto { Traslados = traslados };
@@ -1129,12 +1074,12 @@ public class UpdateReportDtoValidatorTests
             ZonaId = 2,
             SectorId = 3,
             CuadranteId = 5,
-            TurnoCeiba = 2,
+            TurnoCeiba = "Balderas 2",
             TipoDeAtencion = "Telefónica",
-            TipoDeAccion = 2,
+            TipoDeAccion = "Reactiva",
             HechosReportados = "Descripción completa actualizada de los hechos reportados.",
             AccionesRealizadas = "Acciones actualizadas realizadas por el oficial.",
-            Traslados = 1,
+            Traslados = "Sí",
             Observaciones = "Observaciones actualizadas"
         };
 
@@ -1159,12 +1104,12 @@ public class UpdateReportDtoValidatorTests
             ZonaId = 0,
             SectorId = -1,
             CuadranteId = 0,
-            TurnoCeiba = -1,
+            TurnoCeiba = new string('T', 101),
             TipoDeAtencion = new string('C', 101),
-            TipoDeAccion = 5,
+            TipoDeAccion = new string('x', 501),
             HechosReportados = "Corto",
             AccionesRealizadas = "Breve",
-            Traslados = 10,
+            Traslados = new string('R', 101),
             Observaciones = new string('D', 5001)
         };
 

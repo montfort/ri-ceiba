@@ -139,12 +139,12 @@ public class InputValidationTests : IClassFixture<CeibaWebApplicationFactory>
             ZonaId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = veryLongString, // Excessively long input
             AccionesRealizadas = "Test actions",
-            Traslados = 0
+            Traslados = "No"
         };
 
         // Act
@@ -204,12 +204,12 @@ public class InputValidationTests : IClassFixture<CeibaWebApplicationFactory>
             ZonaId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test facts for the report",
             AccionesRealizadas = "Test actions taken",
-            Traslados = 0
+            Traslados = "No"
         };
 
         // Act

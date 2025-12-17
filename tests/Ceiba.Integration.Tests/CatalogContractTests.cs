@@ -427,12 +427,11 @@ public class CatalogContractTests : IClassFixture<CeibaWebApplicationFactory>
     [Fact(DisplayName = "T062: SugerenciaCampos should define all expected field types")]
     public void SugerenciaCampos_ShouldDefineExpectedFieldTypes()
     {
-        // Assert
+        // Assert - tipo_de_accion was removed, now a free text field
         SugerenciaCampos.All.Should().Contain("sexo");
         SugerenciaCampos.All.Should().Contain("delito");
         SugerenciaCampos.All.Should().Contain("tipo_de_atencion");
         SugerenciaCampos.All.Should().Contain("turno_ceiba");
-        SugerenciaCampos.All.Should().Contain("tipo_de_accion");
         SugerenciaCampos.All.Should().Contain("traslados");
     }
 

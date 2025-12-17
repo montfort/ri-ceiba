@@ -127,9 +127,10 @@ public class ReporteIncidencia : BaseEntityWithUser
 
     /// <summary>
     /// Ceiba shift identifier.
-    /// Required field identifying the shift during which the incident occurred.
+    /// Free-form text field for shift identification.
+    /// Examples: "Balderas 1", "Nonoalco 2"
     /// </summary>
-    public int TurnoCeiba { get; set; }
+    public string TurnoCeiba { get; set; } = string.Empty;
 
     /// <summary>
     /// Type of attention/service provided.
@@ -140,11 +141,9 @@ public class ReporteIncidencia : BaseEntityWithUser
 
     /// <summary>
     /// Type of action taken.
-    /// 1 = ATOS (Atención y Orientación)
-    /// 2 = Capacitación
-    /// 3 = Prevención
+    /// Free-form text field describing the type of action.
     /// </summary>
-    public short TipoDeAccion { get; set; }
+    public string TipoDeAccion { get; set; } = string.Empty;
 
     /// <summary>
     /// Detailed description of the reported facts/incident.
@@ -160,11 +159,10 @@ public class ReporteIncidencia : BaseEntityWithUser
 
     /// <summary>
     /// Transfer status.
-    /// 0 = Sin traslados (No transfers)
-    /// 1 = Con traslados (With transfers)
-    /// 2 = No aplica (Not applicable)
+    /// Free-form text field for transfer information.
+    /// Examples: "Sí", "No", "No aplica"
     /// </summary>
-    public short Traslados { get; set; }
+    public string Traslados { get; set; } = string.Empty;
 
     /// <summary>
     /// Additional observations/notes.
@@ -267,11 +265,14 @@ public class ReporteIncidencia : BaseEntityWithUser
         if (CuadranteId <= 0)
             errors.Add("El campo 'cuadranteId' es requerido.");
 
-        if (!ValidateTipoDeAccion())
-            errors.Add("El campo 'tipoDeAccion' debe ser 1, 2 o 3.");
+        if (string.IsNullOrWhiteSpace(TurnoCeiba))
+            errors.Add("El campo 'turnoCeiba' es requerido.");
 
-        if (!ValidateTraslados())
-            errors.Add("El campo 'traslados' debe ser 0, 1 o 2.");
+        if (string.IsNullOrWhiteSpace(TipoDeAccion))
+            errors.Add("El campo 'tipoDeAccion' es requerido.");
+
+        if (string.IsNullOrWhiteSpace(Traslados))
+            errors.Add("El campo 'traslados' es requerido.");
 
         if (string.IsNullOrWhiteSpace(HechosReportados))
             errors.Add("El campo 'hechosReportados' es requerido.");
@@ -284,22 +285,6 @@ public class ReporteIncidencia : BaseEntityWithUser
             IsValid = errors.Count == 0,
             Errors = errors
         };
-    }
-
-    /// <summary>
-    /// Validates that TipoDeAccion is one of the allowed values (1, 2, 3).
-    /// </summary>
-    public bool ValidateTipoDeAccion()
-    {
-        return TipoDeAccion >= 1 && TipoDeAccion <= 3;
-    }
-
-    /// <summary>
-    /// Validates that Traslados is one of the allowed values (0, 1, 2).
-    /// </summary>
-    public bool ValidateTraslados()
-    {
-        return Traslados >= 0 && Traslados <= 2;
     }
 
     #endregion

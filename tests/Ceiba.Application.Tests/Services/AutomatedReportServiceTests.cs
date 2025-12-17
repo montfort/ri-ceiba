@@ -150,13 +150,13 @@ public class AutomatedReportServiceTests : IDisposable
             Sexo = "Mujer",
             Edad = edad,
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             Zona = zona!,
             LgbtttiqPlus = false,
             Migrante = false,
             SituacionCalle = false,
             Discapacidad = false,
-            Traslados = 0,
+            Traslados = "No",
             CreatedAt = DateTime.UtcNow
         };
         _context.ReportesIncidencia.Add(report);
@@ -768,13 +768,13 @@ public class AutomatedReportServiceTests : IDisposable
             Sexo = "Mujer",
             Edad = 30,
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             Zona = zona,
             LgbtttiqPlus = true,
             Migrante = false,
             SituacionCalle = true,
             Discapacidad = false,
-            Traslados = 0,
+            Traslados = "No",
             CreatedAt = DateTime.UtcNow
         };
 
@@ -787,13 +787,13 @@ public class AutomatedReportServiceTests : IDisposable
             Sexo = "Mujer",
             Edad = 30,
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             Zona = zona,
             LgbtttiqPlus = false,
             Migrante = true,
             SituacionCalle = false,
             Discapacidad = true,
-            Traslados = 1,
+            Traslados = "Sí",
             CreatedAt = DateTime.UtcNow
         };
 

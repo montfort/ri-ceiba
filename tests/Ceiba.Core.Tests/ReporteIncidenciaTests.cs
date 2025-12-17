@@ -28,12 +28,12 @@ public class ReporteIncidenciaTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Descripción de los hechos",
             AccionesRealizadas = "Acciones realizadas",
-            Traslados = 0
+            Traslados = "No"
         };
 
         // Assert
@@ -186,12 +186,12 @@ public class ReporteIncidenciaTests
             RegionId = 1,
             SectorId = 1,
             CuadranteId = 1,
-            TurnoCeiba = 1,
+            TurnoCeiba = "Balderas 1",
             TipoDeAtencion = "Presencial",
-            TipoDeAccion = 1,
+            TipoDeAccion = "Preventiva",
             HechosReportados = "Test",
             AccionesRealizadas = "Test",
-            Traslados = 0
+            Traslados = "No"
         };
 
         // Act
@@ -201,80 +201,111 @@ public class ReporteIncidenciaTests
         validationResult.IsValid.Should().BeTrue();
     }
 
-    [Theory(DisplayName = "T025: TipoDeAccion should be 1, 2, or 3")]
-    [InlineData(1)] // ATOS
-    [InlineData(2)] // Capacitación
-    [InlineData(3)] // Prevención
-    public void Validate_WithValidTipoDeAccion_ShouldPass(int tipoDeAccion)
+    [Theory(DisplayName = "T025: TipoDeAccion should be a non-empty string")]
+    [InlineData("Preventiva")]
+    [InlineData("Reactiva")]
+    [InlineData("Seguimiento")]
+    [InlineData("Orientación y apoyo")]
+    public void Validate_WithValidTipoDeAccion_ShouldPass(string tipoDeAccion)
     {
         // Arrange
         var report = new ReporteIncidencia
         {
-            TipoDeAccion = (short)tipoDeAccion
+            UsuarioId = Guid.NewGuid(),
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = tipoDeAccion,
+            HechosReportados = "Test",
+            AccionesRealizadas = "Test",
+            Traslados = "No"
         };
 
         // Act
-        var validationResult = report.ValidateTipoDeAccion();
+        var validationResult = report.Validate();
 
         // Assert
-        validationResult.Should().BeTrue();
+        validationResult.IsValid.Should().BeTrue();
     }
 
-    [Theory(DisplayName = "T025: TipoDeAccion with invalid values should fail")]
-    [InlineData(0)]
-    [InlineData(4)]
-    [InlineData(-1)]
-    public void Validate_WithInvalidTipoDeAccion_ShouldFail(int tipoDeAccion)
+    [Theory(DisplayName = "T025: TipoDeAccion with empty values should fail")]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Validate_WithEmptyTipoDeAccion_ShouldFail(string tipoDeAccion)
     {
         // Arrange
         var report = new ReporteIncidencia
         {
-            TipoDeAccion = (short)tipoDeAccion
+            TipoDeAccion = tipoDeAccion
         };
 
         // Act
-        var validationResult = report.ValidateTipoDeAccion();
+        var validationResult = report.Validate();
 
         // Assert
-        validationResult.Should().BeFalse();
+        validationResult.IsValid.Should().BeFalse();
+        validationResult.Errors.Should().Contain(e => e.Contains("tipoDeAccion"));
     }
 
-    [Theory(DisplayName = "T025: Traslados should be 0, 1, or 2")]
-    [InlineData(0)] // Sin traslados
-    [InlineData(1)] // Con traslados
-    [InlineData(2)] // No aplica
-    public void Validate_WithValidTraslados_ShouldPass(int traslados)
+    [Theory(DisplayName = "T025: Traslados should be a non-empty string")]
+    [InlineData("Sí")]
+    [InlineData("No")]
+    [InlineData("No aplica")]
+    public void Validate_WithValidTraslados_ShouldPass(string traslados)
     {
         // Arrange
         var report = new ReporteIncidencia
         {
-            Traslados = (short)traslados
+            UsuarioId = Guid.NewGuid(),
+            TipoReporte = "A",
+            DatetimeHechos = DateTime.UtcNow,
+            Sexo = "Femenino",
+            Edad = 28,
+            Delito = "Test",
+            ZonaId = 1,
+            RegionId = 1,
+            SectorId = 1,
+            CuadranteId = 1,
+            TurnoCeiba = "Balderas 1",
+            TipoDeAtencion = "Presencial",
+            TipoDeAccion = "Preventiva",
+            HechosReportados = "Test",
+            AccionesRealizadas = "Test",
+            Traslados = traslados
         };
 
         // Act
-        var validationResult = report.ValidateTraslados();
+        var validationResult = report.Validate();
 
         // Assert
-        validationResult.Should().BeTrue();
+        validationResult.IsValid.Should().BeTrue();
     }
 
-    [Theory(DisplayName = "T025: Traslados with invalid values should fail")]
-    [InlineData(-1)]
-    [InlineData(3)]
-    [InlineData(10)]
-    public void Validate_WithInvalidTraslados_ShouldFail(int traslados)
+    [Theory(DisplayName = "T025: Traslados with empty values should fail")]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Validate_WithEmptyTraslados_ShouldFail(string traslados)
     {
         // Arrange
         var report = new ReporteIncidencia
         {
-            Traslados = (short)traslados
+            Traslados = traslados
         };
 
         // Act
-        var validationResult = report.ValidateTraslados();
+        var validationResult = report.Validate();
 
         // Assert
-        validationResult.Should().BeFalse();
+        validationResult.IsValid.Should().BeFalse();
+        validationResult.Errors.Should().Contain(e => e.Contains("traslados"));
     }
 
     [Fact(DisplayName = "T025: Required fields should not be null or empty")]

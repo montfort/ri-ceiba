@@ -220,32 +220,29 @@
                             </h5>
                             <div class="row mb-3">
                                 <div class="col-md-4">
-                                    <label for="turnoCeiba" class="form-label">Turno CEIBA *</label>
-                                    <InputSelect id="turnoCeiba" class="form-select" @bind-Value="Model.TurnoCeiba">
-                                        <option value="0">Seleccione un turno</option>
-                                        <option value="1">Turno 1 (Matutino)</option>
-                                        <option value="2">Turno 2 (Vespertino)</option>
-                                        <option value="3">Turno 3 (Nocturno)</option>
-                                    </InputSelect>
+                                    <SuggestionInput Id="turnoCeiba"
+                                                     Label="Turno CEIBA"
+                                                     Value="@Model.TurnoCeiba"
+                                                     ValueChanged="@OnTurnoCeibaChanged"
+                                                     Suggestions="@TurnoCeibaSuggestions"
+                                                     Required="true"
+                                                     PlaceholderText="Ingrese el turno CEIBA" />
                                     <ValidationMessage For="@(() => Model.TurnoCeiba)" />
                                 </div>
                                 <div class="col-md-4">
                                     <label for="tipoDeAccion" class="form-label">Tipo de Acción *</label>
-                                    <InputSelect id="tipoDeAccion" class="form-select" @bind-Value="Model.TipoDeAccion">
-                                        <option value="0">Seleccione una acción</option>
-                                        <option value="1">Preventiva</option>
-                                        <option value="2">Reactiva</option>
-                                        <option value="3">Seguimiento</option>
-                                    </InputSelect>
+                                    <InputTextArea id="tipoDeAccion" class="form-control" @bind-Value="Model.TipoDeAccion" rows="3" />
+                                    <small class="form-text text-muted">Máximo 500 caracteres</small>
                                     <ValidationMessage For="@(() => Model.TipoDeAccion)" />
                                 </div>
                                 <div class="col-md-4">
-                                    <label for="traslados" class="form-label">Traslados *</label>
-                                    <InputSelect id="traslados" class="form-select" @bind-Value="Model.Traslados">
-                                        <option value="0">Sin traslado</option>
-                                        <option value="1">Hospital</option>
-                                        <option value="2">Ministerio Público</option>
-                                    </InputSelect>
+                                    <SuggestionInput Id="traslados"
+                                                     Label="Traslados"
+                                                     Value="@Model.Traslados"
+                                                     ValueChanged="@OnTrasladosChanged"
+                                                     Suggestions="@TrasladosSuggestions"
+                                                     Required="true"
+                                                     PlaceholderText="Ingrese estado de traslados" />
                                     <ValidationMessage For="@(() => Model.Traslados)" />
                                 </div>
                             </div>
@@ -347,6 +344,8 @@
     private List<string> SexoSuggestions { get; set; } = new();
     private List<string> DelitoSuggestions { get; set; } = new();
     private List<string> TipoDeAtencionSuggestions { get; set; } = new();
+    private List<string> TurnoCeibaSuggestions { get; set; } = new();
+    private List<string> TrasladosSuggestions { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -545,6 +544,8 @@
             SexoSuggestions = await CatalogService.GetSuggestionsAsync("sexo");
             DelitoSuggestions = await CatalogService.GetSuggestionsAsync("delito");
             TipoDeAtencionSuggestions = await CatalogService.GetSuggestionsAsync("tipo_de_atencion");
+            TurnoCeibaSuggestions = await CatalogService.GetSuggestionsAsync("turno_ceiba");
+            TrasladosSuggestions = await CatalogService.GetSuggestionsAsync("traslados");
         }
         catch (Exception ex)
         {
@@ -740,6 +741,18 @@
     private Task OnTipoAtencionChanged(string? value)
     {
         Model.TipoDeAtencion = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTurnoCeibaChanged(string? value)
+    {
+        Model.TurnoCeiba = value ?? string.Empty;
+        return Task.CompletedTask;
+    }
+
+    private Task OnTrasladosChanged(string? value)
+    {
+        Model.Traslados = value ?? string.Empty;
         return Task.CompletedTask;
     }
 }

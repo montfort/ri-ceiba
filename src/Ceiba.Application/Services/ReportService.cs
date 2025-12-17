@@ -75,10 +75,10 @@ public class ReportService : IReportService
             CuadranteId = createDto.CuadranteId,
             TurnoCeiba = createDto.TurnoCeiba,
             TipoDeAtencion = createDto.TipoDeAtencion,
-            TipoDeAccion = (short)createDto.TipoDeAccion,
+            TipoDeAccion = createDto.TipoDeAccion,
             HechosReportados = createDto.HechosReportados,
             AccionesRealizadas = createDto.AccionesRealizadas,
-            Traslados = (short)createDto.Traslados,
+            Traslados = createDto.Traslados,
             Observaciones = createDto.Observaciones
         };
 
@@ -232,14 +232,14 @@ public class ReportService : IReportService
 
     private static void ApplyAdditionalFieldUpdates(ReporteIncidencia report, UpdateReportDto updateDto)
     {
-        if (updateDto.TurnoCeiba.HasValue)
-            report.TurnoCeiba = updateDto.TurnoCeiba.Value;
+        if (updateDto.TurnoCeiba != null)
+            report.TurnoCeiba = updateDto.TurnoCeiba;
 
         if (updateDto.TipoDeAtencion != null)
             report.TipoDeAtencion = updateDto.TipoDeAtencion;
 
-        if (updateDto.TipoDeAccion.HasValue)
-            report.TipoDeAccion = (short)updateDto.TipoDeAccion.Value;
+        if (updateDto.TipoDeAccion != null)
+            report.TipoDeAccion = updateDto.TipoDeAccion;
 
         if (updateDto.HechosReportados != null)
             report.HechosReportados = updateDto.HechosReportados;
@@ -247,8 +247,8 @@ public class ReportService : IReportService
         if (updateDto.AccionesRealizadas != null)
             report.AccionesRealizadas = updateDto.AccionesRealizadas;
 
-        if (updateDto.Traslados.HasValue)
-            report.Traslados = (short)updateDto.Traslados.Value;
+        if (updateDto.Traslados != null)
+            report.Traslados = updateDto.Traslados;
 
         if (updateDto.Observaciones != null)
             report.Observaciones = updateDto.Observaciones;
@@ -474,12 +474,12 @@ public class ReportService : IReportService
             (updateDto.RegionId.HasValue, "RegionId"),
             (updateDto.SectorId.HasValue, "SectorId"),
             (updateDto.CuadranteId.HasValue, "CuadranteId"),
-            (updateDto.TurnoCeiba.HasValue, "TurnoCeiba"),
+            (updateDto.TurnoCeiba != null, "TurnoCeiba"),
             (updateDto.TipoDeAtencion != null, "TipoDeAtencion"),
-            (updateDto.TipoDeAccion.HasValue, "TipoDeAccion"),
+            (updateDto.TipoDeAccion != null, "TipoDeAccion"),
             (updateDto.HechosReportados != null, "HechosReportados"),
             (updateDto.AccionesRealizadas != null, "AccionesRealizadas"),
-            (updateDto.Traslados.HasValue, "Traslados"),
+            (updateDto.Traslados != null, "Traslados"),
             (updateDto.Observaciones != null, "Observaciones")
         };
 

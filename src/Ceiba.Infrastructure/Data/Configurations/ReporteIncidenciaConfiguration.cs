@@ -125,6 +125,7 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
         // Operational Details
         builder.Property(r => r.TurnoCeiba)
             .HasColumnName("turno_ceiba")
+            .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(r => r.TipoDeAtencion)
@@ -134,6 +135,7 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
 
         builder.Property(r => r.TipoDeAccion)
             .HasColumnName("tipo_de_accion")
+            .HasMaxLength(500)
             .IsRequired();
 
         builder.Property(r => r.HechosReportados)
@@ -148,6 +150,7 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
 
         builder.Property(r => r.Traslados)
             .HasColumnName("traslados")
+            .HasMaxLength(100)
             .IsRequired();
 
         builder.Property(r => r.Observaciones)
@@ -221,8 +224,6 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
         {
             t.HasCheckConstraint("CK_REPORTE_EDAD", "edad > 0 AND edad < 150");
             t.HasCheckConstraint("CK_REPORTE_ESTADO", "estado IN (0, 1)");
-            t.HasCheckConstraint("CK_REPORTE_TIPO_ACCION", "tipo_de_accion IN (1, 2, 3)");
-            t.HasCheckConstraint("CK_REPORTE_TRASLADOS", "traslados IN (0, 1, 2)");
         });
     }
 }

@@ -104,12 +104,12 @@ public class ReportFormComponentTests : TestContext
         cut.Find("select#zona").Should().NotBeNull();
         cut.Find("select#sector").Should().NotBeNull();
         cut.Find("select#cuadrante").Should().NotBeNull();
-        cut.Find("select#turnoCeiba").Should().NotBeNull();
+        cut.Find("input#turnoCeiba").Should().NotBeNull();
         cut.Find("input#tipoDeAtencion").Should().NotBeNull();
-        cut.Find("select#tipoDeAccion").Should().NotBeNull();
+        cut.Find("textarea#tipoDeAccion").Should().NotBeNull();
         cut.Find("textarea#hechosReportados").Should().NotBeNull();
         cut.Find("textarea#accionesRealizadas").Should().NotBeNull();
-        cut.Find("select#traslados").Should().NotBeNull();
+        cut.Find("input#traslados").Should().NotBeNull();
         cut.Find("textarea#observaciones").Should().NotBeNull();
     }
 
@@ -408,12 +408,12 @@ public class ReportFormComponentTests : TestContext
         await cut.InvokeAsync(() =>
         {
             cut.Find("select#cuadrante").Change("1");
-            cut.Find("select#turnoCeiba").Change("1");
+            cut.Find("input#turnoCeiba").Input("Balderas 1");
             cut.Find("input#tipoDeAtencion").Input("Presencial");
-            cut.Find("select#tipoDeAccion").Change("1");
+            cut.Find("textarea#tipoDeAccion").Change("Preventiva");
             cut.Find("textarea#hechosReportados").Change("Descripción de hechos");
             cut.Find("textarea#accionesRealizadas").Change("Acciones realizadas");
-            cut.Find("select#traslados").Change("0");
+            cut.Find("input#traslados").Input("No");
         });
     }
 

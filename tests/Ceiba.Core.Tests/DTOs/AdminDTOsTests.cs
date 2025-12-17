@@ -398,7 +398,6 @@ public class AdminDTOsTests
         SugerenciaCampos.Delito.Should().Be("delito");
         SugerenciaCampos.TipoDeAtencion.Should().Be("tipo_de_atencion");
         SugerenciaCampos.TurnoCeiba.Should().Be("turno_ceiba");
-        SugerenciaCampos.TipoDeAccion.Should().Be("tipo_de_accion");
         SugerenciaCampos.Traslados.Should().Be("traslados");
     }
 
@@ -406,7 +405,7 @@ public class AdminDTOsTests
     public void SugerenciaCampos_All_ShouldContainAllFields()
     {
         // Assert
-        SugerenciaCampos.All.Should().HaveCount(6);
+        SugerenciaCampos.All.Should().HaveCount(5);
         SugerenciaCampos.All.Should().Contain("sexo");
         SugerenciaCampos.All.Should().Contain("delito");
         SugerenciaCampos.All.Should().Contain("tipo_de_atencion");
@@ -426,9 +425,8 @@ public class AdminDTOsTests
     public void SugerenciaCampos_DetallesOperativos_ShouldContainOperationalFields()
     {
         // Assert
-        SugerenciaCampos.DetallesOperativos.Should().HaveCount(3);
+        SugerenciaCampos.DetallesOperativos.Should().HaveCount(2);
         SugerenciaCampos.DetallesOperativos.Should().Contain("turno_ceiba");
-        SugerenciaCampos.DetallesOperativos.Should().Contain("tipo_de_accion");
         SugerenciaCampos.DetallesOperativos.Should().Contain("traslados");
     }
 
@@ -437,7 +435,6 @@ public class AdminDTOsTests
     [InlineData("delito", "Tipo de Delito")]
     [InlineData("tipo_de_atencion", "Tipo de Atención")]
     [InlineData("turno_ceiba", "Turno CEIBA")]
-    [InlineData("tipo_de_accion", "Tipo de Acción")]
     [InlineData("traslados", "Traslados")]
     [InlineData("unknown", "unknown")]
     public void SugerenciaCampos_GetDisplayName_ShouldReturnCorrectNames(string campo, string expected)
