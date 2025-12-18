@@ -1,4 +1,14 @@
-# Ceiba - Sistema de Reportes de Incidencias
+<p align="center">
+  <img src="insignia_ceiba_200.png" alt="Insignia Ceiba" width="120" />
+</p>
+
+<h1 align="center">Ceiba - Sistema de Reportes de Incidencias</h1>
+
+<p align="center">
+  <strong>Unidad Especializada en Género • Secretaría de Seguridad Ciudadana CDMX</strong>
+</p>
+
+---
 
 Bienvenido a la documentación oficial del sistema **Ceiba**, una aplicación web para la gestión de reportes de incidencias policiales.
 
