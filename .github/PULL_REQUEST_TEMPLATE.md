@@ -1,206 +1,206 @@
-# Pull Request - Ceiba Incident Reporting System
+# Pull Request - Sistema de Reportes de Incidencias Ceiba
 
-## Description
-<!-- Provide a brief description of the changes in this PR -->
+## Descripción
+<!-- Proporciona una breve descripción de los cambios en este PR -->
 
-## Type of Change
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Database migration (includes schema changes)
-- [ ] Security enhancement
-- [ ] Documentation update
-- [ ] Configuration change
+## Tipo de Cambio
+- [ ] 🐛 Bug fix (cambio que corrige un issue)
+- [ ] ✨ Nueva funcionalidad (cambio que agrega funcionalidad)
+- [ ] 💥 Breaking change (cambio que afecta funcionalidad existente)
+- [ ] 🗃️ Migración de base de datos (incluye cambios de esquema)
+- [ ] 🔒 Mejora de seguridad
+- [ ] 📝 Actualización de documentación
+- [ ] 🔧 Cambio de configuración
 
-## Related Tasks
-<!-- Link to tasks.md items (e.g., T042, US1-T003) -->
+## Tareas Relacionadas
+<!-- Vincula los items de tasks.md (ej. T042, US1-T003) -->
 - Closes:
 
-## Testing Performed
-- [ ] Unit tests added/updated
-- [ ] Integration tests added/updated
-- [ ] Component tests added/updated (Blazor)
-- [ ] E2E tests added/updated
-- [ ] Manual testing performed
-- [ ] All tests passing locally
+## Testing Realizado
+- [ ] Tests unitarios agregados/actualizados
+- [ ] Tests de integración agregados/actualizados
+- [ ] Tests de componentes agregados/actualizados (Blazor)
+- [ ] Tests E2E agregados/actualizados
+- [ ] Testing manual realizado
+- [ ] Todos los tests pasan localmente
 
-## Security Checklist (T020e - RS-001 to RS-006)
+## Checklist de Seguridad (T020e - RS-001 a RS-006)
 
-### OWASP Top 10 Verification
-- [ ] **A01:2021 - Broken Access Control**
-  - [ ] Authorization checks implemented for all protected resources
-  - [ ] Role-based permissions verified (CREADOR, REVISOR, ADMIN)
-  - [ ] Horizontal privilege escalation prevented (users can't access others' data)
-  - [ ] Vertical privilege escalation prevented (role boundaries enforced)
+### Verificación OWASP Top 10
+- [ ] **A01:2021 - Control de Acceso Roto**
+  - [ ] Verificaciones de autorización implementadas para todos los recursos protegidos
+  - [ ] Permisos basados en roles verificados (CREADOR, REVISOR, ADMIN)
+  - [ ] Escalación de privilegios horizontal prevenida (usuarios no pueden acceder a datos de otros)
+  - [ ] Escalación de privilegios vertical prevenida (límites de roles respetados)
 
-- [ ] **A02:2021 - Cryptographic Failures**
-  - [ ] Sensitive data encrypted in transit (HTTPS enforced)
-  - [ ] Passwords hashed with ASP.NET Identity (not stored in plain text)
-  - [ ] No sensitive data in logs (PII redacted by PIIRedactionEnricher)
-  - [ ] Connection strings in secure configuration (not hardcoded)
+- [ ] **A02:2021 - Fallas Criptográficas**
+  - [ ] Datos sensibles cifrados en tránsito (HTTPS forzado)
+  - [ ] Contraseñas hasheadas con ASP.NET Identity (no almacenadas en texto plano)
+  - [ ] Sin datos sensibles en logs (PII redactada por PIIRedactionEnricher)
+  - [ ] Cadenas de conexión en configuración segura (no hardcodeadas)
 
-- [ ] **A03:2021 - Injection**
-  - [ ] **NO raw SQL concatenation** (parameterized queries or EF Core only)
-  - [ ] User input validated and sanitized
-  - [ ] LINQ queries used instead of raw SQL
-  - [ ] No dynamic LINQ with user input
+- [ ] **A03:2021 - Inyección**
+  - [ ] **SIN concatenación de SQL raw** (solo consultas parametrizadas o EF Core)
+  - [ ] Input de usuario validado y sanitizado
+  - [ ] Consultas LINQ usadas en lugar de SQL raw
+  - [ ] Sin LINQ dinámico con input de usuario
 
-- [ ] **A04:2021 - Insecure Design**
-  - [ ] Security requirements reviewed against FR-001 to FR-007
-  - [ ] Threat model considered for new features
-  - [ ] Least privilege principle applied
+- [ ] **A04:2021 - Diseño Inseguro**
+  - [ ] Requisitos de seguridad revisados contra FR-001 a FR-007
+  - [ ] Modelo de amenazas considerado para nuevas funcionalidades
+  - [ ] Principio de mínimo privilegio aplicado
 
-- [ ] **A05:2021 - Security Misconfiguration**
-  - [ ] No default credentials in production configuration
-  - [ ] Security headers configured (CSP, HSTS, X-Frame-Options)
-  - [ ] Error messages don't leak sensitive information
-  - [ ] Development-only features disabled in production
+- [ ] **A05:2021 - Configuración de Seguridad Incorrecta**
+  - [ ] Sin credenciales por defecto en configuración de producción
+  - [ ] Headers de seguridad configurados (CSP, HSTS, X-Frame-Options)
+  - [ ] Mensajes de error no filtran información sensible
+  - [ ] Funcionalidades solo de desarrollo deshabilitadas en producción
 
-- [ ] **A06:2021 - Vulnerable and Outdated Components**
-  - [ ] All NuGet packages up to date
-  - [ ] No known vulnerabilities in dependencies
-  - [ ] .NET 10 latest patch version used
+- [ ] **A06:2021 - Componentes Vulnerables y Desactualizados**
+  - [ ] Todos los paquetes NuGet actualizados
+  - [ ] Sin vulnerabilidades conocidas en dependencias
+  - [ ] Última versión de parche de .NET 10 usada
 
-- [ ] **A07:2021 - Identification and Authentication Failures**
-  - [ ] Password policy enforced (min 10 chars, uppercase + digit)
-  - [ ] Session timeout implemented (30 minutes - FR-005)
-  - [ ] User-Agent validation active (RS-005)
-  - [ ] Anti-CSRF tokens used on forms
+- [ ] **A07:2021 - Fallas de Identificación y Autenticación**
+  - [ ] Política de contraseñas aplicada (mín 10 caracteres, mayúscula + dígito)
+  - [ ] Timeout de sesión implementado (30 minutos - FR-005)
+  - [ ] Validación de User-Agent activa (RS-005)
+  - [ ] Tokens anti-CSRF usados en formularios
 
-- [ ] **A08:2021 - Software and Data Integrity Failures**
-  - [ ] Database migrations include rollback procedures
-  - [ ] Pre-migration backups created (MigrationBackupService)
-  - [ ] No unsigned or unverified code execution
+- [ ] **A08:2021 - Fallas de Integridad de Software y Datos**
+  - [ ] Migraciones de base de datos incluyen procedimientos de rollback
+  - [ ] Backups pre-migración creados (MigrationBackupService)
+  - [ ] Sin ejecución de código sin firmar o sin verificar
 
-- [ ] **A09:2021 - Security Logging and Monitoring Failures**
-  - [ ] Critical operations logged to audit table (RegistroAuditoria)
-  - [ ] Failed authentication attempts logged
-  - [ ] Authorization failures logged (AuthorizationLoggingMiddleware)
-  - [ ] Logs include sufficient context (user, IP, timestamp, action)
-  - [ ] No PII in logs (verified by PIIRedactionEnricher)
+- [ ] **A09:2021 - Fallas de Logging y Monitoreo de Seguridad**
+  - [ ] Operaciones críticas logueadas en tabla de auditoría (RegistroAuditoria)
+  - [ ] Intentos de autenticación fallidos logueados
+  - [ ] Fallas de autorización logueadas (AuthorizationLoggingMiddleware)
+  - [ ] Logs incluyen contexto suficiente (usuario, IP, timestamp, acción)
+  - [ ] Sin PII en logs (verificado por PIIRedactionEnricher)
 
 - [ ] **A10:2021 - Server-Side Request Forgery (SSRF)**
-  - [ ] No user-controlled URLs in HTTP requests
-  - [ ] External API calls validated and restricted
+  - [ ] Sin URLs controladas por usuario en peticiones HTTP
+  - [ ] Llamadas a APIs externas validadas y restringidas
 
-### Input Validation (RS-004 Mitigation)
-- [ ] All user inputs validated on server side
-- [ ] Client-side validation is supplementary only
-- [ ] Data annotations used on DTOs/models
-- [ ] String length limits enforced
-- [ ] Numeric ranges validated
-- [ ] Date ranges validated
-- [ ] File uploads validated (type, size, content)
-- [ ] Special characters handled safely
+### Validación de Input (Mitigación RS-004)
+- [ ] Todos los inputs de usuario validados en servidor
+- [ ] Validación del lado del cliente es solo suplementaria
+- [ ] Data annotations usadas en DTOs/modelos
+- [ ] Límites de longitud de strings aplicados
+- [ ] Rangos numéricos validados
+- [ ] Rangos de fechas validados
+- [ ] Uploads de archivos validados (tipo, tamaño, contenido)
+- [ ] Caracteres especiales manejados de forma segura
 
-### SQL Injection Prevention (Critical)
-- [ ] **ZERO raw SQL string concatenation with user input**
-- [ ] All database queries use EF Core LINQ or parameterized queries
-- [ ] `FromSqlRaw` only used with parameters (`{0}` placeholders)
-- [ ] No dynamic table/column names from user input
-- [ ] Verified by Roslyn analyzer (no warnings)
+### Prevención de Inyección SQL (Crítico)
+- [ ] **CERO concatenación de strings SQL raw con input de usuario**
+- [ ] Todas las consultas de BD usan EF Core LINQ o consultas parametrizadas
+- [ ] `FromSqlRaw` solo usado con parámetros (placeholders `{0}`)
+- [ ] Sin nombres de tabla/columna dinámicos desde input de usuario
+- [ ] Verificado por analizador Roslyn (sin warnings)
 
-### Cross-Site Scripting (XSS) Prevention
-- [ ] Blazor automatic escaping maintained (no `@((MarkupString)userInput)`)
-- [ ] User-generated content sanitized before display
-- [ ] CSP headers configured in Program.cs
-- [ ] No `dangerouslySetInnerHTML` equivalents
+### Prevención de Cross-Site Scripting (XSS)
+- [ ] Escapado automático de Blazor mantenido (sin `@((MarkupString)userInput)`)
+- [ ] Contenido generado por usuario sanitizado antes de mostrar
+- [ ] Headers CSP configurados en Program.cs
+- [ ] Sin equivalentes a `dangerouslySetInnerHTML`
 
-### Authentication & Authorization
-- [ ] Endpoints protected with `[Authorize]` attribute or policy
-- [ ] Anonymous access explicitly marked with `[AllowAnonymous]`
-- [ ] Role requirements verified (RequireCreadorRole, RequireRevisorRole, RequireAdminRole)
-- [ ] Current user context correctly retrieved (HttpContextAccessor)
-- [ ] Session hijacking mitigated (UserAgentValidationMiddleware active)
+### Autenticación y Autorización
+- [ ] Endpoints protegidos con atributo `[Authorize]` o política
+- [ ] Acceso anónimo explícitamente marcado con `[AllowAnonymous]`
+- [ ] Requisitos de rol verificados (RequireCreadorRole, RequireRevisorRole, RequireAdminRole)
+- [ ] Contexto de usuario actual obtenido correctamente (HttpContextAccessor)
+- [ ] Secuestro de sesión mitigado (UserAgentValidationMiddleware activo)
 
-### Audit Logging (RS-001 Mitigation)
-- [ ] All data modifications logged (automatic via AuditSaveChangesInterceptor)
-- [ ] Manual audit entries created for business operations (IAuditService)
-- [ ] Audit logs include: UserId, ActionCode, IP, Timestamp, Details
-- [ ] Failed operations logged (not just successful ones)
-- [ ] Audit logs immutable (no UPDATE or DELETE on RegistroAuditoria)
+### Logging de Auditoría (Mitigación RS-001)
+- [ ] Todas las modificaciones de datos logueadas (automático vía AuditSaveChangesInterceptor)
+- [ ] Entradas de auditoría manuales creadas para operaciones de negocio (IAuditService)
+- [ ] Logs de auditoría incluyen: UserId, ActionCode, IP, Timestamp, Details
+- [ ] Operaciones fallidas logueadas (no solo las exitosas)
+- [ ] Logs de auditoría inmutables (sin UPDATE o DELETE en RegistroAuditoria)
 
-### Sensitive Data Handling (RS-003 Mitigation)
-- [ ] No passwords, API keys, or secrets in code
-- [ ] Secrets stored in environment variables or Azure Key Vault
-- [ ] PII redacted from logs (email, IP, CURP, phone numbers)
-- [ ] Database backups secured and encrypted
-- [ ] No sensitive data in error messages shown to users
+### Manejo de Datos Sensibles (Mitigación RS-003)
+- [ ] Sin contraseñas, API keys o secretos en código
+- [ ] Secretos almacenados en variables de entorno o Azure Key Vault
+- [ ] PII redactada de logs (email, IP, CURP, números de teléfono)
+- [ ] Backups de base de datos asegurados y cifrados
+- [ ] Sin datos sensibles en mensajes de error mostrados a usuarios
 
-### Configuration Security
-- [ ] Feature flags used instead of code changes (FeatureFlags configuration)
-- [ ] Database connection strings in appsettings (not hardcoded)
-- [ ] Development settings not deployed to production
-- [ ] CORS policy configured with specific origins (not `*`)
+### Seguridad de Configuración
+- [ ] Feature flags usados en lugar de cambios de código (configuración FeatureFlags)
+- [ ] Cadenas de conexión de BD en appsettings (no hardcodeadas)
+- [ ] Configuraciones de desarrollo no desplegadas a producción
+- [ ] Política CORS configurada con orígenes específicos (no `*`)
 
-### Database Changes
-- [ ] Migration includes Up and Down methods
-- [ ] Migration changelog updated in MIGRATIONS.md
-- [ ] Breaking changes documented
-- [ ] Data migration scripts tested on copy of production data
-- [ ] Indexes created for new query patterns
-- [ ] Foreign key constraints verified
+### Cambios de Base de Datos
+- [ ] Migración incluye métodos Up y Down
+- [ ] Changelog de migración actualizado en MIGRATIONS.md
+- [ ] Breaking changes documentados
+- [ ] Scripts de migración de datos probados en copia de datos de producción
+- [ ] Índices creados para nuevos patrones de consulta
+- [ ] Restricciones de foreign key verificadas
 
-### Code Quality
-- [ ] No compiler errors
-- [ ] No critical analyzer warnings (CA, IDE rules)
-- [ ] Code follows C# naming conventions (PascalCase, camelCase, _privateFields)
-- [ ] XML documentation on public APIs
-- [ ] No unused using statements
-- [ ] No commented-out code
+### Calidad de Código
+- [ ] Sin errores de compilador
+- [ ] Sin warnings críticos de analizador (reglas CA, IDE)
+- [ ] Código sigue convenciones de nombres C# (PascalCase, camelCase, _privateFields)
+- [ ] Documentación XML en APIs públicas
+- [ ] Sin statements using no utilizados
+- [ ] Sin código comentado
 
-### Performance Considerations
-- [ ] Database queries optimized (no N+1 queries)
-- [ ] Pagination implemented for large result sets
-- [ ] Indexes created for frequently queried columns
-- [ ] No synchronous database calls in async methods
-- [ ] HttpClient used correctly (not new instance per request)
+### Consideraciones de Rendimiento
+- [ ] Consultas de BD optimizadas (sin consultas N+1)
+- [ ] Paginación implementada para conjuntos de resultados grandes
+- [ ] Índices creados para columnas consultadas frecuentemente
+- [ ] Sin llamadas síncronas a BD en métodos async
+- [ ] HttpClient usado correctamente (no nueva instancia por petición)
 
-## Constitution Compliance (Non-Negotiable Principles)
+## Cumplimiento de Constitución (Principios No Negociables)
 
-- [ ] **Principle I - Modular Design**: Changes contained within module boundaries
-- [ ] **Principle II - TDD Mandatory**: Tests written before implementation (Red-Green-Refactor)
-- [ ] **Principle III - Security by Design**: Least privilege and OWASP Top 10 addressed
-- [ ] **Principle IV - Accessibility**: Mobile-responsive, WCAG Level AA compliant
-- [ ] **Principle V - Documentation as Deliverable**: Code documented, README updated if needed
+- [ ] **Principio I - Diseño Modular**: Cambios contenidos dentro de límites de módulo
+- [ ] **Principio II - TDD Obligatorio**: Tests escritos antes de implementación (Red-Green-Refactor)
+- [ ] **Principio III - Seguridad por Diseño**: Mínimo privilegio y OWASP Top 10 abordados
+- [ ] **Principio IV - Accesibilidad**: Mobile-responsive, cumple WCAG Nivel AA
+- [ ] **Principio V - Documentación como Entregable**: Código documentado, README actualizado si es necesario
 
-## Risk Assessment (RS-001 to RS-006, RT-001 to RT-006)
+## Evaluación de Riesgos (RS-001 a RS-006, RT-001 a RT-006)
 
-### Security Risks Addressed
-- [ ] RS-001: Unauthorized access (Authorization policies + logging)
-- [ ] RS-002: XSS attacks (CSP headers + Blazor escaping)
-- [ ] RS-003: Data exposure in logs (PII redaction)
-- [ ] RS-004: Data integrity (Input validation)
-- [ ] RS-005: Session hijacking (User-Agent validation + secure cookies)
-- [ ] RS-006: SQL injection (Parameterized queries + analyzer)
+### Riesgos de Seguridad Abordados
+- [ ] RS-001: Acceso no autorizado (Políticas de autorización + logging)
+- [ ] RS-002: Ataques XSS (Headers CSP + escapado de Blazor)
+- [ ] RS-003: Exposición de datos en logs (Redacción de PII)
+- [ ] RS-004: Integridad de datos (Validación de input)
+- [ ] RS-005: Secuestro de sesión (Validación de User-Agent + cookies seguras)
+- [ ] RS-006: Inyección SQL (Consultas parametrizadas + analizador)
 
-### Technical Risks Addressed
-- [ ] RT-001: Database unavailability (Error handling + retry policies)
-- [ ] RT-002: Email delivery failure (Logging + retry mechanism)
-- [ ] RT-003: AI service failures (Graceful degradation)
-- [ ] RT-004: Deployment errors (Feature flags + migration backups)
-- [ ] RT-005: Performance degradation (Indexes + pagination)
-- [ ] RT-006: Storage exhaustion (Log retention + backup cleanup)
+### Riesgos Técnicos Abordados
+- [ ] RT-001: Indisponibilidad de base de datos (Manejo de errores + políticas de reintento)
+- [ ] RT-002: Falla de entrega de email (Logging + mecanismo de reintento)
+- [ ] RT-003: Fallas de servicio de IA (Degradación elegante)
+- [ ] RT-004: Errores de despliegue (Feature flags + backups de migración)
+- [ ] RT-005: Degradación de rendimiento (Índices + paginación)
+- [ ] RT-006: Agotamiento de almacenamiento (Retención de logs + limpieza de backups)
 
-## Deployment Checklist (if applicable)
+## Checklist de Despliegue (si aplica)
 
-- [ ] Database migration tested on staging environment
-- [ ] Pre-migration backup script executed
-- [ ] Environment variables configured
-- [ ] Feature flags set correctly for environment
-- [ ] Rollback procedure documented
-- [ ] Monitoring alerts configured for new features
+- [ ] Migración de base de datos probada en ambiente de staging
+- [ ] Script de backup pre-migración ejecutado
+- [ ] Variables de entorno configuradas
+- [ ] Feature flags configurados correctamente para el ambiente
+- [ ] Procedimiento de rollback documentado
+- [ ] Alertas de monitoreo configuradas para nuevas funcionalidades
 
-## Screenshots (if applicable)
-<!-- Add screenshots for UI changes -->
+## Capturas de Pantalla (si aplica)
+<!-- Agrega capturas de pantalla para cambios de UI -->
 
-## Additional Notes
-<!-- Any additional information reviewers should know -->
+## Notas Adicionales
+<!-- Cualquier información adicional que los revisores deban conocer -->
 
 ---
 
-**Reviewer Notes:**
-- Security checklist items marked N/A must include justification
-- All security-related PRs require approval from ADMIN role
-- Database migrations require backup verification before merge
-- Failed security checks block PR merge (non-negotiable)
+**Notas para Revisores:**
+- Items del checklist de seguridad marcados como N/A deben incluir justificación
+- Todos los PRs relacionados con seguridad requieren aprobación de rol ADMIN
+- Migraciones de base de datos requieren verificación de backup antes de merge
+- Verificaciones de seguridad fallidas bloquean el merge del PR (no negociable)
