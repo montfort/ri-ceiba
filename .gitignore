@@ -127,3 +127,4 @@ logs/
 .env.local
 .env.*.local
 !.env.example
+.wiki-temp
