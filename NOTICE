@@ -1,0 +1,72 @@
+Ceiba - Sistema de Reportes de Incidencias
+Copyright (c) 2025 José Villaseñor Montfort
+Todos los derechos reservados.
+
+================================================================================
+
+AVISO DE ATRIBUCIÓN
+
+Este software fue diseñado y desarrollado por José Villaseñor Montfort para la
+Unidad Especializada en Género de la Secretaría de Seguridad Ciudadana
+de la Ciudad de México.
+
+================================================================================
+
+AUTOR ORIGINAL
+
+    José Villaseñor Montfort
+    Diseño, arquitectura y desarrollo del sistema
+
+================================================================================
+
+TECNOLOGÍAS UTILIZADAS
+
+Este software utiliza las siguientes tecnologías y bibliotecas de código
+abierto, cada una sujeta a sus propios términos de licencia:
+
+Framework y Plataforma:
+- .NET 10 (MIT License) - https://dotnet.microsoft.com/
+- ASP.NET Core (MIT License) - https://asp.net/
+- Blazor Server (MIT License) - https://blazor.net/
+
+Base de Datos:
+- PostgreSQL (PostgreSQL License) - https://www.postgresql.org/
+- Npgsql (PostgreSQL License) - https://www.npgsql.org/
+- Entity Framework Core (MIT License) - https://docs.microsoft.com/ef/
+
+Generación de Documentos:
+- QuestPDF (MIT License) - https://www.questpdf.com/
+
+Correo Electrónico:
+- MailKit (MIT License) - https://github.com/jstedfast/MailKit
+
+Logging:
+- Serilog (Apache 2.0 License) - https://serilog.net/
+
+Testing:
+- xUnit (Apache 2.0 License) - https://xunit.net/
+- bUnit (MIT License) - https://bunit.dev/
+- FluentAssertions (Apache 2.0 License) - https://fluentassertions.com/
+
+Contenedores:
+- Docker (Apache 2.0 License) - https://www.docker.com/
+
+================================================================================
+
+MARCAS COMERCIALES
+
+"Ceiba" y el logotipo asociado son marcas utilizadas para identificar este
+software. El uso de estas marcas requiere autorización del Autor.
+
+================================================================================
+
+AGRADECIMIENTOS
+
+- Secretaría de Seguridad Ciudadana de la Ciudad de México
+- Unidad Especializada en Género
+- Comunidades de código abierto de .NET, Blazor y PostgreSQL
+
+================================================================================
+
+Para información sobre licenciamiento, consulte el archivo LICENSE.
+Para reportar vulnerabilidades de seguridad, consulte SECURITY.md.

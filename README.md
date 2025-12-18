@@ -380,12 +380,27 @@ Este proyecto sigue principios estrictos de desarrollo:
 
 ## 📄 Licencia
 
-Proyecto desarrollado para la **Secretaría de Seguridad Ciudadana de la Ciudad de México**.
+Este software es propietario con código fuente disponible. Consulta el archivo [LICENSE](LICENSE) para los términos completos.
 
-Uso restringido a personal autorizado de la SSC CDMX.
+**Resumen:**
+- ✅ Uso interno por la SSC CDMX
+- ✅ Modificación del código fuente
+- ✅ Distribución interna entre unidades autorizadas
+- ❌ Redistribución pública sin autorización
+- ❌ Uso comercial o venta
+
+Para detalles de atribución y tecnologías utilizadas, consulta [NOTICE](NOTICE).
 
 ---
 
+## 👤 Autor
+
 <p align="center">
-  <sub>Diseño y desarrollo: <strong>José Villaseñor Montfort</strong> • <a href="https://enigmora.com">Enigmora SC</a></sub>
+  <strong>José Villaseñor Montfort</strong><br>
+  Diseño, arquitectura y desarrollo<br>
+  <a href="https://enigmora.com">Enigmora SC</a>
+</p>
+
+<p align="center">
+  <sub>Copyright © 2025 José Villaseñor Montfort. Todos los derechos reservados.</sub>
 </p>

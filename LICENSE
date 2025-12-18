@@ -1,0 +1,123 @@
+LICENCIA DE SOFTWARE PROPIETARIO CON CÓDIGO FUENTE
+
+Copyright (c) 2025 José Villaseñor Montfort
+Todos los derechos reservados.
+
+================================================================================
+
+TÉRMINOS Y CONDICIONES
+
+1. DEFINICIONES
+
+   "Software" se refiere al sistema Ceiba - Sistema de Reportes de Incidencias,
+   incluyendo todo el código fuente, documentación, archivos de configuración,
+   scripts y materiales asociados contenidos en este repositorio.
+
+   "Autor" se refiere a José Villaseñor Montfort, creador y titular de los
+   derechos de autor del Software.
+
+   "Licenciatario" se refiere a la Secretaría de Seguridad Ciudadana de la
+   Ciudad de México y sus unidades administrativas autorizadas.
+
+   "Uso Interno" se refiere al uso del Software exclusivamente dentro de las
+   operaciones del Licenciatario, sin distribución a terceros externos.
+
+2. CONCESIÓN DE LICENCIA
+
+   Sujeto a los términos de esta licencia, el Autor otorga al Licenciatario
+   una licencia no exclusiva, no transferible y perpetua para:
+
+   a) USAR el Software para sus operaciones internas.
+
+   b) MODIFICAR el código fuente para adaptarlo a sus necesidades operativas.
+
+   c) CREAR obras derivadas basadas en el Software para Uso Interno.
+
+   d) DISTRIBUIR el Software y sus modificaciones dentro de las unidades
+      administrativas del Licenciatario.
+
+   e) ACCEDER al código fuente completo del Software.
+
+3. REQUISITOS DE ATRIBUCIÓN
+
+   El Licenciatario debe:
+
+   a) Mantener todos los avisos de derechos de autor y atribución existentes
+      en el código fuente y la documentación.
+
+   b) Incluir una atribución visible al Autor en cualquier interfaz de usuario
+      del Software o sus derivados (por ejemplo: "Desarrollado por José Villaseñor Montfort").
+
+   c) Mantener el archivo NOTICE intacto en todas las copias y distribuciones.
+
+4. RESTRICCIONES
+
+   El Licenciatario NO puede:
+
+   a) Vender, sublicenciar o comercializar el Software o sus derivados.
+
+   b) Distribuir el Software a terceros externos sin autorización escrita
+      del Autor.
+
+   c) Publicar el código fuente en repositorios públicos o de acceso abierto.
+
+   d) Remover o alterar los avisos de derechos de autor, marcas comerciales
+      u otros avisos de propiedad.
+
+   e) Usar el nombre del Autor para promocionar productos derivados sin
+      permiso escrito.
+
+5. PROPIEDAD INTELECTUAL
+
+   a) El Autor retiene todos los derechos de propiedad intelectual sobre
+      el Software original.
+
+   b) Las modificaciones realizadas por el Licenciatario son propiedad del
+      Licenciatario, sujetas a los términos de esta licencia.
+
+   c) El Licenciatario reconoce que el Software contiene información
+      confidencial y secretos comerciales del Autor.
+
+6. GARANTÍAS Y LIMITACIONES
+
+   EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍAS DE NINGÚN TIPO,
+   EXPRESAS O IMPLÍCITAS, INCLUYENDO PERO NO LIMITADO A GARANTÍAS DE
+   COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN.
+
+   EN NINGÚN CASO EL AUTOR SERÁ RESPONSABLE POR CUALQUIER RECLAMACIÓN,
+   DAÑO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN DE CONTRATO, AGRAVIO
+   O DE OTRO MODO, QUE SURJA DE O EN CONEXIÓN CON EL SOFTWARE O EL USO
+   U OTRAS RELACIONES CON EL SOFTWARE.
+
+7. SOPORTE Y MANTENIMIENTO
+
+   Esta licencia no incluye obligaciones de soporte técnico, actualizaciones
+   o mantenimiento. Dichos servicios, si se requieren, deberán ser acordados
+   por separado entre el Autor y el Licenciatario.
+
+8. TERMINACIÓN
+
+   a) Esta licencia es efectiva hasta su terminación.
+
+   b) Los derechos del Licenciatario bajo esta licencia terminarán
+      automáticamente si el Licenciatario incumple cualquier término.
+
+   c) Tras la terminación, el Licenciatario debe cesar todo uso del Software
+      y destruir todas las copias en su posesión.
+
+9. LEY APLICABLE
+
+   Esta licencia se regirá e interpretará de acuerdo con las leyes de los
+   Estados Unidos Mexicanos, sin referencia a conflictos de principios legales.
+
+10. ACUERDO COMPLETO
+
+    Esta licencia constituye el acuerdo completo entre las partes con respecto
+    al Software y reemplaza todos los acuerdos previos o contemporáneos.
+
+================================================================================
+
+Para consultas sobre licenciamiento adicional o permisos especiales, contactar
+al Autor a través de los canales oficiales del proyecto.
+
+Fecha de vigencia: Enero 2025
