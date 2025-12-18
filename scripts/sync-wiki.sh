@@ -11,7 +11,10 @@
 #   - SSH key configurada o token de acceso
 #
 # El wiki de GitHub es un repositorio separado con URL:
-#   https://github.com/org/ceiba.wiki.git
+#   git@github.com:montfort/ri-ceiba.wiki.git
+#
+# Nota: El wiki debe estar habilitado en GitHub para que el repositorio exista.
+# Ve a Settings > Features > Wikis en tu repositorio de GitHub.
 
 set -e
 
@@ -21,8 +24,9 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 WIKI_SOURCE="$PROJECT_ROOT/docs/wiki"
 WIKI_CLONE_DIR="$PROJECT_ROOT/.wiki-temp"
 
-# URL del wiki - MODIFICAR según tu repositorio
-WIKI_REPO_URL="${WIKI_REPO_URL:-git@github.com:org/ceiba.wiki.git}"
+# URL del wiki (repo principal + .wiki.git)
+# Usar HTTPS para compatibilidad con autenticación por token/credential helper
+WIKI_REPO_URL="${WIKI_REPO_URL:-https://github.com/montfort/ri-ceiba.wiki.git}"
 
 # Colores para output
 RED='\033[0;31m'
@@ -143,11 +147,11 @@ show_help() {
     echo "  help    Mostrar esta ayuda"
     echo ""
     echo "Variables de entorno:"
-    echo "  WIKI_REPO_URL   URL del repositorio wiki (default: git@github.com:org/ceiba.wiki.git)"
+    echo "  WIKI_REPO_URL   URL del repositorio wiki (default: https://github.com/montfort/ri-ceiba.wiki.git)"
     echo ""
     echo "Ejemplos:"
     echo "  $0 push                                    # Subir cambios al wiki"
-    echo "  WIKI_REPO_URL=git@github.com:mi-org/mi-repo.wiki.git $0 push"
+    echo "  WIKI_REPO_URL=git@github.com:otro/repo.wiki.git $0 push"
 }
 
 # Main

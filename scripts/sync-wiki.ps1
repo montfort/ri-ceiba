@@ -10,12 +10,17 @@
 #   - Acceso al repositorio wiki de GitHub
 #   - SSH key configurada o token de acceso
 
+# Nota: El wiki debe estar habilitado en GitHub para que el repositorio exista.
+# Ve a Settings > Features > Wikis en tu repositorio de GitHub.
+
 param(
     [Parameter(Mandatory=$true)]
     [ValidateSet("push", "pull", "clean", "help")]
     [string]$Action,
 
-    [string]$WikiRepoUrl = "git@github.com:org/ceiba.wiki.git"
+    # URL del wiki (repo principal + .wiki.git)
+    # Usar HTTPS para compatibilidad con autenticación por token/credential helper
+    [string]$WikiRepoUrl = "https://github.com/montfort/ri-ceiba.wiki.git"
 )
 
 # Configuración
@@ -157,12 +162,12 @@ Comandos:
   help    Mostrar esta ayuda
 
 Parámetros:
-  -WikiRepoUrl   URL del repositorio wiki (default: git@github.com:org/ceiba.wiki.git)
+  -WikiRepoUrl   URL del repositorio wiki (default: https://github.com/montfort/ri-ceiba.wiki.git)
 
 Ejemplos:
   .\sync-wiki.ps1 -Action push
   .\sync-wiki.ps1 -Action pull
-  .\sync-wiki.ps1 -Action push -WikiRepoUrl "git@github.com:mi-org/mi-repo.wiki.git"
+  .\sync-wiki.ps1 -Action push -WikiRepoUrl "git@github.com:otro/repo.wiki.git"
 "@
 }
 
