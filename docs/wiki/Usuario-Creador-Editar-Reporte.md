@@ -80,6 +80,6 @@ En este caso, tus opciones son:
 
 ## Próximos Pasos
 
-- [[Usuario Creador Enviar Reporte|Cómo entregar un reporte]]
-- [[Usuario Creador Historial|Ver tu historial de reportes]]
-- [[Usuario Creador FAQ|Preguntas frecuentes]]
+- [Cómo entregar un reporte](Usuario-Creador-Enviar-Reporte)
+- [Ver tu historial de reportes](Usuario-Creador-Historial)
+- [Preguntas frecuentes](Usuario-Creador-FAQ)

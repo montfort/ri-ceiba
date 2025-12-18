@@ -308,6 +308,6 @@ Configurar comportamiento cuando IA no está disponible:
 
 ## Próximos Pasos
 
-- [[Ops Config Email SMTP|Configurar email para envío]]
-- [[Usuario Revisor Reportes Automatizados|Usar reportes automatizados]]
-- [[Ops Mant Monitoreo|Monitorear uso de IA]]
+- [Configurar email para envío](Ops-Config-Email-SMTP)
+- [Usar reportes automatizados](Usuario-Revisor-Reportes-Automatizados)
+- [Monitorear uso de IA](Ops-Mant-Monitoreo)

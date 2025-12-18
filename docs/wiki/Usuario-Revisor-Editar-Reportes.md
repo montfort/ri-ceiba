@@ -92,6 +92,6 @@ La zona fue seleccionada incorrectamente:
 
 ## Próximos Pasos
 
-- [[Usuario Revisor Exportar PDF|Exportar reportes a PDF]]
-- [[Usuario Revisor Exportacion Masiva|Exportación masiva]]
-- [[Usuario Revisor Ver Reportes|Volver a la lista de reportes]]
+- [Exportar reportes a PDF](Usuario-Revisor-Exportar-PDF)
+- [Exportación masiva](Usuario-Revisor-Exportacion-Masiva)
+- [Volver a la lista de reportes](Usuario-Revisor-Ver-Reportes)

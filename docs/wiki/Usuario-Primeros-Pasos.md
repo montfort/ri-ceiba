@@ -65,9 +65,9 @@ En dispositivos móviles, el menú se oculta y aparece un ícono de hamburguesa 
 
 Según tu rol, continúa con la guía correspondiente:
 
-- **Si eres Oficial (CREADOR)**: [[Usuario Creador Introduccion|Ir a Guía del Creador]]
-- **Si eres Supervisor (REVISOR)**: [[Usuario Revisor Introduccion|Ir a Guía del Revisor]]
-- **Si eres Administrador (ADMIN)**: [[Usuario Admin Introduccion|Ir a Guía del Administrador]]
+- **Si eres Oficial (CREADOR)**: [Ir a Guía del Creador](Usuario-Creador-Introduccion)
+- **Si eres Supervisor (REVISOR)**: [Ir a Guía del Revisor](Usuario-Revisor-Introduccion)
+- **Si eres Administrador (ADMIN)**: [Ir a Guía del Administrador](Usuario-Admin-Introduccion)
 
 ## Soporte
 

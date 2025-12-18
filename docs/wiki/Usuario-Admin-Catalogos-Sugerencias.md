@@ -136,6 +136,6 @@ El orden determina cómo aparecen en el autocompletado:
 
 ## Próximos Pasos
 
-- [[Usuario Admin Catalogos Geograficos|Catálogos geográficos]]
-- [[Usuario Admin Auditoria|Ver auditoría]]
-- [[Usuario Admin FAQ|Preguntas frecuentes]]
+- [Catálogos geográficos](Usuario-Admin-Catalogos-Geograficos)
+- [Ver auditoría](Usuario-Admin-Auditoria)
+- [Preguntas frecuentes](Usuario-Admin-FAQ)

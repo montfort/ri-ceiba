@@ -142,6 +142,6 @@ Las opciones de exportación rápida también están disponibles para JSON:
 
 ## Próximos Pasos
 
-- [[Usuario Revisor Exportar PDF|Exportar a PDF]]
-- [[Usuario Revisor Exportacion Masiva|Exportación masiva]]
-- [[Usuario Revisor Ver Reportes|Ver reportes]]
+- [Exportar a PDF](Usuario-Revisor-Exportar-PDF)
+- [Exportación masiva](Usuario-Revisor-Exportacion-Masiva)
+- [Ver reportes](Usuario-Revisor-Ver-Reportes)

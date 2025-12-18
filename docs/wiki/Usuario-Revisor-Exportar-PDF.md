@@ -112,6 +112,6 @@ Haz clic en el botón **PDF** de cada opción para exportar directamente.
 
 ## Próximos Pasos
 
-- [[Usuario Revisor Exportar JSON|Exportar a JSON]]
-- [[Usuario Revisor Exportacion Masiva|Exportación masiva]]
-- [[Usuario Revisor Ver Reportes|Ver reportes]]
+- [Exportar a JSON](Usuario-Revisor-Exportar-JSON)
+- [Exportación masiva](Usuario-Revisor-Exportacion-Masiva)
+- [Ver reportes](Usuario-Revisor-Ver-Reportes)

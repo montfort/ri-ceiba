@@ -176,5 +176,5 @@ public async Task DeleteZonaAsync(int id)
 
 ## Próximos Pasos
 
-- [[Dev Modulo Reportes Automatizados|Reportes Automatizados]]
-- [[Usuario Admin Catalogos Geograficos|Gestión de catálogos]]
+- [Reportes Automatizados](Dev-Modulo-Reportes-Automatizados)
+- [Gestión de catálogos](Usuario-Admin-Catalogos-Geograficos)

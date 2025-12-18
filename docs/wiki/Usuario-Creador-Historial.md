@@ -111,5 +111,5 @@ Si no tienes reportes:
 
 ## Próximos Pasos
 
-- [[Usuario Creador Crear Reporte|Crear un nuevo reporte]]
-- [[Usuario Creador FAQ|Preguntas frecuentes]]
+- [Crear un nuevo reporte](Usuario-Creador-Crear-Reporte)
+- [Preguntas frecuentes](Usuario-Creador-FAQ)

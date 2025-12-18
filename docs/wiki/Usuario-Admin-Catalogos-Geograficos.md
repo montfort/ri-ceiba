@@ -142,6 +142,6 @@ Para cargar muchos elementos, contacta al equipo de desarrollo para una importac
 
 ## Próximos Pasos
 
-- [[Usuario Admin Catalogos Sugerencias|Configurar sugerencias]]
-- [[Usuario Admin Gestion Usuarios|Gestionar usuarios]]
-- [[Usuario Admin FAQ|Preguntas frecuentes]]
+- [Configurar sugerencias](Usuario-Admin-Catalogos-Sugerencias)
+- [Gestionar usuarios](Usuario-Admin-Gestion-Usuarios)
+- [Preguntas frecuentes](Usuario-Admin-FAQ)

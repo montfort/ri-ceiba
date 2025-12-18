@@ -337,6 +337,6 @@ docker compose logs ceiba-web | jq '.'
 
 ## Próximos Pasos
 
-- [[Ops Mant Monitoreo|Monitorear el sistema]]
-- [[Ops Mant Troubleshooting|Troubleshooting]]
-- [[Ops Seguridad Auditoria|Auditoría de seguridad]]
+- [Monitorear el sistema](Ops-Mant-Monitoreo)
+- [Troubleshooting](Ops-Mant-Troubleshooting)
+- [Auditoría de seguridad](Ops-Seguridad-Auditoria)

@@ -213,6 +213,6 @@ docker compose exec ceiba-web dotnet ef database update
 
 ## Próximos Pasos
 
-- [[Ops Config Variables Entorno|Configurar variables de entorno]]
-- [[Ops Config SSL HTTPS|Configurar SSL/HTTPS]]
-- [[Ops Mant Backup Restore|Configurar backups]]
+- [Configurar variables de entorno](Ops-Config-Variables-Entorno)
+- [Configurar SSL/HTTPS](Ops-Config-SSL-HTTPS)
+- [Configurar backups](Ops-Mant-Backup-Restore)

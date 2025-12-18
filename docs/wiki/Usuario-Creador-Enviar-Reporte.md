@@ -100,6 +100,6 @@ Sí, puedes verlos en tu lista de reportes, pero solo en modo lectura.
 
 ## Próximos Pasos
 
-- [[Usuario Creador Historial|Ver tu historial de reportes]]
-- [[Usuario Creador FAQ|Preguntas frecuentes]]
-- [[Usuario Creador Crear Reporte|Crear otro reporte]]
+- [Ver tu historial de reportes](Usuario-Creador-Historial)
+- [Preguntas frecuentes](Usuario-Creador-FAQ)
+- [Crear otro reporte](Usuario-Creador-Crear-Reporte)

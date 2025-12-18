@@ -291,6 +291,6 @@ TXT _dmarc "v=DMARC1; p=quarantine; rua=mailto:dmarc@tudominio.com"
 
 ## Próximos Pasos
 
-- [[Ops Config IA|Configurar IA para reportes]]
-- [[Ops Config Variables Entorno|Todas las variables de entorno]]
-- [[Usuario Revisor Reportes Automatizados|Usar reportes automatizados]]
+- [Configurar IA para reportes](Ops-Config-IA)
+- [Todas las variables de entorno](Ops-Config-Variables-Entorno)
+- [Usar reportes automatizados](Usuario-Revisor-Reportes-Automatizados)

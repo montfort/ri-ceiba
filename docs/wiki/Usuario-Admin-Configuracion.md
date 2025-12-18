@@ -80,7 +80,7 @@ Los reportes automatizados se configuran desde el rol REVISOR:
 2. Horarios de ejecución
 3. Destinatarios de email
 
-Ver [[Usuario Revisor Reportes Automatizados|Reportes Automatizados]].
+Ver [Reportes Automatizados](Usuario-Revisor-Reportes-Automatizados).
 
 ## Variables de Entorno
 
@@ -92,7 +92,7 @@ Algunas configuraciones se manejan a nivel de servidor mediante variables de ent
 | `ConnectionStrings__DefaultConnection` | Cadena de conexión a BD |
 | `SessionTimeout` | Tiempo de sesión en minutos |
 
-Consulta [[Ops Config Variables Entorno|Variables de Entorno]] para más detalles.
+Consulta [Variables de Entorno](Ops-Config-Variables-Entorno) para más detalles.
 
 ## Respaldo de Configuración
 
@@ -132,6 +132,6 @@ Todos los cambios de configuración quedan registrados en auditoría:
 
 ## Próximos Pasos
 
-- [[Usuario Admin Auditoria|Ver registro de auditoría]]
-- [[Usuario Admin FAQ|Preguntas frecuentes]]
-- [[Ops Config Variables Entorno|Variables de entorno (DevOps)]]
+- [Ver registro de auditoría](Usuario-Admin-Auditoria)
+- [Preguntas frecuentes](Usuario-Admin-FAQ)
+- [Variables de entorno (DevOps)](Ops-Config-Variables-Entorno)

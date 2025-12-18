@@ -75,7 +75,7 @@ Cada reporte de incidencia (Tipo A) incluye:
 
 ## Próximos Pasos
 
-- [[Usuario Creador Crear Reporte|Aprender a crear un reporte]]
-- [[Usuario Creador Editar Reporte|Aprender a editar un reporte]]
-- [[Usuario Creador Enviar Reporte|Aprender a enviar un reporte]]
-- [[Usuario Creador Historial|Ver tu historial de reportes]]
+- [Aprender a crear un reporte](Usuario-Creador-Crear-Reporte)
+- [Aprender a editar un reporte](Usuario-Creador-Editar-Reporte)
+- [Aprender a enviar un reporte](Usuario-Creador-Enviar-Reporte)
+- [Ver tu historial de reportes](Usuario-Creador-Historial)

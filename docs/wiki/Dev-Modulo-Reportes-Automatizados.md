@@ -218,5 +218,5 @@ public class AutomatedReportBackgroundService : BackgroundService
 
 ## Próximos Pasos
 
-- [[Dev Guia Agregar Campo|Agregar campo al reporte]]
-- [[Usuario Revisor Reportes Automatizados|Uso de reportes automatizados]]
+- [Agregar campo al reporte](Dev-Guia-Agregar-Campo)
+- [Uso de reportes automatizados](Usuario-Revisor-Reportes-Automatizados)

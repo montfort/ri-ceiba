@@ -251,6 +251,6 @@ El proyecto incluye `.editorconfig` con reglas predefinidas.
 
 ## Próximos Pasos
 
-- [[Dev Testing TDD|Guía de testing TDD]]
-- [[Dev Arquitectura|Arquitectura del sistema]]
-- [[Dev Guia Componentes Blazor|Componentes Blazor]]
+- [Guía de testing TDD](Dev-Testing-TDD)
+- [Arquitectura del sistema](Dev-Arquitectura)
+- [Componentes Blazor](Dev-Guia-Componentes-Blazor)

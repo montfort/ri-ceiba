@@ -290,6 +290,6 @@ action.Should().Throw<NotFoundException>()
 
 ## Próximos Pasos
 
-- [[Dev Base de Datos|Modelo de base de datos]]
-- [[Dev Guia Debugging|Debugging]]
-- [[Dev Estandares Codigo|Estándares de código]]
+- [Modelo de base de datos](Dev-Base-de-Datos)
+- [Debugging](Dev-Guia-Debugging)
+- [Estándares de código](Dev-Estandares-Codigo)

@@ -295,6 +295,6 @@ LIMIT 10;
 
 ## Próximos Pasos
 
-- [[Ops Mant Logs|Gestión de logs]]
-- [[Ops Mant Troubleshooting|Troubleshooting]]
-- [[Ops Mant Backup Restore|Configurar backups]]
+- [Gestión de logs](Ops-Mant-Logs)
+- [Troubleshooting](Ops-Mant-Troubleshooting)
+- [Configurar backups](Ops-Mant-Backup-Restore)

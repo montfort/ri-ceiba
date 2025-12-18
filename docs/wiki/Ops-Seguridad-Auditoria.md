@@ -302,6 +302,6 @@ aws s3 cp /var/log/ceiba/archived/ s3://bucket/logs/ --recursive
 
 ## Próximos Pasos
 
-- [[Ops Seguridad Incidentes|Respuesta a incidentes]]
-- [[Ops Seguridad Hardening|Hardening del sistema]]
-- [[Usuario Admin Auditoria|Ver auditoría en la aplicación]]
+- [Respuesta a incidentes](Ops-Seguridad-Incidentes)
+- [Hardening del sistema](Ops-Seguridad-Hardening)
+- [Ver auditoría en la aplicación](Usuario-Admin-Auditoria)

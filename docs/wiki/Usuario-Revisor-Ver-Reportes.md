@@ -92,6 +92,6 @@ Los reportes se ordenan por fecha de creación (más recientes primero).
 
 ## Próximos Pasos
 
-- [[Usuario Revisor Editar Reportes|Editar reportes]]
-- [[Usuario Revisor Exportar PDF|Exportar a PDF]]
-- [[Usuario Revisor Exportacion Masiva|Exportación masiva]]
+- [Editar reportes](Usuario-Revisor-Editar-Reportes)
+- [Exportar a PDF](Usuario-Revisor-Exportar-PDF)
+- [Exportación masiva](Usuario-Revisor-Exportacion-Masiva)

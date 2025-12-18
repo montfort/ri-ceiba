@@ -173,5 +173,5 @@ Esto cumple con:
 
 ## Próximos Pasos
 
-- [[Dev Modulo Catalogos|Módulo de Catálogos]]
-- [[Usuario Admin Auditoria|Uso del visor de auditoría]]
+- [Módulo de Catálogos](Dev-Modulo-Catalogos)
+- [Uso del visor de auditoría](Usuario-Admin-Auditoria)
