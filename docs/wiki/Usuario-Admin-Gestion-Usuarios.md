@@ -151,6 +151,6 @@ Todas las operaciones de usuarios quedan registradas:
 
 ## Próximos Pasos
 
-- [[Usuario-Admin-Asignar-Roles|Entender los roles]]
-- [[Usuario-Admin-Auditoria|Ver registro de auditoría]]
-- [[Usuario-Admin-FAQ|Preguntas frecuentes]]
+- [[Usuario Admin Asignar Roles|Entender los roles]]
+- [[Usuario Admin Auditoria|Ver registro de auditoría]]
+- [[Usuario Admin FAQ|Preguntas frecuentes]]

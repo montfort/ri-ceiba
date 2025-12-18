@@ -241,5 +241,5 @@ await JS.InvokeVoidAsync("downloadFileFromBase64",
 
 ## Próximos Pasos
 
-- [[Dev-Modulo-Auditoria|Módulo de Auditoría]]
-- [[Dev-Modulo-Reportes-Automatizados|Reportes Automatizados]]
+- [[Dev Modulo Auditoria|Módulo de Auditoría]]
+- [[Dev Modulo Reportes Automatizados|Reportes Automatizados]]

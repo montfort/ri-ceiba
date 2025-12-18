@@ -173,5 +173,5 @@ Start-Service Ceiba
 
 ## Próximos Pasos
 
-- [[Ops-Config-SSL-HTTPS|Configurar HTTPS]]
-- [[Ops-Mant-Backup-Restore|Configurar backups]]
+- [[Ops Config SSL HTTPS|Configurar HTTPS]]
+- [[Ops Mant Backup Restore|Configurar backups]]

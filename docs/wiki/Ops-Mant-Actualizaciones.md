@@ -298,6 +298,6 @@ fi
 
 ## Próximos Pasos
 
-- [[Ops-Mant-Troubleshooting|Troubleshooting]]
-- [[Ops-Mant-Backup-Restore|Backup y restauración]]
-- [[Ops-Mant-Monitoreo|Monitoreo post-actualización]]
+- [[Ops Mant Troubleshooting|Troubleshooting]]
+- [[Ops Mant Backup Restore|Backup y restauración]]
+- [[Ops Mant Monitoreo|Monitoreo post-actualización]]

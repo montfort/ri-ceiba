@@ -136,7 +136,7 @@ Todos los cambios de roles quedan registrados:
 - Roles después del cambio
 - Fecha y hora
 
-Puedes ver estos registros en el módulo de [[Usuario-Admin-Auditoria|Auditoría]].
+Puedes ver estos registros en el módulo de [[Usuario Admin Auditoria|Auditoría]].
 
 ## Mejores Prácticas
 
@@ -147,6 +147,6 @@ Puedes ver estos registros en el módulo de [[Usuario-Admin-Auditoria|Auditoría
 
 ## Próximos Pasos
 
-- [[Usuario-Admin-Gestion-Usuarios|Gestión completa de usuarios]]
-- [[Usuario-Admin-Auditoria|Ver cambios en auditoría]]
-- [[Usuario-Admin-FAQ|Preguntas frecuentes]]
+- [[Usuario Admin Gestion Usuarios|Gestión completa de usuarios]]
+- [[Usuario Admin Auditoria|Ver cambios en auditoría]]
+- [[Usuario Admin FAQ|Preguntas frecuentes]]

@@ -197,6 +197,6 @@ docker compose exec ceiba-web dotnet Ceiba.Web.dll --validate-config
 
 ## Próximos Pasos
 
-- [[Ops-Config-Base-de-Datos|Configurar base de datos]]
-- [[Ops-Config-Email-SMTP|Configurar email]]
-- [[Ops-Config-IA|Configurar IA]]
+- [[Ops Config Base de Datos|Configurar base de datos]]
+- [[Ops Config Email SMTP|Configurar email]]
+- [[Ops Config IA|Configurar IA]]

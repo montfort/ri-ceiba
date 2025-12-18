@@ -208,6 +208,6 @@ sudo systemctl restart ceiba
 
 ## Próximos Pasos
 
-- [[Ops-Config-SSL-HTTPS|Configurar HTTPS con Let's Encrypt]]
-- [[Ops-Seguridad-Firewall|Configurar firewall]]
-- [[Ops-Mant-Backup-Restore|Configurar backups]]
+- [[Ops Config SSL HTTPS|Configurar HTTPS con Let's Encrypt]]
+- [[Ops Seguridad Firewall|Configurar firewall]]
+- [[Ops Mant Backup Restore|Configurar backups]]

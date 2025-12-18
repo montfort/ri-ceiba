@@ -154,5 +154,5 @@ await _auditService.LogAsync(
 
 ## Próximos Pasos
 
-- [[Dev-Modulo-Reportes|Módulo de Reportes]]
-- [[Dev-Guia-Agregar-Rol|Agregar un nuevo rol]]
+- [[Dev Modulo Reportes|Módulo de Reportes]]
+- [[Dev Guia Agregar Rol|Agregar un nuevo rol]]

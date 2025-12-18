@@ -236,6 +236,6 @@ public class ReporteIncidenciaConfiguration : IEntityTypeConfiguration<ReporteIn
 
 ## Próximos Pasos
 
-- [[Dev-Guia-Migraciones|Guía detallada de migraciones]]
-- [[Dev-API-Referencia|Referencia de API]]
-- [[Dev-Arquitectura|Arquitectura del sistema]]
+- [[Dev Guia Migraciones|Guía detallada de migraciones]]
+- [[Dev API Referencia|Referencia de API]]
+- [[Dev Arquitectura|Arquitectura del sistema]]

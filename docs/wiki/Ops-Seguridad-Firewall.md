@@ -333,6 +333,6 @@ nc -zv servidor 5432  # Debería fallar desde afuera
 
 ## Próximos Pasos
 
-- [[Ops-Seguridad-Hardening|Hardening del sistema]]
-- [[Ops-Config-SSL-HTTPS|Configurar HTTPS]]
-- [[Ops-Seguridad-Incidentes|Plan de respuesta a incidentes]]
+- [[Ops Seguridad Hardening|Hardening del sistema]]
+- [[Ops Config SSL HTTPS|Configurar HTTPS]]
+- [[Ops Seguridad Incidentes|Plan de respuesta a incidentes]]

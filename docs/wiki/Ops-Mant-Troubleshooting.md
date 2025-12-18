@@ -108,7 +108,7 @@ curl -I http://localhost:5000/_blazor
 3. Problemas de red
 
 **Soluciones:**
-Ver [[Ops-Config-Reverse-Proxy|Configuración de Reverse Proxy]] para configurar WebSockets.
+Ver [[Ops Config Reverse Proxy|Configuración de Reverse Proxy]] para configurar WebSockets.
 
 ## Problemas de Base de Datos
 
@@ -241,7 +241,7 @@ echo "Test" | openssl s_client -connect smtp.gmail.com:587 -starttls smtp
 3. Proveedor requiere configuración especial
 
 **Soluciones:**
-Ver [[Ops-Config-Email-SMTP|Configuración de Email]].
+Ver [[Ops Config Email SMTP|Configuración de Email]].
 
 ## Problemas de IA
 
@@ -261,7 +261,7 @@ docker compose logs ceiba-web | grep -i "ai\|openai\|narrative"
 3. Modelo no disponible
 
 **Soluciones:**
-Ver [[Ops-Config-IA|Configuración de IA]].
+Ver [[Ops Config IA|Configuración de IA]].
 
 ## Problemas de Rendimiento
 
@@ -369,6 +369,6 @@ Si el problema persiste:
 
 ## Próximos Pasos
 
-- [[Ops-Mant-Logs|Gestión de logs]]
-- [[Ops-Mant-Monitoreo|Monitoreo]]
-- [[Ops-Seguridad-Incidentes|Respuesta a incidentes]]
+- [[Ops Mant Logs|Gestión de logs]]
+- [[Ops Mant Monitoreo|Monitoreo]]
+- [[Ops Seguridad Incidentes|Respuesta a incidentes]]

@@ -148,6 +148,6 @@ curl -I https://api.openai.com
 
 ## Próximos Pasos
 
-- [[Ops-Instalacion-Docker|Instalación con Docker]]
-- [[Ops-Instalacion-Linux|Instalación en Linux]]
-- [[Ops-Instalacion-Windows|Instalación en Windows]]
+- [[Ops Instalacion Docker|Instalación con Docker]]
+- [[Ops Instalacion Linux|Instalación en Linux]]
+- [[Ops Instalacion Windows|Instalación en Windows]]

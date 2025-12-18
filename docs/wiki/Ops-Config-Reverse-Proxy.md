@@ -361,6 +361,6 @@ proxy_buffers 4 256k;
 
 ## Próximos Pasos
 
-- [[Ops-Config-SSL-HTTPS|Configurar SSL/HTTPS]]
-- [[Ops-Mant-Monitoreo|Monitorear el sistema]]
-- [[Ops-Seguridad-Firewall|Configurar firewall]]
+- [[Ops Config SSL HTTPS|Configurar SSL/HTTPS]]
+- [[Ops Mant Monitoreo|Monitorear el sistema]]
+- [[Ops Seguridad Firewall|Configurar firewall]]

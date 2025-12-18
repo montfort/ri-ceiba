@@ -8,28 +8,28 @@ Bienvenido a la documentación oficial del sistema **Ceiba**, una aplicación we
 
 Si eres un usuario del sistema (oficial de policía, supervisor o administrador):
 
-- [[Usuario-Primeros-Pasos|Primeros Pasos]]
-- [[Usuario-Creador-Introduccion|Guía para Creadores (Oficiales)]]
-- [[Usuario-Revisor-Introduccion|Guía para Revisores (Supervisores)]]
-- [[Usuario-Admin-Introduccion|Guía para Administradores]]
+- [[Usuario Primeros Pasos|Primeros Pasos]]
+- [[Usuario Creador Introduccion|Guía para Creadores (Oficiales)]]
+- [[Usuario Revisor Introduccion|Guía para Revisores (Supervisores)]]
+- [[Usuario Admin Introduccion|Guía para Administradores]]
 
 ### Para Desarrolladores
 
 Si vas a contribuir al código o extender el sistema:
 
-- [[Dev-Inicio-Rapido|Inicio Rápido]]
-- [[Dev-Arquitectura|Arquitectura del Sistema]]
-- [[Dev-Estandares-Codigo|Estándares de Código]]
-- [[Dev-Testing-TDD|Guía de Testing (TDD)]]
+- [[Dev Inicio Rapido|Inicio Rápido]]
+- [[Dev Arquitectura|Arquitectura del Sistema]]
+- [[Dev Estandares Codigo|Estándares de Código]]
+- [[Dev Testing TDD|Guía de Testing (TDD)]]
 
 ### Para Implementadores / DevOps
 
 Si vas a instalar o mantener el sistema en producción:
 
-- [[Ops-Requisitos-Sistema|Requisitos del Sistema]]
-- [[Ops-Instalacion-Docker|Instalación con Docker]]
-- [[Ops-Instalacion-Linux|Instalación en Linux]]
-- [[Ops-Config-Variables-Entorno|Variables de Entorno]]
+- [[Ops Requisitos Sistema|Requisitos del Sistema]]
+- [[Ops Instalacion Docker|Instalación con Docker]]
+- [[Ops Instalacion Linux|Instalación en Linux]]
+- [[Ops Config Variables Entorno|Variables de Entorno]]
 
 ---
 

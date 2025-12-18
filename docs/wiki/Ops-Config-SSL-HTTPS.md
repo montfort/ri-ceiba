@@ -300,6 +300,6 @@ Requiere agregar registro TXT en DNS.
 
 ## Próximos Pasos
 
-- [[Ops-Config-Reverse-Proxy|Configurar reverse proxy]]
-- [[Ops-Seguridad-Hardening|Hardening del servidor]]
-- [[Ops-Seguridad-Firewall|Configurar firewall]]
+- [[Ops Config Reverse Proxy|Configurar reverse proxy]]
+- [[Ops Seguridad Hardening|Hardening del servidor]]
+- [[Ops Seguridad Firewall|Configurar firewall]]

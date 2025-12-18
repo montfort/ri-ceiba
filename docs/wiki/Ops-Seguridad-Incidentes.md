@@ -307,6 +307,6 @@ tcpdump -r captured_traffic.pcap
 
 ## Próximos Pasos
 
-- [[Ops-Seguridad-Auditoria|Auditoría de seguridad]]
-- [[Ops-Mant-Backup-Restore|Backup y restauración]]
-- [[Ops-Seguridad-Hardening|Hardening del sistema]]
+- [[Ops Seguridad Auditoria|Auditoría de seguridad]]
+- [[Ops Mant Backup Restore|Backup y restauración]]
+- [[Ops Seguridad Hardening|Hardening del sistema]]

@@ -265,6 +265,6 @@ public class ValidationException : Exception
 
 ## Próximos Pasos
 
-- [[Dev-Modulo-Reportes|Módulo de Reportes]]
-- [[Dev-Modulo-Exportacion|Módulo de Exportación]]
-- [[Dev-Arquitectura|Arquitectura]]
+- [[Dev Modulo Reportes|Módulo de Reportes]]
+- [[Dev Modulo Exportacion|Módulo de Exportación]]
+- [[Dev Arquitectura|Arquitectura]]

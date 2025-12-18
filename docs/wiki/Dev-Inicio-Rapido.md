@@ -177,6 +177,6 @@ Al ejecutar por primera vez, se crea un admin por defecto:
 
 ## Próximos Pasos
 
-- [[Dev-Arquitectura|Entender la arquitectura]]
-- [[Dev-Estandares-Codigo|Revisar estándares de código]]
-- [[Dev-Testing-TDD|Guía de testing TDD]]
+- [[Dev Arquitectura|Entender la arquitectura]]
+- [[Dev Estandares Codigo|Revisar estándares de código]]
+- [[Dev Testing TDD|Guía de testing TDD]]

@@ -141,6 +141,6 @@ Para obtener los registros en formato descargable:
 
 ## Próximos Pasos
 
-- [[Usuario-Admin-Configuracion|Configuración del sistema]]
-- [[Usuario-Admin-Gestion-Usuarios|Gestionar usuarios]]
-- [[Usuario-Admin-FAQ|Preguntas frecuentes]]
+- [[Usuario Admin Configuracion|Configuración del sistema]]
+- [[Usuario Admin Gestion Usuarios|Gestionar usuarios]]
+- [[Usuario Admin FAQ|Preguntas frecuentes]]

@@ -350,6 +350,6 @@ var usuario = await context.Usuarios
 
 ## Próximos Pasos
 
-- [[Ops-Seguridad-Firewall|Configurar firewall]]
-- [[Ops-Seguridad-Auditoria|Auditoría de seguridad]]
-- [[Ops-Config-SSL-HTTPS|Configurar HTTPS]]
+- [[Ops Seguridad Firewall|Configurar firewall]]
+- [[Ops Seguridad Auditoria|Auditoría de seguridad]]
+- [[Ops Config SSL HTTPS|Configurar HTTPS]]

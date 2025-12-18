@@ -189,5 +189,5 @@ public class CreateReportDto
 
 ## Próximos Pasos
 
-- [[Dev-Modulo-Exportacion|Módulo de Exportación]]
-- [[Dev-Guia-Agregar-Campo|Agregar un campo al reporte]]
+- [[Dev Modulo Exportacion|Módulo de Exportación]]
+- [[Dev Guia Agregar Campo|Agregar un campo al reporte]]

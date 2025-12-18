@@ -123,6 +123,6 @@ Durante la exportación:
 
 ## Próximos Pasos
 
-- [[Usuario-Revisor-Reportes-Automatizados|Reportes automatizados]]
-- [[Usuario-Revisor-Ver-Reportes|Ver reportes]]
-- [[Usuario-Revisor-FAQ|Preguntas frecuentes]]
+- [[Usuario Revisor Reportes Automatizados|Reportes automatizados]]
+- [[Usuario Revisor Ver Reportes|Ver reportes]]
+- [[Usuario Revisor FAQ|Preguntas frecuentes]]

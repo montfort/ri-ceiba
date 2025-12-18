@@ -106,6 +106,6 @@ Los campos de narrativa requieren al menos 10 caracteres.
 
 ## Próximos Pasos
 
-- [[Usuario-Creador-Editar-Reporte|Cómo editar un reporte guardado]]
-- [[Usuario-Creador-Enviar-Reporte|Cómo entregar un reporte]]
-- [[Usuario-Creador-Historial|Ver tu historial de reportes]]
+- [[Usuario Creador Editar Reporte|Cómo editar un reporte guardado]]
+- [[Usuario Creador Enviar Reporte|Cómo entregar un reporte]]
+- [[Usuario Creador Historial|Ver tu historial de reportes]]

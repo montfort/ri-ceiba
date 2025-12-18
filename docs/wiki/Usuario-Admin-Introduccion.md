@@ -96,7 +96,7 @@ Esta separación asegura que:
 
 ## Próximos Pasos
 
-- [[Usuario-Admin-Gestion-Usuarios|Gestionar usuarios]]
-- [[Usuario-Admin-Asignar-Roles|Asignar roles]]
-- [[Usuario-Admin-Catalogos-Geograficos|Configurar catálogos geográficos]]
-- [[Usuario-Admin-Auditoria|Ver auditoría]]
+- [[Usuario Admin Gestion Usuarios|Gestionar usuarios]]
+- [[Usuario Admin Asignar Roles|Asignar roles]]
+- [[Usuario Admin Catalogos Geograficos|Configurar catálogos geográficos]]
+- [[Usuario Admin Auditoria|Ver auditoría]]

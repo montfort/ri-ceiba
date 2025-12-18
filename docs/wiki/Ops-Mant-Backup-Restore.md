@@ -314,6 +314,6 @@ docker compose exec ceiba-db psql -U postgres -c "DROP DATABASE ceiba_test;"
 
 ## Próximos Pasos
 
-- [[Ops-Mant-Monitoreo|Monitorear backups]]
-- [[Ops-Seguridad-Incidentes|Plan de respuesta a incidentes]]
-- [[Ops-Config-Base-de-Datos|Configuración de base de datos]]
+- [[Ops Mant Monitoreo|Monitorear backups]]
+- [[Ops Seguridad Incidentes|Plan de respuesta a incidentes]]
+- [[Ops Config Base de Datos|Configuración de base de datos]]

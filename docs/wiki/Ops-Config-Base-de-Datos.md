@@ -296,6 +296,6 @@ SELECT pg_cancel_backend(12345);
 
 ## Próximos Pasos
 
-- [[Ops-Mant-Backup-Restore|Configurar backups]]
-- [[Ops-Mant-Monitoreo|Monitorear base de datos]]
-- [[Ops-Config-Variables-Entorno|Variables de entorno]]
+- [[Ops Mant Backup Restore|Configurar backups]]
+- [[Ops Mant Monitoreo|Monitorear base de datos]]
+- [[Ops Config Variables Entorno|Variables de entorno]]

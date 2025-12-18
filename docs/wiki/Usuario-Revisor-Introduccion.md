@@ -76,8 +76,8 @@ Como Revisor, tienes acceso a:
 
 ## Próximos Pasos
 
-- [[Usuario-Revisor-Ver-Reportes|Ver todos los reportes]]
-- [[Usuario-Revisor-Editar-Reportes|Editar reportes]]
-- [[Usuario-Revisor-Exportar-PDF|Exportar a PDF]]
-- [[Usuario-Revisor-Exportacion-Masiva|Exportación masiva]]
-- [[Usuario-Revisor-Reportes-Automatizados|Reportes automatizados]]
+- [[Usuario Revisor Ver Reportes|Ver todos los reportes]]
+- [[Usuario Revisor Editar Reportes|Editar reportes]]
+- [[Usuario Revisor Exportar PDF|Exportar a PDF]]
+- [[Usuario Revisor Exportacion Masiva|Exportación masiva]]
+- [[Usuario Revisor Reportes Automatizados|Reportes automatizados]]

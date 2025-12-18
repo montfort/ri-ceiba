@@ -132,6 +132,6 @@ Para que los reportes automatizados funcionen:
 
 ## Próximos Pasos
 
-- [[Usuario-Revisor-Ver-Reportes|Ver reportes manuales]]
-- [[Usuario-Revisor-FAQ|Preguntas frecuentes]]
-- [[Usuario-Admin-Configuracion|Configuración del sistema (Admin)]]
+- [[Usuario Revisor Ver Reportes|Ver reportes manuales]]
+- [[Usuario Revisor FAQ|Preguntas frecuentes]]
+- [[Usuario Admin Configuracion|Configuración del sistema (Admin)]]

@@ -174,6 +174,6 @@ public class MailKitEmailService : IEmailService
 
 ## Próximos Pasos
 
-- [[Dev-Estandares-Codigo|Estándares de código]]
-- [[Dev-Base-de-Datos|Modelo de datos]]
-- [[Dev-Testing-TDD|Guía de testing]]
+- [[Dev Estandares Codigo|Estándares de código]]
+- [[Dev Base de Datos|Modelo de datos]]
+- [[Dev Testing TDD|Guía de testing]]
