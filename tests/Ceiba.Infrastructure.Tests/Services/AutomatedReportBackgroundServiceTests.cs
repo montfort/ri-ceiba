@@ -143,9 +143,9 @@ public class AutomatedReportBackgroundServiceTests
         await Task.Delay(250);
         await service.StopAsync(CancellationToken.None);
 
-        // Assert
+        // Assert - now logs at Debug level
         _mockLogger.Received().Log(
-            LogLevel.Information,
+            LogLevel.Debug,
             Arg.Any<EventId>(),
             Arg.Is<object>(o => o.ToString()!.Contains("disabled")),
             Arg.Any<Exception?>(),
@@ -399,14 +399,14 @@ public class AutomatedReportBackgroundServiceTests
 
     #region Configuration from Database Tests
 
-    [Fact(DisplayName = "ExecuteAsync should log configuration from database")]
-    public async Task ExecuteAsync_LoadsConfig_LogsConfiguration()
+    [Fact(DisplayName = "ExecuteAsync should log configuration changes")]
+    public async Task ExecuteAsync_LoadsConfig_LogsConfigurationChanges()
     {
-        // Arrange
+        // Arrange - config with non-default values will trigger change log on first load
         var config = new AutomatedReportConfigDto
         {
-            Habilitado = false,
-            HoraGeneracion = TimeSpan.FromHours(8)
+            Habilitado = true,  // Different from default (false)
+            HoraGeneracion = TimeSpan.FromHours(8)  // Different from default (TimeSpan.Zero)
         };
 
         _mockConfigService.GetConfigurationAsync(Arg.Any<CancellationToken>())
@@ -420,11 +420,11 @@ public class AutomatedReportBackgroundServiceTests
         await Task.Delay(200);
         await service.StopAsync(CancellationToken.None);
 
-        // Assert
+        // Assert - now only logs when configuration changes (which includes first load with non-default values)
         _mockLogger.Received().Log(
             LogLevel.Information,
             Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("configured from database")),
+            Arg.Is<object>(o => o.ToString()!.Contains("configuration updated")),
             Arg.Any<Exception?>(),
             Arg.Any<Func<object, Exception?, string>>());
     }
@@ -567,9 +567,9 @@ public class AutomatedReportBackgroundServiceTests
         // The service should NOT exit immediately when disabled
         callCount.Should().BeGreaterThanOrEqualTo(1);
 
-        // Verify service logged "disabled" message (not "stopped" immediately)
+        // Verify service logged "disabled" message at Debug level
         _mockLogger.Received().Log(
-            LogLevel.Information,
+            LogLevel.Debug,
             Arg.Any<EventId>(),
             Arg.Is<object>(o => o.ToString()!.Contains("disabled")),
             Arg.Any<Exception?>(),
@@ -608,9 +608,9 @@ public class AutomatedReportBackgroundServiceTests
             // Expected
         }
 
-        // Assert - Should log calculated next run with UTC timestamp
+        // Assert - Should log calculated next run with UTC timestamp at Debug level
         _mockLogger.Received().Log(
-            LogLevel.Information,
+            LogLevel.Debug,
             Arg.Any<EventId>(),
             Arg.Is<object>(o => o.ToString()!.Contains("UTC")),
             Arg.Any<Exception?>(),

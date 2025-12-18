@@ -41,13 +41,20 @@ public class AutomatedReportBackgroundService : BackgroundService
                 config = await configService.EnsureConfigurationExistsAsync(cancellationToken);
             }
 
+            var previousEnabled = _isEnabled;
+            var previousTime = _generationTime;
+
             _generationTime = config.HoraGeneracion;
             _isEnabled = config.Habilitado;
 
-            _logger.LogInformation(
-                "Automated report service configured from database. Enabled: {Enabled}, GenerationTime: {Time}",
-                _isEnabled,
-                _generationTime);
+            // Only log when configuration changes
+            if (previousEnabled != _isEnabled || previousTime != _generationTime)
+            {
+                _logger.LogInformation(
+                    "Automated report configuration updated. Enabled: {Enabled}, GenerationTime: {Time}",
+                    _isEnabled,
+                    _generationTime);
+            }
 
             return true;
         }
@@ -83,9 +90,7 @@ public class AutomatedReportBackgroundService : BackgroundService
 
                 if (!_isEnabled)
                 {
-                    _logger.LogInformation(
-                        "Automated report generation is disabled. Will check again in {Interval}.",
-                        disabledCheckInterval);
+                    _logger.LogDebug("Automated report generation is disabled, waiting...");
                     await Task.Delay(disabledCheckInterval, stoppingToken);
                     continue;
                 }
@@ -146,8 +151,8 @@ public class AutomatedReportBackgroundService : BackgroundService
 
         var delay = nextRun - now;
 
-        _logger.LogInformation(
-            "Calculated next run: {NextRun} UTC (in {Hours}h {Minutes}m). Current UTC: {Now}",
+        _logger.LogDebug(
+            "Next run: {NextRun} UTC (in {Hours}h {Minutes}m). Current UTC: {Now}",
             nextRun.ToString("yyyy-MM-dd HH:mm:ss"),
             (int)delay.TotalHours,
             delay.Minutes,
