@@ -15,7 +15,9 @@
 </p>
 
 <p align="center">
-[![Build Status](https://github.com/montfort/ri-ceiba/actions/workflows/ci.yml/badge.svg)](https://github.com/montfort/ri-ceiba/actions)
+  <a href="https://github.com/montfort/ri-ceiba/actions/workflows/ci.yml">
+    <img src="https://github.com/montfort/ri-ceiba/actions/workflows/ci.yml/badge.svg" alt="Build Status" />
+  </a>
 </p>
 
 <p align="center">
