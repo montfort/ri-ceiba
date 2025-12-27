@@ -2,12 +2,15 @@
 .mcp.json
 
 ## .NET Build Output
-bin/
-obj/
+[Bb]in/
+[Oo]bj/
 out/
 
-## XML Documentation files (auto-generated)
-**/.xml
+## XML Documentation (Solo ignorar en outputs, no globalmente)
+[Bb]in/**.xml
+[Oo]bj/**.xml
+
+## Compiladores y Salidas
 [Bb]uild/
 [Dd]ebug/
 [Rr]elease/
@@ -19,12 +22,10 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
-[Oo]bj/
 [Ll]og/
 [Ll]ogs/
 
-## Visual Studio
+## Visual Studio & VS Code
 .vs/
 *.suo
 *.user
@@ -34,10 +35,12 @@ bld/
 .vscode/
 *.code-workspace
 
-## ReSharper
+## ReSharper & Rider
 _ReSharper*/
 *.[Rr]e[Ss]harper
 *.DotSettings.user
+.idea/
+*.sln.iml
 
 ## Test Results
 [Tt]est[Rr]esult*/
@@ -58,32 +61,39 @@ coverage/
 *.nuget.targets
 .nuget/
 
-## Entity Framework Migrations
-**/Migrations/*.Designer.cs
+## Entity Framework (IMPORTANTE: Las migraciones deben subirse)
+# Se eliminó la exclusión de Migrations/*.Designer.cs para evitar errores
 
 ## ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
-## Blazor
+## Blazor & Web Assets
+# Si compilas CSS/JS al vuelo, ignóralos. Si no, comenta estas líneas.
 **/wwwroot/css/*.min.css
 **/wwwroot/js/*.min.js
 .blazor/
+npm-debug.log
+yarn-error.log
 
-## Environment & Secrets
+## Environment & Secrets (SECCIÓN CRÍTICA)
 *.env
 *.env.*
 !*.env.example
+# appsettings.Development.json contiene secretos locales
 appsettings.Development.json
 appsettings.*.json
+# appsettings.json define la estructura y DEBE subirse (SIN SECRETOS DENTRO)
 !appsettings.json
 secrets.json
 *.pfx
 *.key
 *.crt
+*.pem
 
 ## OS Files
 .DS_Store
 Thumbs.db
+Desktop.ini
 *.tmp
 *.swp
 *~
@@ -96,35 +106,26 @@ logs/
 ## Docker
 .dockerignore
 
-## JetBrains Rider
-.idea/
-*.sln.iml
-
-## Database
+## Database (Archivos locales)
 *.db
 *.sqlite
 *.sqlite3
+*.mdb
+*.ldf
+*.mdf
 
-## Backup files
+## Backup & Temp files
 *.bak
 *.backup
-
-## Temporary files
 *.tmp
 *.temp
+*.swp
 
-## Generated Reports (runtime output, not source code)
+## Generated Reports
 **/generated-reports/
 
 ## Aspire
 .aspire/
 
-## Claude Code local settings (may contain credentials in permissions)
+## Claude & AI Tools
 .claude/settings.local.json
-
-## Environment files with secrets
-.env
-.env.local
-.env.*.local
-!.env.example
-.wiki-temp

@@ -1,0 +1,472 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Application</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Application.Jobs.ExportJob">
+            <summary>
+            Background export job for processing large export requests.
+            T052c: Background export job for >50 reports with email notification.
+            T052d: Max 3 concurrent export jobs and 2-minute timeout.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Jobs.ExportJob.MaxConcurrentJobs">
+            <summary>
+            Maximum concurrent export jobs (T052d)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Jobs.ExportJob.TimeoutMinutes">
+            <summary>
+            Job timeout in minutes (T052d)
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Jobs.ExportJob.ExecuteAsync(Ceiba.Application.Jobs.BackgroundExportRequest,System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Executes background export and sends result via email.
+            </summary>
+            <param name="request">Export request parameters</param>
+            <param name="userId">User who requested the export</param>
+            <param name="userEmail">Email to send results to</param>
+            <param name="cancellationToken">Cancellation token</param>
+        </member>
+        <member name="M:Ceiba.Application.Jobs.ExportJob.ExecuteExportWithoutLimitsAsync(Ceiba.Shared.DTOs.Export.ExportRequestDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Executes export without limit validation (for background jobs only).
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Jobs.ExportJob.SendExportResultEmailAsync(System.String,Ceiba.Shared.DTOs.Export.ExportResultDto,Ceiba.Shared.DTOs.Export.ExportFormat,System.Threading.CancellationToken)">
+            <summary>
+            Sends email with export result attachment.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Jobs.ExportJob.SendExportFailureEmailAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Sends email notification when export fails.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Jobs.ExportJob.Schedule(Ceiba.Application.Jobs.BackgroundExportRequest,System.Guid,System.String)">
+            <summary>
+            Schedules a background export job.
+            T052c: Creates background job with Hangfire.
+            </summary>
+            <param name="request">Export request parameters</param>
+            <param name="userId">User requesting the export</param>
+            <param name="userEmail">Email for notification</param>
+            <returns>Job ID for tracking</returns>
+        </member>
+        <member name="M:Ceiba.Application.Jobs.ExportJob.GetStatus(System.String)">
+            <summary>
+            Gets the status of a background export job.
+            </summary>
+            <param name="jobId">Job ID to check</param>
+            <returns>Job status information</returns>
+        </member>
+        <member name="T:Ceiba.Application.Jobs.BackgroundExportRequest">
+            <summary>
+            Request model for background export jobs.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Jobs.ExportJobStatus">
+            <summary>
+            Status information for a background export job.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.IDocumentConversionService">
+            <summary>
+            Service for converting Markdown documents to Word format using Pandoc.
+            T094: Implement markdown to Word conversion.
+            RT-006 Mitigations: Pandoc availability check, process timeout, error handling.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.IDocumentConversionService.ConvertMarkdownToWordAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Converts markdown content to Word document (.docx).
+            </summary>
+            <param name="markdownContent">Markdown content to convert</param>
+            <param name="title">Document title</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Word document as byte array</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.IDocumentConversionService.IsPandocAvailable">
+            <summary>
+            Checks if Pandoc is available on the system.
+            T094a: Pandoc availability check.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.IDocumentConversionService.GetPandocVersion">
+            <summary>
+            Gets the installed Pandoc version.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.DocumentConversionService">
+            <summary>
+            Pandoc-based document conversion service.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.DocumentConversionService.ConversionTimeoutSeconds">
+            <summary>
+            Maximum time allowed for Pandoc conversion (T094b)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.DocumentConversionService.MaxInputCharacters">
+            <summary>
+            Maximum input size in characters (T094c)
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.ConvertMarkdownToWordAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.IsPandocAvailable">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.GetPandocVersion">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.ExecutePandocAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Executes Pandoc to convert markdown to Word.
+            T094b: Process timeout handling.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.GetPandocExecutable">
+            <summary>
+            Gets the Pandoc executable path based on OS.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.CreateSecureTempDirectory">
+            <summary>
+            Creates a secure temporary directory for file operations.
+            Uses application-specific directory instead of system temp to avoid publicly writable directory risks.
+            Mitigations for CWE-377/CWE-379:
+            - Uses unpredictable GUID-based directory names (prevents race conditions)
+            - Creates under user-specific AppData folder (not publicly writable)
+            - Directory is cleaned up immediately after use
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.TryDeleteFile(System.String)">
+            <summary>
+            Safely tries to delete a file.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.DocumentConversionService.TryDeleteDirectory(System.String)">
+            <summary>
+            Safely tries to delete a directory.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.PandocStartupValidator">
+            <summary>
+            T094a: Pandoc availability validator for application startup.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.PandocStartupValidator.ValidateAndLog(Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Validates Pandoc availability during application startup.
+            Logs a warning if Pandoc is not available (non-blocking).
+            </summary>
+            <param name="logger">Logger instance</param>
+            <returns>True if Pandoc is available, false otherwise</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.ExportService">
+            <summary>
+            High-level export service with authorization and data retrieval
+            Implements T-US2-021 to T-US2-030 test requirements
+            RT-003 Mitigations: Export limits, monitoring, and background job support
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.Export.ExportService.MaxPdfReports">
+            <summary>
+            Maximum number of reports allowed for PDF export (T052a)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.Export.ExportService.MaxJsonReports">
+            <summary>
+            Maximum number of reports allowed for JSON export (T052a)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.Export.ExportService.BackgroundExportThreshold">
+            <summary>
+            Threshold for background export job (T052c)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.Export.ExportService.AlertDurationSeconds">
+            <summary>
+            Alert threshold for export duration in seconds (T052e)
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Services.Export.ExportService.AlertFileSizeBytes">
+            <summary>
+            Alert threshold for export file size in bytes (500MB) (T052e)
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.ExportReportsAsync(Ceiba.Shared.DTOs.Export.ExportRequestDto,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports reports based on request parameters
+            RT-003 Mitigations: Enforces export limits (T052a), monitoring (T052e)
+            </summary>
+            <param name="request">Export request with format and options</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+            <exception cref="T:System.UnauthorizedAccessException">If user is not REVISOR</exception>
+            <exception cref="T:System.ArgumentException">If no report IDs provided or limit exceeded</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.ValidateExportLimits(System.Int32,Ceiba.Shared.DTOs.Export.ExportFormat)">
+            <summary>
+            T052a: Validates export limits and throws ArgumentException with clear error message if exceeded
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.LogExportMetrics(System.Int32,System.Int64,System.TimeSpan,Ceiba.Shared.DTOs.Export.ExportFormat,System.Guid)">
+            <summary>
+            T052e: Logs export metrics and triggers alerts for slow or large exports
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.ExportSingleReportAsync(System.Int32,Ceiba.Shared.DTOs.Export.ExportFormat,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports a single report by ID
+            </summary>
+            <param name="reportId">ID of report to export</param>
+            <param name="format">Export format (PDF or JSON)</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+            <exception cref="T:System.UnauthorizedAccessException">If user is not REVISOR</exception>
+            <exception cref="T:System.Collections.Generic.KeyNotFoundException">If report not found</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.ExportService.MapToExportDtoAsync(Ceiba.Core.Entities.ReporteIncidencia)">
+            <summary>
+            Maps ReporteIncidencia entity to ReportExportDto
+            Resolves user email for display in PDF header
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.IExportService">
+            <summary>
+            High-level service for exporting incident reports
+            Handles authorization, data retrieval, and format conversion
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IExportService.ExportReportsAsync(Ceiba.Shared.DTOs.Export.ExportRequestDto,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports reports based on request parameters
+            </summary>
+            <param name="request">Export request with format and options</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IExportService.ExportSingleReportAsync(System.Int32,Ceiba.Shared.DTOs.Export.ExportFormat,System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Exports a single report by ID
+            </summary>
+            <param name="reportId">ID of report to export</param>
+            <param name="format">Export format (PDF or JSON)</param>
+            <param name="userId">ID of user requesting export</param>
+            <param name="isRevisor">Whether user has REVISOR role</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Export result with file data and metadata</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.IJsonExporter">
+            <summary>
+            Service for exporting incident reports to JSON format
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IJsonExporter.ExportSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto,Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports a single report to JSON format
+            </summary>
+            <param name="report">Report data to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IJsonExporter.ExportMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto},Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports multiple reports to JSON format
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.IPdfGenerator">
+            <summary>
+            Service for generating PDF documents from incident reports
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IPdfGenerator.GenerateSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Generates a PDF document from a single report
+            </summary>
+            <param name="report">Report data to export</param>
+            <returns>PDF file as byte array</returns>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.IPdfGenerator.GenerateMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto})">
+            <summary>
+            Generates a PDF document containing multiple reports
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <returns>PDF file as byte array</returns>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.JsonExporter">
+            <summary>
+            JSON export service implementation
+            Implements T-US2-011 to T-US2-020 test requirements
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.JsonExporter.ExportSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto,Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports a single report to JSON format
+            </summary>
+            <param name="report">Report data to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+            <exception cref="T:System.ArgumentNullException">If report is null</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.JsonExporter.ExportMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto},Ceiba.Shared.DTOs.Export.ExportOptions)">
+            <summary>
+            Exports multiple reports to JSON format
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <param name="options">Optional export customization</param>
+            <returns>JSON file as byte array (UTF-8 encoded)</returns>
+            <exception cref="T:System.ArgumentException">If reports collection is empty</exception>
+        </member>
+        <member name="T:Ceiba.Application.Services.Export.PdfGenerator">
+            <summary>
+            PDF document generation service using QuestPDF
+            Implements T-US2-001 to T-US2-010 test requirements
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.GenerateSingleReport(Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Generates a PDF document from a single report
+            </summary>
+            <param name="report">Report data to export</param>
+            <returns>PDF file as byte array</returns>
+            <exception cref="T:System.ArgumentNullException">If report is null</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.GenerateMultipleReports(System.Collections.Generic.IEnumerable{Ceiba.Shared.DTOs.Export.ReportExportDto})">
+            <summary>
+            Generates a PDF document containing multiple reports
+            </summary>
+            <param name="reports">Collection of reports to export</param>
+            <returns>PDF file as byte array</returns>
+            <exception cref="T:System.ArgumentException">If reports collection is empty</exception>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeHeader(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the PDF header with CEIBA branding
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeContent(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the PDF content with all report sections
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeDemographicSection(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the demographic data section
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeClassificationSection(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the classification section
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeGeographicSection(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the geographic location section
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeIncidentDetailsSection(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the incident details section
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeAuditSection(QuestPDF.Infrastructure.IContainer,Ceiba.Shared.DTOs.Export.ReportExportDto)">
+            <summary>
+            Composes the audit information section
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.FormatBoolean(System.Boolean)">
+            <summary>
+            Formats a boolean value as "Sí" or "No"
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.AddOptionalField(QuestPDF.Fluent.ColumnDescriptor,System.String,System.String)">
+            <summary>
+            Adds an optional text field if value is not empty
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.AddOptionalAuditField(QuestPDF.Fluent.ColumnDescriptor,System.String,System.String)">
+            <summary>
+            Adds an optional audit field if value is not empty
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.AddOptionalDateField(QuestPDF.Fluent.ColumnDescriptor,System.String,System.Nullable{System.DateTime})">
+            <summary>
+            Adds an optional date field if value has a value
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.Export.PdfGenerator.ComposeFooter(QuestPDF.Infrastructure.IContainer)">
+            <summary>
+            Composes the PDF footer with page numbers and generation timestamp
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.ILoginSecurityService">
+            <summary>
+            Service for login security including rate limiting and progressive delays.
+            Implements OWASP recommendations for brute force protection.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.IsIpBlockedAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Checks if the IP address is currently blocked due to rate limiting.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.RecordFailedAttemptAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Records a failed login attempt for the given IP and email.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.RecordSuccessfulLoginAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Records a successful login, clearing failed attempts.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.GetProgressiveDelayAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the progressive delay in milliseconds based on failed attempts.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.GetRemainingLockoutSecondsAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the remaining lockout time in seconds, or 0 if not locked.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Services.ILoginSecurityService.GetFailedAttemptCountAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the number of failed attempts for an IP address.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Services.ReportService">
+            <summary>
+            Service implementation for report management operations.
+            US1: T035
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Validators.CreateReportDtoValidator">
+            <summary>
+            FluentValidation validator for CreateReportDto.
+            US1: T038
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Validators.UpdateReportDtoValidator">
+            <summary>
+            FluentValidation validator for UpdateReportDto.
+            US1: T038
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Core.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Core.Tests.DTOs.AdminDTOsTests">
+            <summary>
+            Unit tests for Admin DTOs (User Management, Catalogs, Audit).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.DTOs.ConfigurationDTOsTests">
+            <summary>
+            Unit tests for Configuration DTOs (AI, Email, Automated Reports).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.DTOs.ExportDTOsTests">
+            <summary>
+            Unit tests for Export DTOs (ExportFormat, ExportOptions, ExportRequestDto, etc.).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.DTOs.ReportDTOsTests">
+            <summary>
+            Unit tests for Report DTOs (CreateReportDto, UpdateReportDto, ReportDto, etc.).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.BaseEntityTests">
+            <summary>
+            Unit tests for BaseEntity, BaseEntityWithUser, and BaseCatalogEntity classes.
+            Tests inheritance hierarchy and default values.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.CatalogoSugerenciaTests">
+            <summary>
+            Unit tests for CatalogoSugerencia entity.
+            Tests configurable suggestion catalog for text field autocomplete.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.ConfiguracionEmailTests">
+            <summary>
+            Unit tests for ConfiguracionEmail entity.
+            Tests email service configuration for SMTP, SendGrid, and Mailgun providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.ConfiguracionIATests">
+            <summary>
+            Unit tests for ConfiguracionIA entity.
+            Tests AI service configuration and validation logic.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.ConfiguracionReportesAutomatizadosTests">
+            <summary>
+            Unit tests for ConfiguracionReportesAutomatizados entity.
+            Tests automated report generation configuration.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.CuadranteTests">
+            <summary>
+            Unit tests for Cuadrante entity.
+            Cuadrante is the lowest level in the geographic hierarchy: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.ModeloReporteTests">
+            <summary>
+            Unit tests for ModeloReporte entity.
+            Tests automated report template functionality.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.RegionTests">
+            <summary>
+            Unit tests for Region entity.
+            Region is the second level in the geographic hierarchy: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.RegistroAuditoriaTests">
+            <summary>
+            Unit tests for RegistroAuditoria entity.
+            Tests audit log entry functionality for system operation tracking.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.ReporteAutomatizadoTests">
+            <summary>
+            Unit tests for ReporteAutomatizado entity.
+            Tests automated daily summary report functionality.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.SectorTests">
+            <summary>
+            Unit tests for Sector entity.
+            Sector is the third level in the geographic hierarchy: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.Entities.ZonaTests">
+            <summary>
+            Unit tests for Zona entity.
+            Zona is the highest level in the geographic hierarchy: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Tests.ReporteIncidenciaTests">
+            <summary>
+            Unit tests for ReporteIncidencia entity (US1)
+            Tests state transitions and validation logic per T025
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.AppHost</name>
+    </assembly>
+    <members>
+        <member name="T:Program">
+            <summary>
+            Auto-generated public partial Program class for top-level statement apps.
+            </summary>
+        </member>
+        <member name="T:Projects.Ceiba_Web">
+            <summary>
+            Metadata for the Ceiba_Web project.
+            </summary>
+        </member>
+        <member name="P:Projects.Ceiba_Web.ProjectPath">
+            <summary>
+            The path to the Ceiba_Web project.
+            </summary>
+        </member>
+        <member name="P:Projects.Ceiba_Web.SuppressBuild">
+            <summary>
+            Gets a value indicating whether building the project before running it should be suppressed.
+            </summary>
+            <remarks>
+            Projects added via ProjectReference items in the AppHost project file are built as part of building the AppHost project process
+            so building them again before running is unnecessary. This property always returns true.
+            </remarks>
+        </member>
+        <member name="T:Projects.Ceiba_AppHost">
+            <summary>
+            Metadata for the Aspire AppHost project.
+            </summary>
+        </member>
+        <member name="P:Projects.Ceiba_AppHost.ProjectPath">
+            <summary>
+            The path to the Aspire Host project.
+            </summary>
+        </member>
+    </members>
+</doc>

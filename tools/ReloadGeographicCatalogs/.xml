@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ReloadGeographicCatalogs</name>
+    </assembly>
+    <members>
+        <member name="T:ReloadGeographicCatalogs.Program">
+             <summary>
+             CLI tool to reload geographic catalogs from regiones.json.
+             Usage: dotnet run -- [connection-string] [json-path]
+            
+             Environment variables:
+             - ConnectionStrings__DefaultConnection: PostgreSQL connection string
+             - CEIBA_REGIONES_JSON_PATH: Path to regiones.json (optional)
+             </summary>
+        </member>
+    </members>
+</doc>

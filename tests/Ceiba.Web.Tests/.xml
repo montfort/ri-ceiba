@@ -1,0 +1,254 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Web.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Web.Tests.Components.AiConfigManagerTests">
+            <summary>
+            Component tests for AiConfigManager Blazor component.
+            Tests AI configuration management for automated reports.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.AuditLogViewerTests">
+            <summary>
+            Component tests for AuditLogViewer Blazor component.
+            Tests audit log viewing and filtering functionality.
+            Phase 3: Coverage improvement tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.AutomatedReportDetailTests">
+            <summary>
+            Component tests for AutomatedReportDetail Blazor component.
+            Tests automated report detail view and actions.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.AutomatedReportListTests">
+            <summary>
+            Component tests for AutomatedReportList Blazor component.
+            Tests automated report listing with filters and generation modal.
+            Phase 3: Coverage improvement tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.CatalogManagerTests">
+            <summary>
+            Component tests for CatalogManager Blazor component.
+            Tests geographic catalog management (Zona/Region/Sector/Cuadrante).
+            Phase 3: Coverage improvement tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.ExportPageTests">
+            <summary>
+            Component tests for ExportPage Blazor component.
+            Tests report export functionality for supervisors.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.LiveAnnouncerTests">
+            <summary>
+            Component tests for LiveAnnouncer Blazor component.
+            Tests WCAG 4.1.3 accessibility live region for screen reader announcements.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.NotFoundTests">
+            <summary>
+            Component tests for NotFound Blazor page component.
+            Tests 404 error page display.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.RedirectToLoginTests">
+            <summary>
+            Component tests for RedirectToLogin Blazor component.
+            Tests navigation to login page with return URL handling.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.ReportFormTests">
+            <summary>
+            Component tests for ReportForm Blazor component.
+            Tests report creation and editing functionality.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.ReportListRevisorTests">
+            <summary>
+            Component tests for ReportListRevisor Blazor component.
+            Tests report supervision view for REVISOR role.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.ReportListTests">
+            <summary>
+            Component tests for ReportList Blazor component.
+            Tests report listing with filters and pagination for CREADOR role.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.ReportViewTests">
+            <summary>
+            Component tests for ReportView Blazor component.
+            Tests report viewing with detail display, submit, and delete functionality.
+            Phase 3: Coverage improvement tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.SkipLinkTests">
+            <summary>
+            Component tests for SkipLink Blazor component.
+            Tests WCAG 2.4.1 accessibility skip link for keyboard navigation.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.SuggestionInputTests">
+            <summary>
+            Component tests for SuggestionInput Blazor component.
+            Tests autocomplete functionality with suggestions, debounce, and validation.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.SuggestionManagerTests">
+            <summary>
+            Component tests for SuggestionManager Blazor component.
+            Tests suggestion field management for reports.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.TemplateListTests">
+            <summary>
+            Component tests for TemplateList Blazor component.
+            Tests report template management for automated reports.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.UserFormTests">
+            <summary>
+            Component tests for UserForm Blazor component.
+            Tests user creation and editing form.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Components.UserListTests">
+            <summary>
+            Component tests for UserList Blazor component.
+            Tests user management functionality including CRUD operations.
+            Phase 3: Coverage improvement tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Configuration.FeatureFlagsTests">
+            <summary>
+            Unit tests for FeatureFlags and FeatureFlagExtensions.
+            T019d: RT-004 Mitigation - Feature flag configuration system tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.AccountControllerTests">
+            <summary>
+            Unit tests for AccountController.
+            Tests authentication endpoints including login, logout, and security features.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.AdminControllerTests">
+            <summary>
+            Unit tests for AdminController.
+            Tests user management and catalog administration operations.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.AuditControllerTests">
+            <summary>
+            Unit tests for AuditController.
+            Tests audit log viewing and filtering operations.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.AutomatedReportConfigControllerTests">
+            <summary>
+            Unit tests for AutomatedReportConfigController.
+            Tests automated report configuration CRUD operations.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.AutomatedReportsControllerTests">
+            <summary>
+            Unit tests for AutomatedReportsController.
+            US4: Reportes Automatizados Diarios con IA.
+            Tests report listing, download, email sending, and generation.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.CatalogsControllerTests">
+            <summary>
+            Unit tests for CatalogsController.
+            Tests catalog operations (Zona, Región, Sector, Cuadrante, Suggestions).
+            US1: T040
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.EmailConfigControllerTests">
+            <summary>
+            Unit tests for EmailConfigController.
+            Tests email configuration CRUD operations and test email functionality.
+            Phase 2: Medium priority tests for coverage improvement.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.ExportControllerTests">
+            <summary>
+            Unit tests for ExportController.
+            Tests report export operations (PDF and JSON).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Controllers.ReportsControllerTests">
+            <summary>
+            Unit tests for ReportsController.
+            Tests report CRUD operations and authorization logic.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Filters.AuthorizeBeforeModelBindingAttributeTests">
+            <summary>
+            Unit tests for AuthorizeBeforeModelBindingAttribute.
+            Tests authorization filter that executes BEFORE model binding.
+            OWASP security best practice tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Middleware.ErrorHandlingMiddlewareTests">
+            <summary>
+            Unit tests for ErrorHandlingMiddleware.
+            Tests global exception handling, error responses, and environment-specific behavior.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Middleware.SecurityHeadersMiddlewareTests">
+             <summary>
+             Unit tests for SecurityHeadersMiddleware.
+             Tests security header configuration and middleware behavior.
+             Phase 2: Medium priority tests for coverage improvement.
+             T114, T114a, T118: HTTPS, HSTS, and security headers.
+            
+             Note: Full header injection tests require integration tests with a real HTTP pipeline
+             because the middleware uses OnStarting callbacks that don't fire with DefaultHttpContext.
+             </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Middleware.UserAgentValidationMiddlewareTests">
+            <summary>
+            Unit tests for UserAgentValidationMiddleware.
+            RS-005 Mitigation: Tests session hijacking detection via User-Agent validation.
+            Phase 3: Coverage improvement tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Middleware.UserAgentValidationMiddlewareTests.MockSession">
+            <summary>
+            Mock session implementation for testing.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.Middleware.UserAgentValidationMiddlewareTests.MockSessionFeature">
+            <summary>
+            Mock session feature for injecting into HttpContext.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.ReportFilterComponentTests">
+            <summary>
+            Component tests for ReportFilter Blazor component (US2).
+            Tests T050: Report filtering functionality for supervisor view.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.ReportFormComponentTests">
+            <summary>
+            Component tests for ReportForm Blazor component (US1)
+            Tests form rendering and interaction per T026
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.ReportFormComponentTests.TestAuthenticationStateProvider">
+            <summary>
+            Test implementation of AuthenticationStateProvider
+            Returns an authenticated user with CREADOR role
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Tests.ReportFormComponentTests.FakeNavigationManager">
+            <summary>
+            Fake NavigationManager for testing that tracks navigation
+            </summary>
+        </member>
+    </members>
+</doc>
