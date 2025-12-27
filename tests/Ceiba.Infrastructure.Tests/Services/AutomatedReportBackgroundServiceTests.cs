@@ -105,20 +105,30 @@ public class AutomatedReportBackgroundServiceTests
     public async Task ExecuteAsync_NoConfig_CreatesDefaultConfig()
     {
         // Arrange
+        var ensureConfigCalled = new TaskCompletionSource<bool>();
+
         _mockConfigService.GetConfigurationAsync(Arg.Any<CancellationToken>())
             .Returns((AutomatedReportConfigDto?)null);
         _mockConfigService.EnsureConfigurationExistsAsync(Arg.Any<CancellationToken>())
-            .Returns(new AutomatedReportConfigDto { Habilitado = false });
+            .Returns(callInfo =>
+            {
+                ensureConfigCalled.TrySetResult(true);
+                return new AutomatedReportConfigDto { Habilitado = false };
+            });
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(200);
+
+        // Wait for the method to be called (with timeout)
+        var called = await Task.WhenAny(ensureConfigCalled.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+
         await service.StopAsync(CancellationToken.None);
 
         // Assert
+        called.Should().Be(ensureConfigCalled.Task, "EnsureConfigurationExistsAsync should have been called");
         await _mockConfigService.Received().EnsureConfigurationExistsAsync(Arg.Any<CancellationToken>());
     }
 
@@ -403,6 +413,7 @@ public class AutomatedReportBackgroundServiceTests
     public async Task ExecuteAsync_LoadsConfig_LogsConfigurationChanges()
     {
         // Arrange - config with non-default values will trigger change log on first load
+        var configLoaded = new TaskCompletionSource<bool>();
         var config = new AutomatedReportConfigDto
         {
             Habilitado = true,  // Different from default (false)
@@ -410,15 +421,28 @@ public class AutomatedReportBackgroundServiceTests
         };
 
         _mockConfigService.GetConfigurationAsync(Arg.Any<CancellationToken>())
-            .Returns(config);
+            .Returns(callInfo =>
+            {
+                configLoaded.TrySetResult(true);
+                return config;
+            });
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(200);
+
+        // Wait for the config to be loaded (with timeout)
+        var loaded = await Task.WhenAny(configLoaded.Task, Task.Delay(TimeSpan.FromSeconds(3)));
+
+        // Give a small delay for the log to be written after config load
+        await Task.Delay(50);
+
         await service.StopAsync(CancellationToken.None);
+
+        // Assert - verify config was loaded
+        loaded.Should().Be(configLoaded.Task, "Configuration should have been loaded");
 
         // Assert - now only logs when configuration changes (which includes first load with non-default values)
         _mockLogger.Received().Log(
