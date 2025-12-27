@@ -15,6 +15,10 @@
 </p>
 
 <p align="center">
+[![Build Status](https://github.com/montfort/ri-ceiba/actions/workflows/ci.yml/badge.svg)](https://github.com/montfort/ri-ceiba/actions)
+</p>
+
+<p align="center">
   <a href="#características-principales">Características</a> •
   <a href="#arquitectura">Arquitectura</a> •
   <a href="#tecnologías">Tecnologías</a> •

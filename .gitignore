@@ -128,4 +128,4 @@ logs/
 .aspire/
 
 ## Claude & AI Tools
-.claude/settings.local.json
+.claude/settings.local.json.wiki-temp/
