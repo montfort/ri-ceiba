@@ -1,0 +1,196 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Infrastructure.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Infrastructure.Tests.AuditInterceptorTests">
+            <summary>
+            Unit tests for audit logging save changes interceptor.
+            Tests audit trail creation for all entity modifications.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Caching.CacheKeysTests">
+            <summary>
+            Unit tests for CacheKeys - cache key generation and formatting.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Caching.MemoryCacheServiceTests">
+            <summary>
+            Unit tests for MemoryCacheService - caching operations.
+            T117b: Query caching strategy tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Data.RegionDataLoaderTests">
+            <summary>
+            Unit tests for RegionDataLoader service.
+            Tests JSON parsing and database seeding for geographic catalogs.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Logging.PIIRedactionEnricherTests">
+            <summary>
+            Unit tests for PIIRedactionEnricher.
+            RS-003 Mitigation: Tests PII redaction in log messages.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Logging.PIIRedactionEnricherTests.TestPropertyFactory">
+            <summary>
+            Test implementation of ILogEventPropertyFactory to capture created properties.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Repositories.ReportRepositoryTests">
+            <summary>
+            Unit tests for ReportRepository.
+            Tests basic CRUD operations. Note: Tests using AsSplitQuery and AsNoTracking
+            are limited due to EF Core InMemory provider limitations.
+            Full repository functionality is tested via integration tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Resilience.AiServiceMetricsTests">
+            <summary>
+            Unit tests for AiServiceMetrics - AI call monitoring and metrics.
+            T092e: AI call monitoring tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Resilience.AiServicePoliciesTests">
+            <summary>
+            Unit tests for AiServicePolicies - Polly resilience policies for AI service HTTP calls.
+            T092a: Configure Polly policies (30s timeout, circuit breaker after 5 failures).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Security.InputSanitizerTests">
+            <summary>
+            Unit tests for InputSanitizer - input validation and XSS/SQL injection prevention.
+            T118b: Input sanitization tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AggregatedHealthCheckServiceTests">
+            <summary>
+            Unit tests for AggregatedHealthCheckService.
+            Tests health check aggregation across multiple services.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AiConfigurationServiceTests">
+            <summary>
+            Unit tests for AiConfigurationService.
+            Tests AI provider configuration management and connection testing.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AiNarrativeServiceTests">
+            <summary>
+            Unit tests for AiNarrativeService.
+            Tests AI narrative generation with different providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AiServiceHealthCheckTests">
+            <summary>
+            T156-T165: RO-004 AI service health check tests.
+            Tests AI narrative service health monitoring.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AuditServiceTests">
+            <summary>
+            Unit tests for AuditService.
+            Tests audit logging and query operations.
+            T119: Audit service implementation and query tests.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AutomatedReportBackgroundServiceTests">
+            <summary>
+            Unit tests for AutomatedReportBackgroundService.
+            Tests automated report generation background service.
+            Phase 2: Medium priority tests for coverage improvement.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AutomatedReportConfigServiceTests">
+            <summary>
+            Unit tests for AutomatedReportConfigService.
+            Tests configuration management for automated report generation.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.AutomatedReportServiceTests">
+            <summary>
+            Unit tests for AutomatedReportService.
+            Tests automated report generation, template management, and statistics calculation.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.CachedCatalogServiceTests">
+            <summary>
+            Unit tests for CachedCatalogService - cached catalog data access.
+            Tests caching behavior for Zonas, Sectores, Cuadrantes, and Sugerencias.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.CatalogAdminServiceTests">
+            <summary>
+            Unit tests for CatalogAdminService (US5: T105)
+            Tests suggestion management operations.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.CatalogServiceTests">
+            <summary>
+            Unit tests for CatalogService (US1: T036)
+            Tests catalog retrieval operations for Zonas, Sectores, Cuadrantes, and Sugerencias.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.DatabaseHealthCheckTests">
+            <summary>
+            T156-T165: RO-004 Database health check tests.
+            Tests database connectivity monitoring and performance thresholds.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.EmailConfigServiceTests">
+            <summary>
+            Unit tests for EmailConfigService.
+            Tests email configuration management, provider switching, and testing.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.EmailHealthCheckTests">
+            <summary>
+            T156-T165: RO-004 Email health check tests.
+            Tests email service health monitoring via resilient email service.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.EmailQueueProcessorServiceTests">
+            <summary>
+            Unit tests for EmailQueueProcessorService.
+            T146-T155: RO-003 Background service for processing queued emails.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.EmailServiceTests">
+            <summary>
+            Unit tests for EmailService.
+            Tests email sending via SMTP, SendGrid, and Mailgun providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.GracefulDegradationServiceTests">
+            <summary>
+            Unit tests for GracefulDegradationService.
+            Tests service state tracking, failure recording, and fallback execution.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.LoginSecurityServiceTests">
+            <summary>
+            Unit tests for LoginSecurityService (T113a-e: Login security features)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.ResilientEmailServiceTests">
+            <summary>
+            T146-T155: RO-003 Email resilience tests.
+            Tests retry logic, circuit breaker, and email queue functionality.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.ServiceResilienceTests">
+            <summary>
+            T156-T165: RO-004 Service resilience tests.
+            Tests health checks and graceful degradation functionality.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Infrastructure.Tests.Services.UserManagementServiceTests">
+            <summary>
+            Unit tests for UserManagementService.
+            Tests user CRUD operations for ADMIN role.
+            US3: FR-021 to FR-026
+            </summary>
+        </member>
+    </members>
+</doc>

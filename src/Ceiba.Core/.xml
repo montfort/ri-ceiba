@@ -1,0 +1,1637 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Core.Entities.BaseEntity">
+            <summary>
+            Base entity class with common audit fields.
+            All entities should inherit from this class to ensure consistent audit tracking.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.BaseEntity.CreatedAt">
+            <summary>
+            UTC timestamp when the entity was created.
+            Automatically set by the database interceptor.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.BaseEntityWithUser">
+            <summary>
+            Base entity class for entities with a user creator.
+            Extends BaseEntity with user tracking.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.BaseEntityWithUser.UsuarioId">
+            <summary>
+            User who created or last modified this entity.
+            References Usuario.Id (ASP.NET Identity user).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.BaseCatalogEntity">
+            <summary>
+            Base entity class for catalog entities that can be activated/deactivated.
+            Extends BaseEntityWithUser with active status flag.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.BaseCatalogEntity.Activo">
+            <summary>
+            Indicates if this catalog entry is active.
+            Inactive entries are hidden from user selection but retained for historical data.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.CatalogoSugerencia">
+            <summary>
+            Configurable suggestion catalog for text field autocomplete.
+            Allows ADMIN users to configure suggestion lists for specific fields.
+            Fields: sexo, delito, tipo_de_atencion
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Id">
+            <summary>
+            Unique identifier for the suggestion.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Campo">
+            <summary>
+            Target field name for this suggestion.
+            Valid values: "sexo", "delito", "tipo_de_atencion"
+            Required, max 50 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Valor">
+            <summary>
+            Suggestion value to display in autocomplete.
+            Example: "Masculino", "Robo", "Orientación"
+            Required, max 200 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.CatalogoSugerencia.Orden">
+            <summary>
+            Display order for suggestions (ascending).
+            Lower numbers appear first in dropdown.
+            Default: 0
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ConfiguracionEmail">
+            <summary>
+            Configuration for email transactional service.
+            Supports SMTP and SendGrid providers.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.Proveedor">
+            <summary>
+            Email provider type: SMTP, SendGrid, Mailgun
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.Habilitado">
+            <summary>
+            Whether the email service is enabled
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.LastTestedAt">
+            <summary>
+            Last time configuration was tested successfully
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.LastTestSuccess">
+            <summary>
+            Result of last connection test
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionEmail.LastTestError">
+            <summary>
+            Error message from last test (if failed)
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ConfiguracionIA">
+            <summary>
+            Entity for storing AI service configuration.
+            Only one active configuration should exist at a time.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Id">
+            <summary>
+            Primary key.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.UpdatedAt">
+            <summary>
+            UTC timestamp when the entity was last updated.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Proveedor">
+            <summary>
+            AI provider type: OpenAI, AzureOpenAI, Local, Ollama
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.ApiKey">
+            <summary>
+            API key for the AI service (encrypted in database).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Modelo">
+            <summary>
+            Model name to use (e.g., gpt-4o-mini, gpt-4o, llama3.2).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Endpoint">
+            <summary>
+            API endpoint URL.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.AzureEndpoint">
+            <summary>
+            Azure-specific: Resource endpoint.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.AzureApiVersion">
+            <summary>
+            Azure-specific: API version.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.LocalEndpoint">
+            <summary>
+            Local LLM endpoint (e.g., Ollama, LM Studio).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.MaxTokens">
+            <summary>
+            Maximum tokens for response generation.
+            Recommended: 2000-8000 for daily reports with all incidents.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Temperature">
+            <summary>
+            Temperature for response generation (0.0 - 2.0).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.MaxReportesParaNarrativa">
+            <summary>
+            Maximum number of incidents to include in AI narrative.
+            0 = unlimited (include all incidents).
+            Recommended: 50-100 for daily reports.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.Activo">
+            <summary>
+            Whether this configuration is active.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionIA.ModificadoPorId">
+            <summary>
+            Last user who modified this configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionIA.Validate">
+            <summary>
+            Validates the configuration based on the selected provider.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionIA.ValidateRequiredFields(System.Collections.Generic.List{System.String})">
+            <summary>
+            Validates required fields common to all providers.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionIA.ValidateProviderSpecificFields(System.Collections.Generic.List{System.String})">
+            <summary>
+            Validates provider-specific fields based on the selected provider.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionIA.ValidateNumericRanges(System.Collections.Generic.List{System.String})">
+            <summary>
+            Validates numeric parameters are within acceptable ranges.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados">
+            <summary>
+            Configuración para la generación automática de reportes
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.Id">
+            <summary>
+            Identificador único de la configuración
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.Habilitado">
+            <summary>
+            Indica si la generación automática está habilitada
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.HoraGeneracion">
+            <summary>
+            Hora del día para generar reportes automáticamente (formato HH:mm:ss)
+            Por defecto: 06:00:00
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.Destinatarios">
+            <summary>
+            Lista de destinatarios de correo electrónico separados por comas
+            Ejemplo: "supervisor@example.com,director@example.com"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.RutaSalida">
+            <summary>
+            Ruta donde se guardan los archivos generados
+            Por defecto: ./generated-reports
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.UpdatedAt">
+            <summary>
+            Última vez que se modificó esta configuración
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.GetDestinatariosArray">
+            <summary>
+            Obtiene la lista de destinatarios como array
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ConfiguracionReportesAutomatizados.SetDestinatariosArray(System.String[])">
+            <summary>
+            Establece los destinatarios desde un array
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Cuadrante">
+            <summary>
+            Geographic quadrant entity (lowest level in geographic hierarchy).
+            Belongs to a Sector, which belongs to a Zona.
+            Example: "Cuadrante 1-A", "Cuadrante Norte-1"
+            Part of hierarchical catalog: Zona → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Id">
+            <summary>
+            Unique identifier for the cuadrante.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Nombre">
+            <summary>
+            Display name of the cuadrante.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.SectorId">
+            <summary>
+            Foreign key to the parent Sector.
+            Required - cuadrante must belong to a sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Sector">
+            <summary>
+            Navigation property: Parent sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Cuadrante.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this cuadrante.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ModeloReporte">
+            <summary>
+            Represents a template for automated report generation.
+            Templates define the structure and format of generated reports.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.Id">
+            <summary>
+            Unique identifier for the template.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.Nombre">
+            <summary>
+            Display name for the template.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.Descripcion">
+            <summary>
+            Template description.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.ContenidoMarkdown">
+            <summary>
+            Template content in Markdown format.
+            Supports placeholders for dynamic content:
+            - {{fecha_inicio}}, {{fecha_fin}} - Report period
+            - {{total_reportes}} - Total reports count
+            - {{estadisticas}} - JSON statistics block
+            - {{narrativa_ia}} - AI-generated narrative
+            - {{tabla_delitos}} - Crime type breakdown table
+            - {{tabla_zonas}} - Zone breakdown table
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.Activo">
+            <summary>
+            Indicates if this template is active and available for selection.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.EsDefault">
+            <summary>
+            Indicates if this is the default template for new automated reports.
+            Only one template can be the default.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.UpdatedAt">
+            <summary>
+            Last modification timestamp.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ModeloReporte.ReportesGenerados">
+            <summary>
+            Navigation property to generated reports using this template.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Region">
+            <summary>
+            Geographic region entity (second level in geographic hierarchy).
+            Belongs to a Zona, contains multiple Sectores.
+            Example: "Región Norte", "Región Centro"
+            Part of hierarchical catalog: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Region.Id">
+            <summary>
+            Unique identifier for the region.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Region.Nombre">
+            <summary>
+            Display name of the region.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Region.ZonaId">
+            <summary>
+            Foreign key to the parent Zona.
+            Required - region must belong to a zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Region.Zona">
+            <summary>
+            Navigation property: Parent zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Region.Sectores">
+            <summary>
+            Navigation property: Sectors within this region.
+            Cascade delete configured in EF Core configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Region.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this region.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.RegistroAuditoria">
+            <summary>
+            Audit log entry for all system operations.
+            Immutable record of who did what, when.
+            Retention: Indefinite (never deleted per FR-035b).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Id">
+            <summary>
+            Unique identifier for the audit log entry.
+            Uses BIGINT to support high volume logging.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Codigo">
+            <summary>
+            Action code identifying the operation performed.
+            See AuditActionCode class for standard codes.
+            Required, max 50 characters.
+            Example: "AUTH_LOGIN", "REPORT_CREATE", "USER_SUSPEND"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.IdRelacionado">
+            <summary>
+            ID of the related entity (if applicable).
+            Example: Report ID for REPORT_CREATE, User ID for USER_SUSPEND
+            Nullable - system-level operations may not have a related entity.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.TablaRelacionada">
+            <summary>
+            Table name of the related entity.
+            Example: "REPORTE_INCIDENCIA", "USUARIO", "ZONA"
+            Nullable - system-level operations may not have a related table.
+            Max 50 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.UsuarioId">
+            <summary>
+            User who performed the action.
+            References Usuario.Id (ASP.NET Identity user).
+            Nullable - system-triggered operations have NULL user.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Ip">
+            <summary>
+            Client IP address from which the action originated.
+            Supports both IPv4 and IPv6 (max 45 characters).
+            Nullable - may not be available for background jobs.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.RegistroAuditoria.Detalles">
+            <summary>
+            Additional details in JSON format.
+            Stores context-specific information about the operation.
+            Example: {"old_value": "Borrador", "new_value": "Entregado"}
+            Nullable - simple operations may not need extra details.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ReporteAutomatizado">
+            <summary>
+            Represents an automatically generated daily summary report.
+            Contains aggregated statistics and AI-generated narrative from incident reports.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.Id">
+            <summary>
+            Unique identifier for the automated report.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.FechaInicio">
+            <summary>
+            Start of the reporting period (inclusive).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.FechaFin">
+            <summary>
+            End of the reporting period (exclusive).
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.ContenidoMarkdown">
+            <summary>
+            Report content in Markdown format.
+            Includes statistics and AI-generated narrative.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.ContenidoWordPath">
+            <summary>
+            Path to the generated Word document file.
+            NULL if Word generation failed or not yet generated.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.Estadisticas">
+            <summary>
+            Aggregated statistics in JSON format.
+            Contains: total reports, crime types, zones, demographics, etc.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.Enviado">
+            <summary>
+            Indicates if the report was successfully sent by email.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.FechaEnvio">
+            <summary>
+            Timestamp when the email was sent.
+            NULL if not yet sent or sending failed.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.ErrorMensaje">
+            <summary>
+            Error message if generation or sending failed.
+            NULL on success.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.ModeloReporteId">
+            <summary>
+            ID of the template used for generation.
+            NULL if using default template.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteAutomatizado.ModeloReporte">
+            <summary>
+            Navigation property to the template used.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ReporteIncidencia">
+            <summary>
+            Incident report entity (Type A).
+            Core entity for police incident reporting system.
+            US1: T031
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Id">
+            <summary>
+            Unique identifier for the report.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TipoReporte">
+            <summary>
+            Report type identifier.
+            Default: "A" (Type A report)
+            Extensible for future types (B, C, etc.)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Estado">
+            <summary>
+            Report state.
+            0 = Borrador (Draft) - editable by CREADOR
+            1 = Entregado (Submitted) - not editable by CREADOR
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.DatetimeHechos">
+            <summary>
+            Date and time when the incident occurred.
+            Required field, stored in UTC.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Sexo">
+            <summary>
+            Gender of the person involved.
+            Suggested values configured in CatalogoSugerencia.
+            Examples: "Masculino", "Femenino", "No binario"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Edad">
+            <summary>
+            Age of the person involved.
+            Validation: 1-149
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.LgbtttiqPlus">
+            <summary>
+            LGBTTTIQ+ community member indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.SituacionCalle">
+            <summary>
+            Homeless person indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Migrante">
+            <summary>
+            Migrant person indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Discapacidad">
+            <summary>
+            Disability indicator.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Delito">
+            <summary>
+            Crime/incident type.
+            Suggested values configured in CatalogoSugerencia.
+            Examples: "Violencia familiar", "Robo", "Lesiones"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.ZonaId">
+            <summary>
+            Foreign key to Zona.
+            Required - every report must have a geographic zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Zona">
+            <summary>
+            Navigation property: Zone where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.RegionId">
+            <summary>
+            Foreign key to Región.
+            Required - every report must have a geographic region.
+            Must belong to the selected Zona.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Region">
+            <summary>
+            Navigation property: Region where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.SectorId">
+            <summary>
+            Foreign key to Sector.
+            Required - every report must have a geographic sector.
+            Must belong to the selected Región.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Sector">
+            <summary>
+            Navigation property: Sector where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.CuadranteId">
+            <summary>
+            Foreign key to Cuadrante.
+            Required - every report must have a geographic quadrant.
+            Must belong to the selected Sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Cuadrante">
+            <summary>
+            Navigation property: Quadrant where incident occurred.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TurnoCeiba">
+            <summary>
+            Ceiba shift identifier.
+            Free-form text field for shift identification.
+            Examples: "Balderas 1", "Nonoalco 2"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TipoDeAtencion">
+            <summary>
+            Type of attention/service provided.
+            Suggested values configured in CatalogoSugerencia.
+            Examples: "Presencial", "Telefónica", "Derivación"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.TipoDeAccion">
+            <summary>
+            Type of action taken.
+            Free-form text field describing the type of action.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.HechosReportados">
+            <summary>
+            Detailed description of the reported facts/incident.
+            Required field, long text.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.AccionesRealizadas">
+            <summary>
+            Actions taken by the officer in response to the incident.
+            Required field, long text.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Traslados">
+            <summary>
+            Transfer status.
+            Free-form text field for transfer information.
+            Examples: "Sí", "No", "No aplica"
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.Observaciones">
+            <summary>
+            Additional observations/notes.
+            Optional field, long text.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.UpdatedAt">
+            <summary>
+            Last update timestamp (UTC).
+            Nullable - only set after updates.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.CamposAdicionales">
+            <summary>
+            Extensible JSON fields for future report types (RT-004 mitigation).
+            Allows adding new fields without schema migrations.
+            Example: {"campo_especifico_B": "valor", "otro_campo": 123}
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.ReporteIncidencia.SchemaVersion">
+            <summary>
+            Schema version for migration tracking (RT-004 mitigation).
+            Default: "1.0"
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.IsBorrador">
+            <summary>
+            Checks if the report is in Borrador (draft) state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.IsEntregado">
+            <summary>
+            Checks if the report is in Entregado (submitted) state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.Submit">
+            <summary>
+            Submits the report, changing estado from 0 to 1.
+            Irreversible transition.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown if report is already submitted</exception>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.CanBeEditedByCreador(System.Guid)">
+            <summary>
+            Checks if the report can be edited by a CREADOR user.
+            CREADOR can only edit their own reports while in Borrador state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.CanBeSubmittedByCreador(System.Guid)">
+            <summary>
+            Checks if the report can be submitted by a CREADOR user.
+            CREADOR can only submit their own reports while in Borrador state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.Validate">
+            <summary>
+            Validates the entity's field values.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.SetCamposAdicionales(System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Sets additional fields in the JSONB column.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Entities.ReporteIncidencia.GetCamposAdicionales">
+            <summary>
+            Gets additional fields from the JSONB column.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.ValidationResult">
+            <summary>
+            Validation result container.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Sector">
+            <summary>
+            Geographic sector entity (third level in geographic hierarchy).
+            Belongs to a Región, contains multiple Cuadrantes.
+            Example: "Sector 1", "Sector A"
+            Part of hierarchical catalog: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Id">
+            <summary>
+            Unique identifier for the sector.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Nombre">
+            <summary>
+            Display name of the sector.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.RegionId">
+            <summary>
+            Foreign key to the parent Región.
+            Required - sector must belong to a region.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Region">
+            <summary>
+            Navigation property: Parent region.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Cuadrantes">
+            <summary>
+            Navigation property: Cuadrantes within this sector.
+            Cascade delete configured in EF Core configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Sector.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this sector.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Entities.Zona">
+            <summary>
+            Geographic zone entity (highest level in geographic hierarchy).
+            Example: "Zona Norte", "Zona Sur", "Zona Centro"
+            Part of hierarchical catalog: Zona → Región → Sector → Cuadrante
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Id">
+            <summary>
+            Unique identifier for the zone.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Nombre">
+            <summary>
+            Display name of the zone.
+            Required, max 100 characters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Regiones">
+            <summary>
+            Navigation property: Regions within this zone.
+            Cascade delete configured in EF Core configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Entities.Zona.Reportes">
+            <summary>
+            Navigation property: Reports assigned to this zone.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Enums.AuditActionCode">
+            <summary>
+            Standard audit action codes for system operations.
+            All critical operations must be logged with one of these codes.
+            Follows convention: ENTITY_ACTION pattern.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.ValidationException">
+            <summary>
+            Exception thrown when a validation error occurs.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.ForbiddenException">
+            <summary>
+            Exception thrown when an unauthorized access attempt occurs (403 Forbidden).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.BadRequestException">
+            <summary>
+            Exception thrown when a bad request occurs (400 Bad Request).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Exceptions.NotFoundException">
+            <summary>
+            Exception thrown when a resource is not found (404 Not Found).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAiConfigurationService">
+            <summary>
+            Service interface for managing AI configuration.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.GetActiveConfigurationAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current active AI configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.SaveConfigurationAsync(Ceiba.Core.Entities.ConfiguracionIA,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Saves or updates the AI configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.TestConnectionAsync(Ceiba.Core.Entities.ConfiguracionIA,System.Threading.CancellationToken)">
+            <summary>
+            Tests the AI connection with the current configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiConfigurationService.GetConfigurationHistoryAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets the configuration history.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAiNarrativeService">
+            <summary>
+            Provider-agnostic abstraction for AI narrative generation.
+            Supports multiple backends: OpenAI, Azure OpenAI, local LLM.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiNarrativeService.GenerateNarrativeAsync(Ceiba.Shared.DTOs.NarrativeRequestDto,System.Threading.CancellationToken)">
+            <summary>
+            Generates a narrative summary based on incident report statistics and descriptions.
+            </summary>
+            <param name="request">The narrative generation request with statistics and content.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>The generated narrative response.</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAiNarrativeService.IsAvailableAsync(System.Threading.CancellationToken)">
+            <summary>
+            Checks if the AI service is available and properly configured.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>True if the service is available.</returns>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IAiNarrativeService.ProviderName">
+            <summary>
+            Gets the current provider name (e.g., "OpenAI", "AzureOpenAI", "Local").
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAuditService">
+            <summary>
+            Service interface for manual audit logging.
+            Used for operations that need explicit audit trails beyond automatic interceptor logging.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAuditService.LogAsync(System.String,System.Nullable{System.Int32},System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Logs an audit event with full details.
+            </summary>
+            <param name="codigo">Audit action code (see AuditActionCode)</param>
+            <param name="idRelacionado">Optional related entity ID</param>
+            <param name="tablaRelacionada">Optional related table name</param>
+            <param name="detalles">Optional additional details (JSON)</param>
+            <param name="ip">Optional client IP address</param>
+            <param name="cancellationToken">Cancellation token</param>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAuditService.QueryAsync(System.Nullable{System.Guid},System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Queries audit logs with filtering.
+            </summary>
+            <param name="usuarioId">Filter by user</param>
+            <param name="codigo">Filter by action code</param>
+            <param name="fechaInicio">Filter by start date</param>
+            <param name="fechaFin">Filter by end date</param>
+            <param name="skip">Pagination: records to skip</param>
+            <param name="take">Pagination: records to take (max 500)</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>List of audit log entries</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.AuditLogDto">
+            <summary>
+            DTO for audit log query results.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.AuditLogDto.#ctor(System.Int64,System.String,System.Nullable{System.Int32},System.String,System.DateTime,System.Nullable{System.Guid},System.String,System.String,System.String)">
+            <summary>
+            DTO for audit log query results.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAutomatedReportConfigService">
+            <summary>
+            Servicio para gestionar la configuración de reportes automatizados
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportConfigService.GetConfigurationAsync(System.Threading.CancellationToken)">
+            <summary>
+            Obtiene la configuración actual de reportes automatizados
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportConfigService.UpdateConfigurationAsync(Ceiba.Shared.DTOs.AutomatedReportConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Actualiza la configuración de reportes automatizados
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportConfigService.EnsureConfigurationExistsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Crea la configuración inicial si no existe
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IAutomatedReportService">
+            <summary>
+            Service for managing automated daily reports.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GetReportsAsync(System.Int32,System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.Boolean})">
+            <summary>
+            Gets a paginated list of automated reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GetReportByIdAsync(System.Int32)">
+            <summary>
+            Gets the detail of a specific automated report.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GenerateReportAsync(Ceiba.Shared.DTOs.GenerateReportRequestDto,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Generates a new automated report for the specified period.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.SendReportByEmailAsync(System.Int32,System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Sends an existing report by email.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.DeleteReportAsync(System.Int32)">
+            <summary>
+            Deletes an automated report.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.RegenerateWordDocumentAsync(System.Int32)">
+            <summary>
+            Regenerates the Word document for a report.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GetTemplatesAsync(System.Boolean)">
+            <summary>
+            Gets all report templates.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GetTemplateByIdAsync(System.Int32)">
+            <summary>
+            Gets a template by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GetDefaultTemplateAsync">
+            <summary>
+            Gets the default template.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.CreateTemplateAsync(Ceiba.Shared.DTOs.CreateTemplateDto,System.Guid)">
+            <summary>
+            Creates a new template.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.UpdateTemplateAsync(System.Int32,Ceiba.Shared.DTOs.UpdateTemplateDto,System.Guid)">
+            <summary>
+            Updates an existing template.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.DeleteTemplateAsync(System.Int32)">
+            <summary>
+            Deletes a template.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.SetDefaultTemplateAsync(System.Int32)">
+            <summary>
+            Sets a template as the default.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.CalculateStatisticsAsync(System.DateTime,System.DateTime,System.Threading.CancellationToken)">
+            <summary>
+            Calculates statistics for a given period.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.GetConfigurationAsync">
+            <summary>
+            Gets the current automated report configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IAutomatedReportService.UpdateConfigurationAsync(Ceiba.Shared.DTOs.AutomatedReportConfigDto)">
+            <summary>
+            Updates the automated report configuration.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ICatalogAdminService">
+            <summary>
+            Service interface for catalog administration operations.
+            Only accessible by ADMIN role.
+            US3: FR-027 to FR-030
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetZonasAsync(System.Nullable{System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Gets all zones with their sector count.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetZonaByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets a zone by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.CreateZonaAsync(Ceiba.Shared.DTOs.CreateZonaDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new zone.
+            FR-027: Configure zones (create)
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.UpdateZonaAsync(System.Int32,Ceiba.Shared.DTOs.CreateZonaDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing zone.
+            FR-027: Configure zones (edit)
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.ToggleZonaActivoAsync(System.Int32,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Toggles zone active status.
+            FR-027: Configure zones (activate/deactivate)
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetRegionesAsync(System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Gets regions, optionally filtered by zone.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetRegionByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets a region by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.CreateRegionAsync(Ceiba.Shared.DTOs.CreateRegionDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new region linked to a zone.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.UpdateRegionAsync(System.Int32,Ceiba.Shared.DTOs.CreateRegionDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing region.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.ToggleRegionActivoAsync(System.Int32,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Toggles region active status.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetSectoresAsync(System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Gets sectors, optionally filtered by region.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetSectorByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets a sector by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.CreateSectorAsync(Ceiba.Shared.DTOs.CreateSectorDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new sector linked to a region.
+            FR-028: Configure sectors associated to regions
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.UpdateSectorAsync(System.Int32,Ceiba.Shared.DTOs.CreateSectorDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing sector.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.ToggleSectorActivoAsync(System.Int32,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Toggles sector active status.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetCuadrantesAsync(System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Gets cuadrantes, optionally filtered by sector.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetCuadranteByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets a cuadrante by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.CreateCuadranteAsync(Ceiba.Shared.DTOs.CreateCuadranteDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new cuadrante linked to a sector.
+            FR-029: Configure cuadrantes associated to sectors
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.UpdateCuadranteAsync(System.Int32,Ceiba.Shared.DTOs.CreateCuadranteDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing cuadrante.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.ToggleCuadranteActivoAsync(System.Int32,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Toggles cuadrante active status.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetSugerenciasAsync(System.String,System.Nullable{System.Boolean},System.Threading.CancellationToken)">
+            <summary>
+            Gets suggestions, optionally filtered by field.
+            FR-030: Configure suggestion lists
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.GetSugerenciaByIdAsync(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets a suggestion by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.CreateSugerenciaAsync(Ceiba.Shared.DTOs.CreateSugerenciaDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new suggestion.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.UpdateSugerenciaAsync(System.Int32,Ceiba.Shared.DTOs.CreateSugerenciaDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing suggestion.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.DeleteSugerenciaAsync(System.Int32,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deletes a suggestion.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogAdminService.ReorderSugerenciasAsync(System.String,System.Int32[],System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Reorders suggestions within a field.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ICatalogService">
+            <summary>
+            Service interface for catalog operations (Zona, Región, Sector, Cuadrante, Suggestions).
+            US1: T034
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetZonasAsync">
+            <summary>
+            Gets all active zones.
+            </summary>
+            <returns>List of zones</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetRegionesByZonaAsync(System.Int32)">
+            <summary>
+            Gets regions for a specific zone.
+            </summary>
+            <param name="zonaId">Zone ID</param>
+            <returns>List of regions in the zone</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetSectoresByRegionAsync(System.Int32)">
+            <summary>
+            Gets sectors for a specific region.
+            </summary>
+            <param name="regionId">Region ID</param>
+            <returns>List of sectors in the region</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetCuadrantesBySectorAsync(System.Int32)">
+            <summary>
+            Gets quadrants for a specific sector.
+            </summary>
+            <param name="sectorId">Sector ID</param>
+            <returns>List of quadrants in the sector</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.GetSuggestionsAsync(System.String)">
+            <summary>
+            Gets suggestions for a specific field.
+            </summary>
+            <param name="campo">Field name (sexo, delito, tipo_de_atencion)</param>
+            <returns>List of suggestions ordered by orden field</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ICatalogService.ValidateHierarchyAsync(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Validates the geographic hierarchy (Zona → Región → Sector → Cuadrante).
+            Ensures that the region belongs to the zona, sector belongs to the region,
+            and the cuadrante belongs to the sector.
+            </summary>
+            <param name="zonaId">Zone ID</param>
+            <param name="regionId">Region ID</param>
+            <param name="sectorId">Sector ID</param>
+            <param name="cuadranteId">Quadrant ID</param>
+            <returns>True if hierarchy is valid, false otherwise</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IEmailConfigService">
+            <summary>
+            Service for managing email configuration.
+            Supports SMTP and transactional email providers like SendGrid.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.GetConfigurationAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current email configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.UpdateConfigurationAsync(Ceiba.Shared.DTOs.EmailConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Updates the email configuration.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.EnsureConfigurationExistsAsync(System.Threading.CancellationToken)">
+            <summary>
+            Ensures a default email configuration exists.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailConfigService.TestConfigurationAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Tests the email configuration by sending a test email.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IEmailService">
+            <summary>
+            Email service abstraction for sending reports via SMTP.
+            US4: Reportes Automatizados Diarios con IA.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailService.SendAsync(Ceiba.Shared.DTOs.SendEmailRequestDto,System.Threading.CancellationToken)">
+            <summary>
+            Sends an email with optional attachments.
+            </summary>
+            <param name="request">The email sending request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>The result of the send operation.</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IEmailService.IsAvailableAsync(System.Threading.CancellationToken)">
+            <summary>
+            Checks if the email service is available and properly configured.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>True if the service is available.</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IReportRepository">
+            <summary>
+            Repository interface for ReporteIncidencia entity.
+            Data access layer abstraction.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IReportService">
+            <summary>
+            Service interface for report management operations.
+            US1: T033
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.CreateReportAsync(Ceiba.Shared.DTOs.CreateReportDto,System.Guid)">
+            <summary>
+            Creates a new incident report in Borrador state.
+            </summary>
+            <param name="createDto">Report creation data</param>
+            <param name="usuarioId">ID of the CREADOR user creating the report</param>
+            <returns>Created report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.UpdateReportAsync(System.Int32,Ceiba.Shared.DTOs.UpdateReportDto,System.Guid,System.Boolean)">
+            <summary>
+            Updates an existing report.
+            CREADOR can only edit their own reports in Borrador state.
+            REVISOR can edit any report regardless of state.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="updateDto">Update data</param>
+            <param name="usuarioId">ID of the user performing the update</param>
+            <param name="isRevisor">Whether the user has REVISOR role</param>
+            <returns>Updated report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.SubmitReportAsync(System.Int32,System.Guid)">
+            <summary>
+            Submits a report, changing estado from Borrador (0) to Entregado (1).
+            Only the creator can submit their own reports while in Borrador state.
+            This transition is irreversible.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="usuarioId">ID of the CREADOR user submitting the report</param>
+            <returns>Updated report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.GetReportByIdAsync(System.Int32,System.Guid,System.Boolean)">
+            <summary>
+            Gets a report by ID.
+            CREADOR can only view their own reports.
+            REVISOR can view all reports.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="usuarioId">ID of the user requesting the report</param>
+            <param name="isRevisor">Whether the user has REVISOR role</param>
+            <returns>Report details</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.ListReportsAsync(Ceiba.Shared.DTOs.ReportFilterDto,System.Guid,System.Boolean)">
+            <summary>
+            Lists reports with filtering and pagination.
+            CREADOR sees only their own reports.
+            REVISOR sees all reports.
+            </summary>
+            <param name="filter">Filter criteria</param>
+            <param name="usuarioId">ID of the user requesting the list</param>
+            <param name="isRevisor">Whether the user has REVISOR role</param>
+            <returns>Paginated list of reports</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IReportService.DeleteReportAsync(System.Int32,System.Guid)">
+            <summary>
+            Deletes a report in Borrador state.
+            Only the creator can delete their own reports while in Borrador state.
+            </summary>
+            <param name="reportId">Report ID</param>
+            <param name="usuarioId">ID of the CREADOR user deleting the report</param>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IResilientEmailService">
+            <summary>
+            T146-T155: RO-003 Resilient email service interface.
+            Provides retry logic, circuit breaker, and email queue functionality.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IResilientEmailService.CurrentCircuitState">
+            <summary>
+            Current state of the circuit breaker.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IResilientEmailService.QueuedEmailCount">
+            <summary>
+            Number of emails currently in the retry queue.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IResilientEmailService.LastSuccessfulSend">
+            <summary>
+            Timestamp of the last successful email send.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IResilientEmailService.SendWithRetryAsync(Ceiba.Shared.DTOs.SendEmailRequestDto,System.Threading.CancellationToken)">
+            <summary>
+            Sends an email with automatic retry logic and circuit breaker protection.
+            </summary>
+            <param name="request">The email request to send.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Result indicating success or failure.</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IResilientEmailService.ProcessQueueAsync(System.Threading.CancellationToken)">
+            <summary>
+            Processes queued emails that failed to send.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Number of successfully sent emails.</returns>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IResilientEmailService.GetHealth">
+            <summary>
+            Gets the current health status of the email service.
+            </summary>
+            <returns>Health status information.</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.CircuitState">
+            <summary>
+            Circuit breaker states.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.CircuitState.Closed">
+            <summary>Normal operation - requests pass through.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.CircuitState.Open">
+            <summary>Failing - requests are rejected.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.CircuitState.HalfOpen">
+            <summary>Testing if service recovered.</summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.EmailServiceHealth">
+            <summary>
+            Email service health status.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.EmailResilienceOptions">
+            <summary>
+            Configuration options for email resilience.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxRetries">
+            <summary>
+            Maximum number of retry attempts for a single email.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.RetryDelayMs">
+            <summary>
+            Initial delay between retries in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.QueueOnFailure">
+            <summary>
+            Whether to queue emails when sending fails.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueSize">
+            <summary>
+            Maximum number of emails in the queue.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueTime">
+            <summary>
+            Maximum time an email can stay in the queue.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueRetries">
+            <summary>
+            Maximum retry attempts for queued emails.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.MaxQueueBatchSize">
+            <summary>
+            Maximum emails to process per queue batch.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.FailureThreshold">
+            <summary>
+            Number of consecutive failures before opening circuit.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.EmailResilienceOptions.CircuitBreakerTimeout">
+            <summary>
+            How long to wait before testing circuit recovery.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IServiceHealthCheck">
+            <summary>
+            T156-T165: RO-004 Service health check interface.
+            Provides health status for services with circuit breaker patterns.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.IServiceHealthCheck.ServiceName">
+            <summary>
+            Gets the name of the service being monitored.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IServiceHealthCheck.CheckHealthAsync(System.Threading.CancellationToken)">
+            <summary>
+            Checks if the service is healthy and available.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ServiceHealthStatus">
+            <summary>
+            Health status for a service.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.ServiceName">
+            <summary>
+            Name of the service.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.IsHealthy">
+            <summary>
+            Whether the service is healthy.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.Status">
+            <summary>
+            Current service status.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.Details">
+            <summary>
+            Additional details about the service health.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.LastChecked">
+            <summary>
+            When the health was last checked.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.ResponseTimeMs">
+            <summary>
+            Response time of the health check in milliseconds.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Core.Interfaces.ServiceHealthStatus.ErrorMessage">
+            <summary>
+            Error message if the service is unhealthy.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ServiceStatus">
+            <summary>
+            Service availability status levels.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.ServiceStatus.Healthy">
+            <summary>Service is fully operational.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.ServiceStatus.Degraded">
+            <summary>Service is operational but may have degraded performance.</summary>
+        </member>
+        <member name="F:Ceiba.Core.Interfaces.ServiceStatus.Unhealthy">
+            <summary>Service is unavailable.</summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ISetupService">
+            <summary>
+            Service for managing initial application setup.
+            Used to detect if setup is required and create the first admin user.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ISetupService.GetStatusAsync">
+            <summary>
+            Gets the current setup status.
+            Returns information about whether setup is complete or required.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ISetupService.IsSetupRequiredAsync">
+            <summary>
+            Checks if the initial setup is required.
+            Returns true if no users exist in the system.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ISetupService.MarkSetupCompleteAsync">
+            <summary>
+            Marks the setup as complete.
+            Should be called after the first admin user is created.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.ISetupService.CreateFirstAdminAsync(Ceiba.Shared.DTOs.CreateFirstAdminDto)">
+            <summary>
+            Creates the first administrator user.
+            Also seeds suggestions and other initial data.
+            </summary>
+            <param name="dto">The admin user details.</param>
+            <returns>True if successful, false otherwise.</returns>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.IUserManagementService">
+            <summary>
+            Service interface for user management operations.
+            Only accessible by ADMIN role.
+            US3: FR-021 to FR-026
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.ListUsersAsync(Ceiba.Shared.DTOs.UserFilterDto,System.Threading.CancellationToken)">
+            <summary>
+            Gets a paginated list of users with optional filtering.
+            FR-021: List all system users
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.GetUserByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets a user by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.CreateUserAsync(Ceiba.Shared.DTOs.CreateUserDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new user with specified roles.
+            FR-022: Create users with name, email, password, roles
+            FR-026: Validates unique email
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.UpdateUserAsync(System.Guid,Ceiba.Shared.DTOs.UpdateUserDto,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Updates an existing user.
+            FR-025: Assign or modify roles
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.SuspendUserAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Suspends a user (prevents login).
+            FR-023: Suspend existing users
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.ActivateUserAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Activates a suspended user.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.DeleteUserAsync(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Soft deletes a user (marks as inactive).
+            FR-024: Preserve referential integrity
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.GetAvailableRolesAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets available roles for assignment.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Core.Interfaces.IUserManagementService.IsEmailInUseAsync(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if an email is already in use.
+            FR-026: Unique email constraint
+            </summary>
+        </member>
+        <member name="T:Ceiba.Core.Interfaces.ReportSearchCriteria">
+            <summary>
+            Search criteria for report queries.
+            Encapsulates all filter, pagination, and sorting parameters.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Application.Tests</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Application.Tests.Jobs.ExportJobTests">
+            <summary>
+            Unit tests for ExportJob.
+            T052c: Background export job for >50 reports with email notification.
+            T052d: Max 3 concurrent export jobs and 2-minute timeout.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.ReportServiceTests">
+            <summary>
+            Unit tests for ReportService (US1)
+            Tests create/edit functionality per T024
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.AiNarrativeServiceTests">
+            <summary>
+            Unit tests for AiNarrativeService (US4: T082)
+            Tests AI narrative generation with multiple providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.AutomatedReportServiceTests">
+            <summary>
+            Unit tests for AutomatedReportService.
+            US4: Reportes Automatizados Diarios con IA.
+            Tests T084: Automated report generation, templates, and statistics.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Application.Tests.Services.AutomatedReportServiceTests.JsonOptions">
+            <summary>
+            JSON options matching those used in AutomatedReportService for consistent serialization.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Tests.Services.AutomatedReportServiceTests.CreateMockListSection(System.Collections.Generic.List{System.String})">
+            <summary>
+            Creates a mock IConfigurationSection that simulates a list of strings.
+            This is needed because Moq cannot mock extension methods like Get&lt;T&gt;().
+            The Get&lt;List&lt;string&gt;&gt;() extension method works by iterating GetChildren().
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.DocumentConversionServiceTests">
+            <summary>
+            Unit tests for DocumentConversionService.
+            Tests Pandoc availability, input validation, and conversion scenarios.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.EmailServiceTests">
+            <summary>
+            Unit tests for EmailService.
+            US4: Reportes Automatizados Diarios con IA.
+            Tests T083: Email service operations for SMTP, SendGrid, and Mailgun providers.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.Export.ExportServiceTests">
+            <summary>
+            Unit tests for Export orchestration service
+            Tests T-US2-021 to T-US2-030
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.Export.JsonExporterTests">
+            <summary>
+            Unit tests for JSON export service
+            Tests T-US2-011 to T-US2-020
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.Export.PdfGeneratorTests">
+            <summary>
+            Unit tests for PDF generation service
+            Tests T-US2-001 to T-US2-005
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Services.UserManagementServiceTests">
+            <summary>
+            Unit tests for UserManagementService (US3: T064)
+            FR-021 to FR-026: User management operations
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Validators.CreateReportDtoValidatorTests">
+            <summary>
+            Unit tests for CreateReportDtoValidator.
+            Tests all validation rules for CreateReportDto.
+            US1: T038
+            </summary>
+        </member>
+        <member name="M:Ceiba.Application.Tests.Validators.CreateReportDtoValidatorTests.CreateValidDto">
+            <summary>
+            Creates a valid CreateReportDto for testing purposes.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Application.Tests.Validators.UpdateReportDtoValidatorTests">
+            <summary>
+            Unit tests for UpdateReportDtoValidator.
+            Tests all validation rules for UpdateReportDto.
+            US1: T038
+            </summary>
+        </member>
+    </members>
+</doc>

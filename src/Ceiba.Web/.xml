@@ -1,0 +1,505 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Ceiba.Web</name>
+    </assembly>
+    <members>
+        <member name="T:Ceiba.Web.Components.Shared.LiveAnnouncer">
+            <summary>
+            Live region for screen reader announcements (WCAG 4.1.3).
+            Uses an intentional singleton pattern to maintain a single active announcer
+            for the entire application's accessibility needs.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.Filter">
+            <summary>
+            The filter state to bind to.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.FilterChanged">
+            <summary>
+            Callback when filter values change.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.ShowZonaFilter">
+            <summary>
+            Show the zona filter input. Defaults to true.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.DebounceDelay">
+            <summary>
+            Debounce delay in milliseconds for text input filters.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Components.Shared.ReportFilter.OnClear">
+            <summary>
+            Callback when clear filters button is clicked.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Components.Pages.Admin.UserForm.UserFormModel">
+            <summary>
+            Form model for user creation/editing
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Configuration.FeatureFlags">
+            <summary>
+            T019d: RT-004 Mitigation - Feature flag configuration system.
+            Allows enabling/disabling features without code changes or migrations.
+            Configured via appsettings.json.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableReporteTipoB">
+            <summary>
+            Enable Type B incident reports (future feature).
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableReporteTipoC">
+            <summary>
+            Enable Type C incident reports (future feature).
+            Default: false
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableAutomatedReports">
+            <summary>
+            Enable automated report generation with AI.
+            Default: true (core feature from US4)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableAINarrative">
+            <summary>
+            Enable AI narrative summarization.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableEmailNotifications">
+            <summary>
+            Enable email notifications.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnablePDFExport">
+            <summary>
+            Enable PDF export functionality.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableJSONExport">
+            <summary>
+            Enable JSON export functionality.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableBulkOperations">
+            <summary>
+            Enable bulk operations (batch export, etc.).
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableAdvancedSearch">
+            <summary>
+            Enable advanced search with full-text indexing.
+            Default: true
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.EnableSelfRegistration">
+            <summary>
+            Enable user self-registration (for testing environments).
+            Default: false (production should use admin-created accounts only)
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Configuration.FeatureFlags.MaintenanceMode">
+            <summary>
+            Enable maintenance mode (blocks all non-admin access).
+            Default: false
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Configuration.FeatureFlagExtensions">
+            <summary>
+            Extension methods for feature flag checks.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Configuration.FeatureFlagExtensions.RequireFeature(Ceiba.Web.Configuration.FeatureFlags,System.Func{Ceiba.Web.Configuration.FeatureFlags,System.Boolean},System.String)">
+            <summary>
+            Checks if a feature is enabled.
+            Throws InvalidOperationException if feature is disabled.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AccountController.GetClientIpAddress">
+            <summary>
+            Gets the client IP address, considering proxy headers.
+            </summary>
+            <remarks>
+            S6932 is suppressed because this method intentionally reads raw request headers
+            to extract client IP from proxy headers (X-Forwarded-For, X-Real-IP).
+            Model binding is not applicable for this infrastructure-level operation.
+            </remarks>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AccountController.GetSafeReturnUrl(System.String)">
+            <summary>
+            Validates and sanitizes the return URL to prevent open redirect attacks.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Controllers.AdminController">
+            <summary>
+            API controller for administration operations.
+            US3: User management and catalog configuration - ADMIN role only
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.ListUsers(Ceiba.Shared.DTOs.UserFilterDto)">
+            <summary>
+            Lists all users with optional filtering.
+            FR-021: List all system users
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.GetUser(System.Guid)">
+            <summary>
+            Gets a user by ID.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.CreateUser(Ceiba.Shared.DTOs.CreateUserDto)">
+            <summary>
+            Creates a new user.
+            FR-022: Create users with name, email, password, roles
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.UpdateUser(System.Guid,Ceiba.Shared.DTOs.UpdateUserDto)">
+            <summary>
+            Updates an existing user.
+            FR-025: Assign or modify roles
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.SuspendUser(System.Guid)">
+            <summary>
+            Suspends a user.
+            FR-023: Suspend existing users
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.ActivateUser(System.Guid)">
+            <summary>
+            Activates a suspended user.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.DeleteUser(System.Guid)">
+            <summary>
+            Deletes a user (soft delete).
+            FR-024: Preserve referential integrity
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.GetRoles">
+            <summary>
+            Gets available roles.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.GetGeographicCatalogStats">
+            <summary>
+            Gets current geographic catalog statistics.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AdminController.ReloadGeographicCatalogs">
+            <summary>
+            Reloads geographic catalogs (Zonas, Regiones, Sectores, Cuadrantes) from regiones.json.
+            WARNING: This will clear existing geographic data and replace it with data from the JSON file.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Controllers.AuditController">
+            <summary>
+            API controller for audit log viewing.
+            US3: FR-031 to FR-036 - ADMIN role only
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AuditController.GetAuditLogs(Ceiba.Shared.DTOs.AuditFilterDto)">
+            <summary>
+            Gets paginated audit logs with optional filtering.
+            FR-034: View and search audit logs
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AuditController.GetAuditCodes">
+            <summary>
+            Gets available audit action codes.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AuditController.GetRelatedTables">
+            <summary>
+            Gets related table names for filtering.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportConfigController.GetConfiguration(System.Threading.CancellationToken)">
+            <summary>
+            Get current automated report configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportConfigController.UpdateConfiguration(Ceiba.Shared.DTOs.AutomatedReportConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Update automated report configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.DownloadReport(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Download Word document for an automated report
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.GetReports(System.Int32,System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Nullable{System.Boolean})">
+            <summary>
+            Get paginated list of automated reports
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.GetReport(System.Int32)">
+            <summary>
+            Get detailed information for a specific report
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.SendReport(System.Int32,System.Collections.Generic.List{System.String},System.Threading.CancellationToken)">
+            <summary>
+            Send report by email
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.RegenerateWord(System.Int32)">
+            <summary>
+            Regenerate Word document for a report
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.AutomatedReportsController.GenerateReport(Ceiba.Shared.DTOs.GenerateReportRequestDto,System.Threading.CancellationToken)">
+            <summary>
+            Generate a new automated report manually
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Controllers.CatalogsController">
+            <summary>
+            API controller for catalog operations (Zona, Región, Sector, Cuadrante, Suggestions).
+            US1: T040
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetZonas">
+            <summary>
+            Gets all active zones.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetRegiones(System.Int32)">
+            <summary>
+            Gets regions for a specific zone.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetSectores(System.Int32)">
+            <summary>
+            Gets sectors for a specific region.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetCuadrantes(System.Int32)">
+            <summary>
+            Gets quadrants for a specific sector.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.GetSuggestions(System.String)">
+            <summary>
+            Gets suggestions for a specific field.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.CatalogsController.ValidateHierarchy(System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Validates the geographic hierarchy (Zona → Región → Sector → Cuadrante).
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.GetConfiguration(System.Threading.CancellationToken)">
+            <summary>
+            Get current email configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.UpdateConfiguration(Ceiba.Shared.DTOs.EmailConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Update email configuration
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.ValidateEmailConfigAsync(Ceiba.Shared.DTOs.EmailConfigUpdateDto,System.Threading.CancellationToken)">
+            <summary>
+            Validates email configuration input based on provider.
+            </summary>
+            <returns>Error message if validation fails, null if valid.</returns>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.EmailConfigController.TestConfiguration(Ceiba.Shared.DTOs.TestEmailConfigDto,System.Threading.CancellationToken)">
+            <summary>
+            Test email configuration by sending a test email
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Controllers.ExportController">
+            <summary>
+            API controller for report export functionality.
+            US2: Supervisor Review and Export - REVISOR role only
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ExportController.ExportReport(System.Int32,Ceiba.Shared.DTOs.Export.ExportFormat)">
+            <summary>
+            Exports a single report to PDF or JSON format.
+            Only REVISOR role can access this endpoint.
+            </summary>
+            <param name="id">Report ID to export</param>
+            <param name="format">Export format (PDF or JSON)</param>
+            <returns>File download with the exported report</returns>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ExportController.ExportBulk(Ceiba.Shared.DTOs.Export.ExportRequestDto)">
+            <summary>
+            Exports multiple reports in bulk (PDF or JSON).
+            Only REVISOR role can access this endpoint.
+            </summary>
+            <param name="request">Export request with report IDs and options</param>
+            <returns>File download with all exported reports</returns>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ExportController.GetFormats">
+            <summary>
+            Gets available export formats.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Controllers.ReportsController">
+            <summary>
+            API controller for incident report management.
+            US1: T039
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.ListReports(Ceiba.Shared.DTOs.ReportFilterDto)">
+            <summary>
+            Lists reports with filtering and pagination.
+            CREADOR sees only their own reports.
+            REVISOR sees all reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.GetReport(System.Int32)">
+            <summary>
+            Gets a report by ID.
+            CREADOR can only view their own reports.
+            REVISOR can view all reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.CreateReport(Ceiba.Shared.DTOs.CreateReportDto)">
+            <summary>
+            Creates a new report.
+            Only CREADOR can create reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.UpdateReport(System.Int32,Ceiba.Shared.DTOs.UpdateReportDto)">
+            <summary>
+            Updates an existing report.
+            CREADOR can only edit their own reports while in Borrador state.
+            REVISOR can edit any report regardless of state.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.SubmitReport(System.Int32)">
+            <summary>
+            Submits a report (changes estado from Borrador to Entregado).
+            Only CREADOR can submit their own reports.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Controllers.ReportsController.DeleteReport(System.Int32)">
+            <summary>
+            Deletes a report in Borrador state.
+            Only the creator can delete their own reports.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Filters.AuthorizeBeforeModelBindingAttribute">
+            <summary>
+            Authorization filter that executes BEFORE model binding and validation.
+            This ensures that authentication is checked before processing the request body,
+            following OWASP security best practices (avoid information disclosure).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.AuthorizationLoggingMiddleware">
+            <summary>
+            RS-001 Mitigation: Authorization logging middleware.
+            Logs all unauthorized access attempts for security monitoring.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Middleware.AuthorizationLoggingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext,Ceiba.Core.Interfaces.IAuditService)">
+            <summary>
+            Invoca el siguiente middleware y registra intentos no autorizados (403).
+            Protege contra parsing inválido del claim de usuario y captura errores del servicio de auditoría.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.ErrorHandlingMiddleware">
+            <summary>
+            Global exception handling middleware.
+            Catches unhandled exceptions, logs them, and returns appropriate error responses.
+            Implements secure error handling (no sensitive data in production).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SecurityHeadersMiddleware">
+            <summary>
+            Middleware to add security headers to all responses.
+            T114, T114a, T118: HTTPS, HSTS, and security headers
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SecurityHeadersOptions">
+            <summary>
+            Options for security headers configuration.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.FrameOptions">
+            <summary>
+            X-Frame-Options header value. Default: DENY
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.ReferrerPolicy">
+            <summary>
+            Referrer-Policy header value. Default: strict-origin-when-cross-origin
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.PermissionsPolicy">
+            <summary>
+            Permissions-Policy header value.
+            </summary>
+        </member>
+        <member name="P:Ceiba.Web.Middleware.SecurityHeadersOptions.ContentSecurityPolicy">
+            <summary>
+            Content-Security-Policy header value.
+            Empty string means no CSP header (Blazor requires special handling).
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SecurityHeadersMiddlewareExtensions">
+            <summary>
+            Extension methods for SecurityHeadersMiddleware.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Middleware.SecurityHeadersMiddlewareExtensions.UseSecurityHeaders(Microsoft.AspNetCore.Builder.IApplicationBuilder,System.Action{Ceiba.Web.Middleware.SecurityHeadersOptions})">
+            <summary>
+            Add security headers middleware to the pipeline.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Middleware.SecurityHeadersMiddlewareExtensions.UseStrictTransportSecurity(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">
+            <summary>
+            Add HSTS with recommended settings for production.
+            T114a: HSTS configuration
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SetupRedirectMiddleware">
+            <summary>
+            Middleware that redirects all requests to the Setup Wizard if initial setup is required.
+            Similar to WordPress's first-run setup experience.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Web.Middleware.SetupRedirectMiddleware.AllowedPaths">
+            <summary>
+            Paths that are allowed even when setup is required.
+            </summary>
+        </member>
+        <member name="F:Ceiba.Web.Middleware.SetupRedirectMiddleware.StaticFileExtensions">
+            <summary>
+            File extensions for static files.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.SetupRedirectMiddlewareExtensions">
+            <summary>
+            Extension methods for SetupRedirectMiddleware.
+            </summary>
+        </member>
+        <member name="M:Ceiba.Web.Middleware.SetupRedirectMiddlewareExtensions.UseSetupRedirect(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Adds the Setup Redirect middleware to the pipeline.
+            Should be registered after routing but before authentication.
+            </summary>
+        </member>
+        <member name="T:Ceiba.Web.Middleware.UserAgentValidationMiddleware">
+            <summary>
+            RS-005 Mitigation: User-Agent validation middleware.
+            Detects and blocks suspicious session hijacking attempts by validating User-Agent consistency.
+            </summary>
+        </member>
+    </members>
+</doc>
