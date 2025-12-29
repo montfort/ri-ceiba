@@ -7,7 +7,7 @@
 <h2 align="center">Ceiba - Sistema de Reportes de Incidencias</h2>
 
 <p align="center">
-  <strong>Versión 1.0.0</strong><br>
+  <strong>Versión 1.0.1</strong><br>
   Diciembre 2025
 </p>
 
@@ -18,7 +18,7 @@
 | Campo | Valor |
 |-------|-------|
 | **Sistema** | Ceiba - Sistema de Reportes de Incidencias |
-| **Versión** | 1.0.0 |
+| **Versión** | 1.0.1 |
 | **Fecha de Entrega** | Diciembre 2025 |
 | **Destinatario** | Secretaría de Seguridad Ciudadana de la Ciudad de México |
 | **Unidad Solicitante** | Unidad Especializada en Género |
@@ -377,6 +377,7 @@ ri-ceiba/
 
 | Versión | Fecha | Descripción |
 |---------|-------|-------------|
+| 1.0.1 | Diciembre 2025 | Página de créditos y licencia, correcciones de CI/CD y tests |
 | 1.0.0 | Diciembre 2025 | Primera versión estable |
 
 ### C. Contacto del Desarrollador
@@ -414,7 +415,7 @@ ri-ceiba/
 
 <p align="center">
   <sub>
-    <strong>Ceiba v1.0.0</strong><br>
+    <strong>Ceiba v1.0.1</strong><br>
     Sistema de Reportes de Incidencias<br>
     Copyright © 2025 José Villaseñor Montfort. Todos los derechos reservados.
   </sub>
