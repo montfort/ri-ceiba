@@ -365,8 +365,7 @@ public class UserManagementServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        user.LockoutEnd.Should().Be(DateTimeOffset.MaxValue);
-        user.LockoutEnabled.Should().BeTrue();
+        user.Activo.Should().BeFalse();
         _mockUserManager.Verify(x => x.UpdateAsync(user), Times.Once);
     }
 
@@ -426,7 +425,7 @@ public class UserManagementServiceTests
             Id = userId,
             Email = "user@example.com",
             UserName = "user@example.com",
-            LockoutEnd = DateTimeOffset.MaxValue,
+            Activo = false, // User is currently suspended
             Nombre = "User",
             CreatedAt = DateTime.UtcNow
         };
@@ -443,7 +442,7 @@ public class UserManagementServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        user.LockoutEnd.Should().BeNull();
+        user.Activo.Should().BeTrue();
         _mockUserManager.Verify(x => x.UpdateAsync(user), Times.Once);
     }
 
@@ -493,8 +492,7 @@ public class UserManagementServiceTests
         await _service.DeleteUserAsync(userId, adminId);
 
         // Assert
-        user.LockoutEnd.Should().Be(DateTimeOffset.MaxValue);
-        user.LockoutEnabled.Should().BeTrue();
+        user.Activo.Should().BeFalse();
         user.Email.Should().StartWith("DELETED_");
         user.Email.Should().Contain(userId.ToString());
         _mockUserManager.Verify(x => x.UpdateAsync(user), Times.Once);

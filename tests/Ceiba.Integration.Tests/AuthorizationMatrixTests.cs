@@ -395,15 +395,14 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
 
         // Act
         var user = await dbContext.Users.FindAsync(userId);
-        // TODO: Implement Activo property in custom Usuario class (US3)
-        // user.Activo = false;
+        user.Should().NotBeNull();
+        user!.Activo = false;
         await dbContext.SaveChangesAsync();
 
         // Assert
         var suspendedUser = await dbContext.Users.FindAsync(userId);
-        // TODO: Implement Activo property check (US3)
-        // suspendedUser.Activo.Should().BeFalse();
         suspendedUser.Should().NotBeNull();
+        suspendedUser!.Activo.Should().BeFalse();
     }
 
     [Fact]
@@ -537,15 +536,14 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         var user = await dbContext.Users.FindAsync(userId);
-        // TODO: Implement Activo property in custom Usuario class (US3)
-        // user.Activo = false;
+        user.Should().NotBeNull();
+        user!.Activo = false;
         await dbContext.SaveChangesAsync();
 
         // Act & Assert
         var suspendedUser = await dbContext.Users.FindAsync(userId);
-        // TODO: Implement Activo property check (US3)
-        // suspendedUser.Activo.Should().BeFalse();
         suspendedUser.Should().NotBeNull();
+        suspendedUser!.Activo.Should().BeFalse();
         // Authentication middleware should reject suspended users
     }
 

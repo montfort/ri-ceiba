@@ -103,7 +103,7 @@ public class UserManagementServiceTests
         // Arrange
         var activeUser = CreateUser("active@example.com");
         var suspendedUser = CreateUser("suspended@example.com");
-        suspendedUser.LockoutEnd = DateTimeOffset.MaxValue;
+        suspendedUser.Activo = false; // User is suspended
 
         var users = new List<Usuario> { activeUser, suspendedUser };
         SetupUserManagerUsers(users);
@@ -415,7 +415,7 @@ public class UserManagementServiceTests
         await _service.UpdateUserAsync(userId, updateDto, _adminUserId);
 
         // Assert
-        user.LockoutEnd.Should().Be(DateTimeOffset.MaxValue);
+        user.Activo.Should().BeFalse();
     }
 
     #endregion
@@ -438,8 +438,7 @@ public class UserManagementServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        user.LockoutEnd.Should().Be(DateTimeOffset.MaxValue);
-        user.LockoutEnabled.Should().BeTrue();
+        user.Activo.Should().BeFalse();
     }
 
     [Fact(DisplayName = "SuspendUserAsync should throw when suspending self")]
@@ -471,13 +470,13 @@ public class UserManagementServiceTests
 
     #region ActivateUserAsync Tests
 
-    [Fact(DisplayName = "ActivateUserAsync should clear lockout")]
-    public async Task ActivateUserAsync_ClearsLockout()
+    [Fact(DisplayName = "ActivateUserAsync should activate user")]
+    public async Task ActivateUserAsync_ActivatesUser()
     {
         // Arrange
         var userId = Guid.NewGuid();
         var user = CreateUser("test@example.com", userId);
-        user.LockoutEnd = DateTimeOffset.MaxValue;
+        user.Activo = false; // User is currently suspended
 
         _userManager.FindByIdAsync(userId.ToString()).Returns(user);
         _userManager.UpdateAsync(user).Returns(IdentityResult.Success);
@@ -488,7 +487,7 @@ public class UserManagementServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        user.LockoutEnd.Should().BeNull();
+        user.Activo.Should().BeTrue();
         result.Activo.Should().BeTrue();
     }
 
@@ -522,7 +521,7 @@ public class UserManagementServiceTests
         await _service.DeleteUserAsync(userId, _adminUserId);
 
         // Assert
-        user.LockoutEnd.Should().Be(DateTimeOffset.MaxValue);
+        user.Activo.Should().BeFalse();
         user.Email.Should().StartWith("DELETED_");
     }
 

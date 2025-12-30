@@ -34,6 +34,12 @@ public class Usuario : IdentityUser<Guid>
     public DateTime? LastLoginAt { get; set; }
 
     /// <summary>
+    /// Indicates whether the user account is active.
+    /// Suspended users (Activo = false) cannot log in.
+    /// </summary>
+    public bool Activo { get; set; } = true;
+
+    /// <summary>
     /// Navigation property to incident reports created by this user.
     /// Only populated for users with CREADOR role.
     /// </summary>

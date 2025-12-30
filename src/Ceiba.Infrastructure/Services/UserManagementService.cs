@@ -47,7 +47,7 @@ public class UserManagementService : IUserManagementService
 
         if (filter.Activo.HasValue)
         {
-            query = query.Where(u => u.LockoutEnd == null == filter.Activo.Value);
+            query = query.Where(u => u.Activo == filter.Activo.Value);
         }
 
         // Get total count before pagination
@@ -185,14 +185,7 @@ public class UserManagementService : IUserManagementService
         }
 
         // Update active status
-        if (!updateDto.Activo && user.LockoutEnd == null)
-        {
-            user.LockoutEnd = DateTimeOffset.MaxValue;
-        }
-        else if (updateDto.Activo && user.LockoutEnd != null)
-        {
-            user.LockoutEnd = null;
-        }
+        user.Activo = updateDto.Activo;
 
         await _userManager.UpdateAsync(user);
 
@@ -236,8 +229,7 @@ public class UserManagementService : IUserManagementService
             throw new InvalidOperationException("No puede suspender su propia cuenta");
         }
 
-        user.LockoutEnd = DateTimeOffset.MaxValue;
-        user.LockoutEnabled = true;
+        user.Activo = false;
         await _userManager.UpdateAsync(user);
 
         // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
@@ -256,7 +248,7 @@ public class UserManagementService : IUserManagementService
         var user = await _userManager.FindByIdAsync(userId.ToString())
             ?? throw new KeyNotFoundException($"Usuario con ID {userId} no encontrado");
 
-        user.LockoutEnd = null;
+        user.Activo = true;
         await _userManager.UpdateAsync(user);
 
         // Note: Audit logging is handled automatically by AuditSaveChangesInterceptor
@@ -281,9 +273,8 @@ public class UserManagementService : IUserManagementService
             throw new InvalidOperationException("No puede eliminar su propia cuenta");
         }
 
-        // Soft delete: Lock the account permanently and mark email as deleted
-        user.LockoutEnd = DateTimeOffset.MaxValue;
-        user.LockoutEnabled = true;
+        // Soft delete: Deactivate the account and mark email as deleted
+        user.Activo = false;
         user.Email = $"DELETED_{user.Id}_{user.Email}";
         user.NormalizedEmail = user.Email.ToUpperInvariant();
         user.UserName = user.Email;
@@ -328,7 +319,7 @@ public class UserManagementService : IUserManagementService
             Email = user.Email ?? string.Empty,
             Nombre = user.Nombre,
             Roles = roles,
-            Activo = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
+            Activo = user.Activo,
             CreatedAt = user.CreatedAt,
             LastLogin = user.LastLoginAt
         };

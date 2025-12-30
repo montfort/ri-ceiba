@@ -38,6 +38,11 @@ public class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
             .HasColumnType("timestamptz")
             .IsRequired(false);
 
+        builder.Property(u => u.Activo)
+            .HasColumnName("activo")
+            .IsRequired()
+            .HasDefaultValue(true);
+
         // Indexes
         builder.HasIndex(u => u.CreatedAt)
             .HasDatabaseName("idx_usuario_created_at");
