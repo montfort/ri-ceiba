@@ -29,18 +29,18 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
     private async Task<(Guid userId, string token)> CreateAndAuthenticateUser(string role)
     {
         using var scope = _factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<Guid>>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<CeibaDbContext>();
 
         // Generate unique email to avoid conflicts when creating multiple users with same role
         var uniqueId = Guid.NewGuid().ToString("N").Substring(0, 8);
         var email = $"{role.ToLower()}-{uniqueId}@test.com";
 
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             UserName = email,
             Email = email,
-            // TODO: Add Nombre, Apellido, Activo in custom Usuario class (US3)
+            Nombre = $"Test {role}",
             EmailConfirmed = true
         };
 
@@ -364,14 +364,14 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
         var (adminId, _) = await CreateAndAuthenticateUser("ADMIN");
 
         using var scope = _factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<Guid>>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
         // Act
-        var newUser = new IdentityUser<Guid>
+        var newUser = new Usuario
         {
             UserName = "newuser@test.com",
             Email = "newuser@test.com",
-            // TODO: Add Nombre, Apellido, Activo in custom Usuario class (US3)
+            Nombre = "New User",
             EmailConfirmed = true
         };
 
@@ -488,17 +488,17 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
     {
         // Arrange
         using var scope = _factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<Guid>>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
         // Generate unique email to avoid conflicts with previous test runs
         var uniqueId = Guid.NewGuid().ToString("N").Substring(0, 8);
         var email = $"multirole-{uniqueId}@test.com";
 
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             UserName = email,
             Email = email,
-            // TODO: Add Nombre, Apellido, Activo in custom Usuario class (US3)
+            Nombre = "Multi Role User",
             EmailConfirmed = true
         };
 
@@ -580,7 +580,7 @@ public class AuthorizationMatrixTests : IClassFixture<CeibaWebApplicationFactory
     private async Task<(Guid Id, List<string> Roles)> GetUserWithRoles(Guid userId)
     {
         using var scope = _factory.Services.CreateScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser<Guid>>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Usuario>>();
 
         var user = await userManager.FindByIdAsync(userId.ToString());
         user.Should().NotBeNull();

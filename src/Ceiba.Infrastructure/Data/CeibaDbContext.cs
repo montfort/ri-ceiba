@@ -10,7 +10,7 @@ namespace Ceiba.Infrastructure.Data;
 /// Extends IdentityDbContext for ASP.NET Identity integration.
 /// Configured for PostgreSQL 18 with audit logging interceptor.
 /// </summary>
-public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole<Guid>, Guid>
+public class CeibaDbContext : IdentityDbContext<Usuario, IdentityRole<Guid>, Guid>
 {
     /// <summary>
     /// Current authenticated user ID for audit logging.
@@ -70,7 +70,7 @@ public class CeibaDbContext : IdentityDbContext<IdentityUser<Guid>, IdentityRole
     private static void ConfigureIdentityTables(ModelBuilder builder)
     {
         // Use UPPER_SNAKE_CASE for Identity tables to match project conventions
-        builder.Entity<IdentityUser<Guid>>().ToTable("USUARIO");
+        // Note: Usuario configuration is handled by UsuarioConfiguration.cs
         builder.Entity<IdentityRole<Guid>>().ToTable("ROL");
         builder.Entity<IdentityUserRole<Guid>>().ToTable("USUARIO_ROL");
         builder.Entity<IdentityUserClaim<Guid>>().ToTable("USUARIO_CLAIM");

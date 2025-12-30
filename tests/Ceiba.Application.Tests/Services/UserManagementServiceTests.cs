@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Services;
 using Ceiba.Shared.DTOs;
@@ -15,7 +16,7 @@ namespace Ceiba.Application.Tests.Services;
 /// </summary>
 public class UserManagementServiceTests
 {
-    private readonly Mock<UserManager<IdentityUser<Guid>>> _mockUserManager;
+    private readonly Mock<UserManager<Usuario>> _mockUserManager;
     private readonly Mock<RoleManager<IdentityRole<Guid>>> _mockRoleManager;
     private readonly Mock<ILogger<UserManagementService>> _mockLogger;
     private readonly UserManagementService _service;
@@ -23,8 +24,8 @@ public class UserManagementServiceTests
     public UserManagementServiceTests()
     {
         // Setup UserManager mock
-        var userStore = new Mock<IUserStore<IdentityUser<Guid>>>();
-        _mockUserManager = new Mock<UserManager<IdentityUser<Guid>>>(
+        var userStore = new Mock<IUserStore<Usuario>>();
+        _mockUserManager = new Mock<UserManager<Usuario>>(
             userStore.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
         // Setup RoleManager mock
@@ -47,11 +48,13 @@ public class UserManagementServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
             Email = "test@example.com",
-            UserName = "test@example.com"
+            UserName = "test@example.com",
+            Nombre = "Test User",
+            CreatedAt = DateTime.UtcNow
         };
         var roles = new List<string> { "CREADOR" };
 
@@ -76,7 +79,7 @@ public class UserManagementServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
 
         // Act
         var result = await _service.GetUserByIdAsync(userId);
@@ -103,14 +106,14 @@ public class UserManagementServiceTests
         };
 
         _mockUserManager.Setup(x => x.FindByEmailAsync(createDto.Email))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
-        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<IdentityUser<Guid>>(), createDto.Password))
+            .ReturnsAsync((Usuario?)null);
+        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<Usuario>(), createDto.Password))
             .ReturnsAsync(IdentityResult.Success);
         _mockRoleManager.Setup(x => x.RoleExistsAsync("CREADOR"))
             .ReturnsAsync(true);
-        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<IdentityUser<Guid>>(), "CREADOR"))
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<Usuario>(), "CREADOR"))
             .ReturnsAsync(IdentityResult.Success);
-        _mockUserManager.Setup(x => x.GetRolesAsync(It.IsAny<IdentityUser<Guid>>()))
+        _mockUserManager.Setup(x => x.GetRolesAsync(It.IsAny<Usuario>()))
             .ReturnsAsync(new List<string> { "CREADOR" });
 
         // Act
@@ -120,7 +123,7 @@ public class UserManagementServiceTests
         result.Should().NotBeNull();
         result.Email.Should().Be(createDto.Email);
         result.Roles.Should().Contain("CREADOR");
-        _mockUserManager.Verify(x => x.CreateAsync(It.IsAny<IdentityUser<Guid>>(), createDto.Password), Times.Once);
+        _mockUserManager.Verify(x => x.CreateAsync(It.IsAny<Usuario>(), createDto.Password), Times.Once);
     }
 
     [Fact(DisplayName = "T064: CreateUserAsync should throw when email already in use")]
@@ -136,7 +139,7 @@ public class UserManagementServiceTests
             Roles = new List<string> { "CREADOR" }
         };
 
-        var existingUser = new IdentityUser<Guid> { Id = Guid.NewGuid(), Email = createDto.Email };
+        var existingUser = new Usuario { Id = Guid.NewGuid(), Email = createDto.Email, Nombre = "Existing", CreatedAt = DateTime.UtcNow };
         _mockUserManager.Setup(x => x.FindByEmailAsync(createDto.Email))
             .ReturnsAsync(existingUser);
 
@@ -162,8 +165,8 @@ public class UserManagementServiceTests
         };
 
         _mockUserManager.Setup(x => x.FindByEmailAsync(createDto.Email))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
-        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<IdentityUser<Guid>>(), createDto.Password))
+            .ReturnsAsync((Usuario?)null);
+        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<Usuario>(), createDto.Password))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Password too weak" }));
 
         // Act
@@ -188,16 +191,16 @@ public class UserManagementServiceTests
         };
 
         _mockUserManager.Setup(x => x.FindByEmailAsync(createDto.Email))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
-        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<IdentityUser<Guid>>(), createDto.Password))
+            .ReturnsAsync((Usuario?)null);
+        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<Usuario>(), createDto.Password))
             .ReturnsAsync(IdentityResult.Success);
         _mockRoleManager.Setup(x => x.RoleExistsAsync("CREADOR"))
             .ReturnsAsync(true);
         _mockRoleManager.Setup(x => x.RoleExistsAsync("INVALID_ROLE"))
             .ReturnsAsync(false);
-        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<IdentityUser<Guid>>(), "CREADOR"))
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<Usuario>(), "CREADOR"))
             .ReturnsAsync(IdentityResult.Success);
-        _mockUserManager.Setup(x => x.GetRolesAsync(It.IsAny<IdentityUser<Guid>>()))
+        _mockUserManager.Setup(x => x.GetRolesAsync(It.IsAny<Usuario>()))
             .ReturnsAsync(new List<string> { "CREADOR" });
 
         // Act
@@ -205,7 +208,7 @@ public class UserManagementServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        _mockUserManager.Verify(x => x.AddToRoleAsync(It.IsAny<IdentityUser<Guid>>(), "INVALID_ROLE"), Times.Never);
+        _mockUserManager.Verify(x => x.AddToRoleAsync(It.IsAny<Usuario>(), "INVALID_ROLE"), Times.Never);
     }
 
     #endregion
@@ -218,11 +221,13 @@ public class UserManagementServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
             Email = "original@example.com",
-            UserName = "original@example.com"
+            UserName = "original@example.com",
+            Nombre = "Original User",
+            CreatedAt = DateTime.UtcNow
         };
 
         var updateDto = new UpdateUserDto
@@ -236,7 +241,7 @@ public class UserManagementServiceTests
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
             .ReturnsAsync(user);
         _mockUserManager.Setup(x => x.FindByEmailAsync(updateDto.Email))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
         _mockUserManager.Setup(x => x.UpdateAsync(user))
             .ReturnsAsync(IdentityResult.Success);
         _mockUserManager.Setup(x => x.GetRolesAsync(user))
@@ -276,7 +281,7 @@ public class UserManagementServiceTests
         };
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
 
         // Act
         var act = async () => await _service.UpdateUserAsync(userId, updateDto, adminId);
@@ -292,11 +297,13 @@ public class UserManagementServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
             Email = "user@example.com",
-            UserName = "user@example.com"
+            UserName = "user@example.com",
+            Nombre = "User",
+            CreatedAt = DateTime.UtcNow
         };
 
         var updateDto = new UpdateUserDto
@@ -336,12 +343,14 @@ public class UserManagementServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
             Email = "user@example.com",
             UserName = "user@example.com",
-            LockoutEnabled = false
+            LockoutEnabled = false,
+            Nombre = "User",
+            CreatedAt = DateTime.UtcNow
         };
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
@@ -366,10 +375,12 @@ public class UserManagementServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
-            Email = "admin@example.com"
+            Email = "admin@example.com",
+            Nombre = "Admin User",
+            CreatedAt = DateTime.UtcNow
         };
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
@@ -391,7 +402,7 @@ public class UserManagementServiceTests
         var adminId = Guid.NewGuid();
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
 
         // Act
         var act = async () => await _service.SuspendUserAsync(userId, adminId);
@@ -410,12 +421,14 @@ public class UserManagementServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
             Email = "user@example.com",
             UserName = "user@example.com",
-            LockoutEnd = DateTimeOffset.MaxValue
+            LockoutEnd = DateTimeOffset.MaxValue,
+            Nombre = "User",
+            CreatedAt = DateTime.UtcNow
         };
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
@@ -442,7 +455,7 @@ public class UserManagementServiceTests
         var adminId = Guid.NewGuid();
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
 
         // Act
         var act = async () => await _service.ActivateUserAsync(userId, adminId);
@@ -462,11 +475,13 @@ public class UserManagementServiceTests
         var userId = Guid.NewGuid();
         var adminId = Guid.NewGuid();
         var originalEmail = "user@example.com";
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
             Email = originalEmail,
-            UserName = originalEmail
+            UserName = originalEmail,
+            Nombre = "User",
+            CreatedAt = DateTime.UtcNow
         };
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
@@ -490,10 +505,12 @@ public class UserManagementServiceTests
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = userId,
-            Email = "admin@example.com"
+            Email = "admin@example.com",
+            Nombre = "Admin User",
+            CreatedAt = DateTime.UtcNow
         };
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
@@ -515,7 +532,7 @@ public class UserManagementServiceTests
         var adminId = Guid.NewGuid();
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId.ToString()))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
 
         // Act
         var act = async () => await _service.DeleteUserAsync(userId, adminId);
@@ -534,7 +551,7 @@ public class UserManagementServiceTests
         // Arrange
         var email = "new@example.com";
         _mockUserManager.Setup(x => x.FindByEmailAsync(email))
-            .ReturnsAsync((IdentityUser<Guid>?)null);
+            .ReturnsAsync((Usuario?)null);
 
         // Act
         var result = await _service.IsEmailInUseAsync(email);
@@ -548,7 +565,7 @@ public class UserManagementServiceTests
     {
         // Arrange
         var email = "existing@example.com";
-        var existingUser = new IdentityUser<Guid> { Id = Guid.NewGuid(), Email = email };
+        var existingUser = new Usuario { Id = Guid.NewGuid(), Email = email, Nombre = "Existing", CreatedAt = DateTime.UtcNow };
         _mockUserManager.Setup(x => x.FindByEmailAsync(email))
             .ReturnsAsync(existingUser);
 
@@ -565,7 +582,7 @@ public class UserManagementServiceTests
         // Arrange
         var userId = Guid.NewGuid();
         var email = "user@example.com";
-        var existingUser = new IdentityUser<Guid> { Id = userId, Email = email };
+        var existingUser = new Usuario { Id = userId, Email = email, Nombre = "Existing", CreatedAt = DateTime.UtcNow };
         _mockUserManager.Setup(x => x.FindByEmailAsync(email))
             .ReturnsAsync(existingUser);
 

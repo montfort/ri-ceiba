@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Shared.DTOs;
 using Microsoft.AspNetCore.Identity;
@@ -14,12 +15,12 @@ namespace Ceiba.Infrastructure.Services;
 /// </summary>
 public class UserManagementService : IUserManagementService
 {
-    private readonly UserManager<IdentityUser<Guid>> _userManager;
+    private readonly UserManager<Usuario> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<UserManagementService> _logger;
 
     public UserManagementService(
-        UserManager<IdentityUser<Guid>> userManager,
+        UserManager<Usuario> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
         ILogger<UserManagementService> logger)
     {
@@ -109,12 +110,14 @@ public class UserManagementService : IUserManagementService
         }
 
         // Create user
-        var user = new IdentityUser<Guid>
+        var user = new Usuario
         {
             Id = Guid.NewGuid(),
             UserName = createDto.Email,
             Email = createDto.Email,
-            EmailConfirmed = true // Admin-created users are pre-confirmed
+            EmailConfirmed = true, // Admin-created users are pre-confirmed
+            Nombre = createDto.Nombre,
+            CreatedAt = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(user, createDto.Password);
@@ -154,6 +157,9 @@ public class UserManagementService : IUserManagementService
     {
         var user = await _userManager.FindByIdAsync(userId.ToString())
             ?? throw new KeyNotFoundException($"Usuario con ID {userId} no encontrado");
+
+        // Update Nombre
+        user.Nombre = updateDto.Nombre;
 
         // Check email uniqueness if changed
         if (!string.Equals(user.Email, updateDto.Email, StringComparison.OrdinalIgnoreCase))
@@ -314,17 +320,17 @@ public class UserManagementService : IUserManagementService
         return true;
     }
 
-    private static UserDto MapToDto(IdentityUser<Guid> user, List<string> roles)
+    private static UserDto MapToDto(Usuario user, List<string> roles)
     {
         return new UserDto
         {
             Id = user.Id,
             Email = user.Email ?? string.Empty,
-            Nombre = user.UserName ?? string.Empty,
+            Nombre = user.Nombre,
             Roles = roles,
             Activo = user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
-            CreatedAt = DateTime.UtcNow, // Identity doesn't track this by default
-            LastLogin = null // Would need custom tracking - Identity doesn't store last login by default
+            CreatedAt = user.CreatedAt,
+            LastLogin = user.LastLoginAt
         };
     }
 }

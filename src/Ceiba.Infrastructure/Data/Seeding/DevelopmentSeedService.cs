@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
@@ -10,11 +11,11 @@ namespace Ceiba.Infrastructure.Data.Seeding;
 /// </summary>
 public class DevelopmentSeedService : IDevelopmentSeedService
 {
-    private readonly UserManager<IdentityUser<Guid>> _userManager;
+    private readonly UserManager<Usuario> _userManager;
     private readonly ILogger<DevelopmentSeedService> _logger;
 
     public DevelopmentSeedService(
-        UserManager<IdentityUser<Guid>> userManager,
+        UserManager<Usuario> userManager,
         ILogger<DevelopmentSeedService> logger)
     {
         _userManager = userManager;
@@ -50,11 +51,13 @@ public class DevelopmentSeedService : IDevelopmentSeedService
                 continue;
             }
 
-            var user = new IdentityUser<Guid>
+            var user = new Usuario
             {
                 UserName = testUser.Email,
                 Email = testUser.Email,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                Nombre = $"{testUser.Nombre} {testUser.Apellido}",
+                CreatedAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, testUser.Password);

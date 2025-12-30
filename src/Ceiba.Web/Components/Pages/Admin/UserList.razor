@@ -100,9 +100,12 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
+                                        <th>Nombre</th>
                                         <th>Email</th>
                                         <th>Roles</th>
                                         <th>Estado</th>
+                                        <th>Creado</th>
+                                        <th>Último acceso</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -110,6 +113,7 @@
                                     @foreach (var user in Users)
                                     {
                                         <tr>
+                                            <td>@user.Nombre</td>
                                             <td>@user.Email</td>
                                             <td>
                                                 @foreach (var role in user.Roles)
@@ -121,6 +125,23 @@
                                                 <span class="badge @(user.Activo ? "bg-success" : "bg-danger")">
                                                     @(user.Activo ? "Activo" : "Suspendido")
                                                 </span>
+                                            </td>
+                                            <td>
+                                                <small title="@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")">
+                                                    @user.CreatedAt.ToString("dd/MM/yyyy")
+                                                </small>
+                                            </td>
+                                            <td>
+                                                @if (user.LastLogin.HasValue)
+                                                {
+                                                    <small title="@user.LastLogin.Value.ToString("dd/MM/yyyy HH:mm")">
+                                                        @user.LastLogin.Value.ToString("dd/MM/yyyy HH:mm")
+                                                    </small>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">Nunca</small>
+                                                }
                                             </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm" role="group">
@@ -203,6 +224,10 @@
                     {
                         <div class="alert alert-danger">@ModalError</div>
                     }
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input id="nombre" type="text" class="form-control" @bind="FormNombre" placeholder="Nombre completo" required />
+                    </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email *</label>
                         <input id="email" type="email" class="form-control" @bind="FormEmail" required />
@@ -298,6 +323,7 @@
     private bool IsSaving { get; set; }
     private string? ModalError { get; set; }
     private Guid? EditingUserId { get; set; }
+    private string FormNombre { get; set; } = string.Empty;
     private string FormEmail { get; set; } = string.Empty;
     private string FormPassword { get; set; } = string.Empty;
     private List<string> FormRoles { get; set; } = new();
@@ -399,6 +425,7 @@
     {
         IsEditing = false;
         EditingUserId = null;
+        FormNombre = string.Empty;
         FormEmail = string.Empty;
         FormPassword = string.Empty;
         FormRoles = new List<string>();
@@ -411,6 +438,7 @@
     {
         IsEditing = true;
         EditingUserId = user.Id;
+        FormNombre = user.Nombre;
         FormEmail = user.Email;
         FormPassword = string.Empty;
         FormRoles = new List<string>(user.Roles);
@@ -436,6 +464,12 @@
     private async Task SaveUser()
     {
         ModalError = null;
+
+        if (string.IsNullOrWhiteSpace(FormNombre))
+        {
+            ModalError = "El nombre es requerido.";
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(FormEmail))
         {
@@ -463,6 +497,7 @@
             {
                 var updateDto = new UpdateUserDto
                 {
+                    Nombre = FormNombre,
                     Email = FormEmail,
                     NewPassword = string.IsNullOrWhiteSpace(FormPassword) ? null : FormPassword,
                     Roles = FormRoles,
@@ -474,6 +509,7 @@
             {
                 var createDto = new CreateUserDto
                 {
+                    Nombre = FormNombre,
                     Email = FormEmail,
                     Password = FormPassword,
                     Roles = FormRoles

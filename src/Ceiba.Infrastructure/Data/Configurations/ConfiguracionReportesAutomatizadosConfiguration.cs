@@ -1,5 +1,4 @@
 using Ceiba.Core.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -51,8 +50,8 @@ public class ConfiguracionReportesAutomatizadosConfiguration : IEntityTypeConfig
             .HasColumnName("usuario_id")
             .IsRequired();
 
-        // Foreign key to Usuario (Identity)
-        builder.HasOne<IdentityUser<Guid>>()
+        // Foreign key to Usuario
+        builder.HasOne<Usuario>()
             .WithMany()
             .HasForeignKey(c => c.UsuarioId)
             .OnDelete(DeleteBehavior.Restrict);

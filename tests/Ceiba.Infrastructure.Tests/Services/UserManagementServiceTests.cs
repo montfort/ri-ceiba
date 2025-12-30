@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Ceiba.Infrastructure.Services;
 using Ceiba.Shared.DTOs;
 using FluentAssertions;
@@ -16,7 +17,7 @@ namespace Ceiba.Infrastructure.Tests.Services;
 /// </summary>
 public class UserManagementServiceTests
 {
-    private readonly UserManager<IdentityUser<Guid>> _userManager;
+    private readonly UserManager<Usuario> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly ILogger<UserManagementService> _logger;
     private readonly UserManagementService _service;
@@ -25,13 +26,13 @@ public class UserManagementServiceTests
     public UserManagementServiceTests()
     {
         // Create mock user store
-        var userStore = Substitute.For<IUserStore<IdentityUser<Guid>>>();
-        userStore.As<IUserEmailStore<IdentityUser<Guid>>>();
-        userStore.As<IUserPasswordStore<IdentityUser<Guid>>>();
-        userStore.As<IUserLockoutStore<IdentityUser<Guid>>>();
-        userStore.As<IQueryableUserStore<IdentityUser<Guid>>>();
+        var userStore = Substitute.For<IUserStore<Usuario>>();
+        userStore.As<IUserEmailStore<Usuario>>();
+        userStore.As<IUserPasswordStore<Usuario>>();
+        userStore.As<IUserLockoutStore<Usuario>>();
+        userStore.As<IQueryableUserStore<Usuario>>();
 
-        _userManager = Substitute.For<UserManager<IdentityUser<Guid>>>(
+        _userManager = Substitute.For<UserManager<Usuario>>(
             userStore,
             null, null, null, null, null, null, null, null);
 
@@ -77,7 +78,7 @@ public class UserManagementServiceTests
     public async Task ListUsersAsync_FiltersBySearch()
     {
         // Arrange
-        var users = new List<IdentityUser<Guid>>
+        var users = new List<Usuario>
         {
             CreateUser("john@example.com"),
             CreateUser("jane@example.com"),
@@ -104,7 +105,7 @@ public class UserManagementServiceTests
         var suspendedUser = CreateUser("suspended@example.com");
         suspendedUser.LockoutEnd = DateTimeOffset.MaxValue;
 
-        var users = new List<IdentityUser<Guid>> { activeUser, suspendedUser };
+        var users = new List<Usuario> { activeUser, suspendedUser };
         SetupUserManagerUsers(users);
         SetupUserRoles(users);
 
@@ -125,7 +126,7 @@ public class UserManagementServiceTests
         var adminUser = CreateUser("admin@example.com");
         var creadorUser = CreateUser("creador@example.com");
 
-        var users = new List<IdentityUser<Guid>> { adminUser, creadorUser };
+        var users = new List<Usuario> { adminUser, creadorUser };
         SetupUserManagerUsers(users);
 
         _userManager.GetRolesAsync(adminUser).Returns(new List<string> { "ADMIN" });
@@ -145,7 +146,7 @@ public class UserManagementServiceTests
     public async Task ListUsersAsync_OrdersByEmail()
     {
         // Arrange
-        var users = new List<IdentityUser<Guid>>
+        var users = new List<Usuario>
         {
             CreateUser("charlie@example.com"),
             CreateUser("alice@example.com"),
@@ -217,12 +218,12 @@ public class UserManagementServiceTests
         };
 
         _userManager.FindByEmailAsync(createDto.Email).ReturnsNull();
-        _userManager.CreateAsync(Arg.Any<IdentityUser<Guid>>(), createDto.Password)
+        _userManager.CreateAsync(Arg.Any<Usuario>(), createDto.Password)
             .Returns(IdentityResult.Success);
         _roleManager.RoleExistsAsync("CREADOR").Returns(true);
-        _userManager.AddToRoleAsync(Arg.Any<IdentityUser<Guid>>(), "CREADOR")
+        _userManager.AddToRoleAsync(Arg.Any<Usuario>(), "CREADOR")
             .Returns(IdentityResult.Success);
-        _userManager.GetRolesAsync(Arg.Any<IdentityUser<Guid>>())
+        _userManager.GetRolesAsync(Arg.Any<Usuario>())
             .Returns(new List<string> { "CREADOR" });
 
         // Act
@@ -266,7 +267,7 @@ public class UserManagementServiceTests
         };
 
         _userManager.FindByEmailAsync(createDto.Email).ReturnsNull();
-        _userManager.CreateAsync(Arg.Any<IdentityUser<Guid>>(), createDto.Password)
+        _userManager.CreateAsync(Arg.Any<Usuario>(), createDto.Password)
             .Returns(IdentityResult.Failed(new IdentityError
             {
                 Code = "PasswordTooWeak",
@@ -291,21 +292,21 @@ public class UserManagementServiceTests
         };
 
         _userManager.FindByEmailAsync(createDto.Email).ReturnsNull();
-        _userManager.CreateAsync(Arg.Any<IdentityUser<Guid>>(), createDto.Password)
+        _userManager.CreateAsync(Arg.Any<Usuario>(), createDto.Password)
             .Returns(IdentityResult.Success);
         _roleManager.RoleExistsAsync("CREADOR").Returns(true);
         _roleManager.RoleExistsAsync("NONEXISTENT").Returns(false);
-        _userManager.AddToRoleAsync(Arg.Any<IdentityUser<Guid>>(), "CREADOR")
+        _userManager.AddToRoleAsync(Arg.Any<Usuario>(), "CREADOR")
             .Returns(IdentityResult.Success);
-        _userManager.GetRolesAsync(Arg.Any<IdentityUser<Guid>>())
+        _userManager.GetRolesAsync(Arg.Any<Usuario>())
             .Returns(new List<string> { "CREADOR" });
 
         // Act
         var result = await _service.CreateUserAsync(createDto, _adminUserId);
 
         // Assert
-        await _userManager.Received(1).AddToRoleAsync(Arg.Any<IdentityUser<Guid>>(), "CREADOR");
-        await _userManager.DidNotReceive().AddToRoleAsync(Arg.Any<IdentityUser<Guid>>(), "NONEXISTENT");
+        await _userManager.Received(1).AddToRoleAsync(Arg.Any<Usuario>(), "CREADOR");
+        await _userManager.DidNotReceive().AddToRoleAsync(Arg.Any<Usuario>(), "NONEXISTENT");
     }
 
     #endregion
@@ -628,22 +629,24 @@ public class UserManagementServiceTests
 
     #region Helper Methods
 
-    private static IdentityUser<Guid> CreateUser(string email, Guid? id = null)
+    private static Usuario CreateUser(string email, Guid? id = null)
     {
-        return new IdentityUser<Guid>
+        return new Usuario
         {
             Id = id ?? Guid.NewGuid(),
             Email = email,
             UserName = email,
             NormalizedEmail = email.ToUpperInvariant(),
             NormalizedUserName = email.ToUpperInvariant(),
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            Nombre = email.Split('@')[0],
+            CreatedAt = DateTime.UtcNow
         };
     }
 
-    private static List<IdentityUser<Guid>> CreateTestUsers(int count)
+    private static List<Usuario> CreateTestUsers(int count)
     {
-        var users = new List<IdentityUser<Guid>>();
+        var users = new List<Usuario>();
         for (int i = 0; i < count; i++)
         {
             users.Add(CreateUser($"user{i}@example.com"));
@@ -651,13 +654,13 @@ public class UserManagementServiceTests
         return users;
     }
 
-    private void SetupUserManagerUsers(List<IdentityUser<Guid>> users)
+    private void SetupUserManagerUsers(List<Usuario> users)
     {
         var mockUsers = users.BuildMock();
         _userManager.Users.Returns(mockUsers);
     }
 
-    private void SetupUserRoles(List<IdentityUser<Guid>> users)
+    private void SetupUserRoles(List<Usuario> users)
     {
         foreach (var user in users)
         {

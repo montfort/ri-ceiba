@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Data;
 using Ceiba.Infrastructure.Data.Seeding;
@@ -15,7 +16,7 @@ namespace Ceiba.Infrastructure.Services;
 public class SetupService : ISetupService
 {
     private readonly CeibaDbContext _context;
-    private readonly UserManager<IdentityUser<Guid>> _userManager;
+    private readonly UserManager<Usuario> _userManager;
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
     private readonly IProductionSeedService _productionSeedService;
     private readonly IGeographicSeedService _geographicSeedService;
@@ -23,7 +24,7 @@ public class SetupService : ISetupService
 
     public SetupService(
         CeibaDbContext context,
-        UserManager<IdentityUser<Guid>> userManager,
+        UserManager<Usuario> userManager,
         RoleManager<IdentityRole<Guid>> roleManager,
         IProductionSeedService productionSeedService,
         IGeographicSeedService geographicSeedService,
@@ -117,11 +118,13 @@ public class SetupService : ISetupService
             await _productionSeedService.SeedRolesAsync();
 
             // Create the admin user
-            var adminUser = new IdentityUser<Guid>
+            var adminUser = new Usuario
             {
                 UserName = dto.Email,
                 Email = dto.Email,
-                EmailConfirmed = true // Auto-confirm for first admin
+                EmailConfirmed = true, // Auto-confirm for first admin
+                Nombre = dto.Nombre,
+                CreatedAt = DateTime.UtcNow
             };
 
             var createResult = await _userManager.CreateAsync(adminUser, dto.Password);

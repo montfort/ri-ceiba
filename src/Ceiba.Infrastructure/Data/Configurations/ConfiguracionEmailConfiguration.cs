@@ -1,5 +1,4 @@
 using Ceiba.Core.Entities;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -104,7 +103,7 @@ public class ConfiguracionEmailConfiguration : IEntityTypeConfiguration<Configur
             .HasColumnType("timestamptz");
 
         // Relationships
-        builder.HasOne<IdentityUser<Guid>>()
+        builder.HasOne<Usuario>()
             .WithMany()
             .HasForeignKey(c => c.UsuarioId)
             .OnDelete(DeleteBehavior.Restrict);
