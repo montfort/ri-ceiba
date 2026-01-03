@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Ceiba.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -68,7 +69,7 @@ class Program
                 options.UseNpgsql(connectionString));
 
             // Add Identity services (required for SeedDataService)
-            services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
+            services.AddIdentity<Usuario, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<CeibaDbContext>()
                 .AddDefaultTokenProviders();
 

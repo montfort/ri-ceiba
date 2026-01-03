@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Ceiba.Application.Services;
+using Ceiba.Core.Entities;
 using Ceiba.Web.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +16,8 @@ namespace Ceiba.Web.Tests.Controllers;
 /// </summary>
 public class AccountControllerTests
 {
-    private readonly Mock<SignInManager<IdentityUser<Guid>>> _signInManagerMock;
+    private readonly Mock<SignInManager<Usuario>> _signInManagerMock;
+    private readonly Mock<UserManager<Usuario>> _userManagerMock;
     private readonly Mock<ILoginSecurityService> _loginSecurityMock;
     private readonly Mock<ILogger<AccountController>> _loggerMock;
     private readonly AccountController _controller;
@@ -23,15 +25,15 @@ public class AccountControllerTests
     public AccountControllerTests()
     {
         // Setup SignInManager mock (complex setup required)
-        var userStoreMock = new Mock<IUserStore<IdentityUser<Guid>>>();
-        var userManagerMock = new Mock<UserManager<IdentityUser<Guid>>>(
+        var userStoreMock = new Mock<IUserStore<Usuario>>();
+        _userManagerMock = new Mock<UserManager<Usuario>>(
             userStoreMock.Object, null!, null!, null!, null!, null!, null!, null!, null!);
 
         var contextAccessorMock = new Mock<IHttpContextAccessor>();
-        var claimsFactoryMock = new Mock<IUserClaimsPrincipalFactory<IdentityUser<Guid>>>();
+        var claimsFactoryMock = new Mock<IUserClaimsPrincipalFactory<Usuario>>();
 
-        _signInManagerMock = new Mock<SignInManager<IdentityUser<Guid>>>(
-            userManagerMock.Object,
+        _signInManagerMock = new Mock<SignInManager<Usuario>>(
+            _userManagerMock.Object,
             contextAccessorMock.Object,
             claimsFactoryMock.Object,
             null!, null!, null!, null!);
@@ -41,6 +43,7 @@ public class AccountControllerTests
 
         _controller = new AccountController(
             _signInManagerMock.Object,
+            _userManagerMock.Object,
             _loginSecurityMock.Object,
             _loggerMock.Object);
 

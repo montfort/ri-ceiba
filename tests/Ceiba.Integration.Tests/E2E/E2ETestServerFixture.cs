@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Sockets;
 using Ceiba.Application.Services;
 using Ceiba.Application.Services.Export;
+using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Caching;
 using Ceiba.Infrastructure.Data;
@@ -103,7 +104,7 @@ public class E2ETestServerFixture : IAsyncLifetime
         });
 
         // Configure ASP.NET Identity
-        services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
+        services.AddIdentity<Usuario, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<CeibaDbContext>()
             .AddDefaultTokenProviders();
 

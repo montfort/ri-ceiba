@@ -82,9 +82,12 @@ public class UserListTests : TestContext
 
         // Assert
         cut.Markup.Should().Contain("<table");
+        cut.Markup.Should().Contain("Nombre");
         cut.Markup.Should().Contain("Email");
         cut.Markup.Should().Contain("Roles");
         cut.Markup.Should().Contain("Estado");
+        cut.Markup.Should().Contain("Creado");
+        cut.Markup.Should().Contain("Último acceso");
         cut.Markup.Should().Contain("Acciones");
     }
 
@@ -120,6 +123,48 @@ public class UserListTests : TestContext
         // Assert
         cut.Markup.Should().Contain("Activo");
         cut.Markup.Should().Contain("bg-success");
+    }
+
+    [Fact(DisplayName = "UserList should display user Nombre")]
+    public void UserList_ShouldDisplayUserNombre()
+    {
+        // Act
+        var cut = Render<UserList>();
+
+        // Assert
+        cut.Markup.Should().Contain("Administrador Sistema");
+        cut.Markup.Should().Contain("Oficial Creador");
+    }
+
+    [Fact(DisplayName = "UserList should display CreatedAt date")]
+    public void UserList_ShouldDisplayCreatedAtDate()
+    {
+        // Act
+        var cut = Render<UserList>();
+
+        // Assert
+        cut.Markup.Should().Contain("15/01/2025");
+        cut.Markup.Should().Contain("20/06/2025");
+    }
+
+    [Fact(DisplayName = "UserList should display LastLogin date")]
+    public void UserList_ShouldDisplayLastLoginDate()
+    {
+        // Act
+        var cut = Render<UserList>();
+
+        // Assert
+        cut.Markup.Should().Contain("30/12/2025");
+    }
+
+    [Fact(DisplayName = "UserList should display Nunca for null LastLogin")]
+    public void UserList_ShouldDisplayNuncaForNullLastLogin()
+    {
+        // Act
+        var cut = Render<UserList>();
+
+        // Assert
+        cut.Markup.Should().Contain("Nunca");
     }
 
     #endregion
@@ -184,10 +229,27 @@ public class UserListTests : TestContext
         await cut.InvokeAsync(() => newUserButton.Click());
 
         // Assert
+        cut.Markup.Should().Contain("Nombre");
         cut.Markup.Should().Contain("Email");
         cut.Markup.Should().Contain("Contraseña");
         cut.Markup.Should().Contain("Roles");
         cut.Markup.Should().Contain("Crear Usuario");
+    }
+
+    [Fact(DisplayName = "UserList create modal Nombre field should have placeholder")]
+    public async Task UserList_CreateModal_NombreFieldShouldHavePlaceholder()
+    {
+        // Arrange
+        var cut = Render<UserList>();
+
+        // Open modal
+        var newUserButton = cut.FindAll("button").First(b => b.TextContent.Contains("Nuevo Usuario"));
+        await cut.InvokeAsync(() => newUserButton.Click());
+
+        // Assert
+        var nombreInput = cut.Find("#nombre");
+        nombreInput.Should().NotBeNull();
+        nombreInput.GetAttribute("placeholder").Should().Be("Nombre completo");
     }
 
     [Fact(DisplayName = "UserList create modal cancel should close modal")]
@@ -230,6 +292,27 @@ public class UserListTests : TestContext
             // Assert
             cut.Markup.Should().Contain("modal");
             cut.Markup.Should().Contain("Editar Usuario");
+        }
+    }
+
+    [Fact(DisplayName = "UserList edit modal should load user Nombre")]
+    public async Task UserList_EditModal_ShouldLoadUserNombre()
+    {
+        // Arrange
+        var cut = Render<UserList>();
+
+        // Wait for table to render
+        cut.WaitForAssertion(() => cut.FindAll("table tbody tr").Count.Should().BeGreaterThan(0));
+
+        // Act - Find and click edit button
+        var editButton = cut.FindAll("button.btn-outline-primary").FirstOrDefault();
+        if (editButton != null)
+        {
+            await cut.InvokeAsync(() => editButton.Click());
+
+            // Assert - modal should have the user's nombre
+            var nombreInput = cut.Find("#nombre");
+            nombreInput.GetAttribute("value").Should().Be("Administrador Sistema");
         }
     }
 
@@ -430,8 +513,26 @@ public class UserListTests : TestContext
     {
         var users = new List<UserDto>
         {
-            new() { Id = _testUserId, Email = "admin@ceiba.local", Roles = new List<string> { "ADMIN" }, Activo = true },
-            new() { Id = Guid.NewGuid(), Email = "creador@ceiba.local", Roles = new List<string> { "CREADOR" }, Activo = true }
+            new()
+            {
+                Id = _testUserId,
+                Email = "admin@ceiba.local",
+                Nombre = "Administrador Sistema",
+                Roles = new List<string> { "ADMIN" },
+                Activo = true,
+                CreatedAt = new DateTime(2025, 1, 15, 10, 30, 0),
+                LastLogin = new DateTime(2025, 12, 30, 8, 0, 0)
+            },
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Email = "creador@ceiba.local",
+                Nombre = "Oficial Creador",
+                Roles = new List<string> { "CREADOR" },
+                Activo = true,
+                CreatedAt = new DateTime(2025, 6, 20, 14, 0, 0),
+                LastLogin = null // Never logged in
+            }
         };
 
         var roles = new List<string> { "ADMIN", "REVISOR", "CREADOR" };

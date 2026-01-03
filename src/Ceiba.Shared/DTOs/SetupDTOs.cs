@@ -44,6 +44,13 @@ public class SetupStatus
 public class CreateFirstAdminDto
 {
     /// <summary>
+    /// Administrator's full display name.
+    /// </summary>
+    [Required(ErrorMessage = "El nombre es requerido")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 100 caracteres")]
+    public string Nombre { get; set; } = string.Empty;
+
+    /// <summary>
     /// Administrator's email address. Will also be used as username.
     /// </summary>
     [Required(ErrorMessage = "El correo electrónico es requerido")]

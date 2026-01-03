@@ -3,6 +3,7 @@ using System;
 using Ceiba.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ceiba.Infrastructure.Migrations
 {
     [DbContext(typeof(CeibaDbContext))]
-    partial class CeibaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251230062007_AddUsuarioCustomProperties")]
+    partial class AddUsuarioCustomProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -898,12 +901,6 @@ namespace Ceiba.Infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("Activo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("activo");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()

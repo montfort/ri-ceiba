@@ -277,6 +277,92 @@ public class UserFormTests : TestContext
         cut.Markup.Should().Contain("Guardar Cambios");
     }
 
+    [Fact(DisplayName = "UserForm should display CreatedAt metadata in edit mode")]
+    public void UserForm_ShouldDisplayCreatedAtMetadataInEditMode()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUserService.Setup(x => x.GetUserByIdAsync(userId))
+            .ReturnsAsync(new UserDto
+            {
+                Id = userId,
+                Email = "test@test.com",
+                Nombre = "Test User",
+                Roles = new List<string> { "CREADOR" },
+                Activo = true,
+                CreatedAt = new DateTime(2025, 6, 15, 10, 30, 0),
+                LastLogin = new DateTime(2025, 12, 28, 14, 0, 0)
+            });
+
+        // Act
+        var cut = Render<UserForm>(parameters => parameters.Add(p => p.UserId, userId));
+
+        // Assert
+        cut.Markup.Should().Contain("Creado:");
+        cut.Markup.Should().Contain("15/06/2025");
+    }
+
+    [Fact(DisplayName = "UserForm should display LastLogin metadata in edit mode")]
+    public void UserForm_ShouldDisplayLastLoginMetadataInEditMode()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUserService.Setup(x => x.GetUserByIdAsync(userId))
+            .ReturnsAsync(new UserDto
+            {
+                Id = userId,
+                Email = "test@test.com",
+                Nombre = "Test User",
+                Roles = new List<string> { "CREADOR" },
+                Activo = true,
+                CreatedAt = new DateTime(2025, 6, 15, 10, 30, 0),
+                LastLogin = new DateTime(2025, 12, 28, 14, 0, 0)
+            });
+
+        // Act
+        var cut = Render<UserForm>(parameters => parameters.Add(p => p.UserId, userId));
+
+        // Assert
+        cut.Markup.Should().Contain("Último acceso:");
+        cut.Markup.Should().Contain("28/12/2025");
+    }
+
+    [Fact(DisplayName = "UserForm should display Nunca for null LastLogin in edit mode")]
+    public void UserForm_ShouldDisplayNuncaForNullLastLoginInEditMode()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _mockUserService.Setup(x => x.GetUserByIdAsync(userId))
+            .ReturnsAsync(new UserDto
+            {
+                Id = userId,
+                Email = "test@test.com",
+                Nombre = "Test User",
+                Roles = new List<string> { "CREADOR" },
+                Activo = true,
+                CreatedAt = new DateTime(2025, 6, 15, 10, 30, 0),
+                LastLogin = null
+            });
+
+        // Act
+        var cut = Render<UserForm>(parameters => parameters.Add(p => p.UserId, userId));
+
+        // Assert
+        cut.Markup.Should().Contain("Último acceso:");
+        cut.Markup.Should().Contain("Nunca");
+    }
+
+    [Fact(DisplayName = "UserForm should not display metadata in create mode")]
+    public void UserForm_ShouldNotDisplayMetadataInCreateMode()
+    {
+        // Act
+        var cut = Render<UserForm>();
+
+        // Assert
+        cut.Markup.Should().NotContain("Creado:");
+        cut.Markup.Should().NotContain("Último acceso:");
+    }
+
     [Fact(DisplayName = "UserForm should show not found for invalid user")]
     public void UserForm_ShouldShowNotFoundForInvalidUser()
     {

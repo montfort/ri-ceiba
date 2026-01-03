@@ -1,5 +1,6 @@
 using Ceiba.Application.Services;
 using Ceiba.Application.Services.Export;
+using Ceiba.Core.Entities;
 using Ceiba.Core.Interfaces;
 using Ceiba.Infrastructure.Caching;
 using Ceiba.Infrastructure.Data;
@@ -82,7 +83,7 @@ try
     }
 
     // Configurar ASP.NET Identity (T010-T010e)
-    builder.Services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
+    builder.Services.AddIdentity<Usuario, IdentityRole<Guid>>()
         .AddEntityFrameworkStores<CeibaDbContext>()
         .AddDefaultTokenProviders();
 

@@ -1,4 +1,5 @@
 using Ceiba.Application.Services;
+using Ceiba.Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -8,16 +9,19 @@ namespace Ceiba.Web.Controllers;
 [Route("[controller]")]
 public class AccountController : Controller
 {
-    private readonly SignInManager<IdentityUser<Guid>> _signInManager;
+    private readonly SignInManager<Usuario> _signInManager;
+    private readonly UserManager<Usuario> _userManager;
     private readonly ILoginSecurityService _loginSecurity;
     private readonly ILogger<AccountController> _logger;
 
     public AccountController(
-        SignInManager<IdentityUser<Guid>> signInManager,
+        SignInManager<Usuario> signInManager,
+        UserManager<Usuario> userManager,
         ILoginSecurityService loginSecurity,
         ILogger<AccountController> logger)
     {
         _signInManager = signInManager;
+        _userManager = userManager;
         _loginSecurity = loginSecurity;
         _logger = logger;
     }
@@ -60,6 +64,15 @@ public class AccountController : Controller
             if (result.Succeeded)
             {
                 await _loginSecurity.RecordSuccessfulLoginAsync(ipAddress, email);
+
+                // Update LastLoginAt timestamp
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user != null)
+                {
+                    user.LastLoginAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                }
+
                 _logger.LogInformation("User {Email} logged in successfully from IP {IpAddress}", email, ipAddress);
                 return Redirect(string.IsNullOrEmpty(safeReturnUrl) ? "/" : safeReturnUrl);
             }
@@ -130,6 +143,15 @@ public class AccountController : Controller
             if (result.Succeeded)
             {
                 await _loginSecurity.RecordSuccessfulLoginAsync(ipAddress, request.Email);
+
+                // Update LastLoginAt timestamp
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user != null)
+                {
+                    user.LastLoginAt = DateTime.UtcNow;
+                    await _userManager.UpdateAsync(user);
+                }
+
                 _logger.LogInformation("User {Email} logged in successfully from IP {IpAddress}", request.Email, ipAddress);
                 return Ok(new { success = true, message = "Login exitoso" });
             }

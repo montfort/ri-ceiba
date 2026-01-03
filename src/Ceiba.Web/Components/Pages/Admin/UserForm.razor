@@ -166,6 +166,30 @@
                                         </small>
                                     }
                                 </div>
+
+                                <!-- User Metadata (read-only) -->
+                                <div class="mb-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body py-2">
+                                            <small class="text-muted d-block">
+                                                <i class="bi bi-calendar-plus me-1"></i>
+                                                <strong>Creado:</strong> @UserCreatedAt?.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="bi bi-clock-history me-1"></i>
+                                                <strong>Último acceso:</strong>
+                                                @if (UserLastLogin.HasValue)
+                                                {
+                                                    @UserLastLogin.Value.ToString("dd/MM/yyyy HH:mm")
+                                                }
+                                                else
+                                                {
+                                                    <span>Nunca</span>
+                                                }
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             }
 
                             <!-- Form Actions -->
@@ -216,6 +240,10 @@
     private List<string> AvailableRoles { get; set; } = new();
     private Guid CurrentUserId { get; set; }
 
+    // Metadata for edit mode (read-only display)
+    private DateTime? UserCreatedAt { get; set; }
+    private DateTime? UserLastLogin { get; set; }
+
     private UserFormModel FormModel { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
@@ -250,6 +278,10 @@
                         SelectedRoles = new List<string>(user.Roles),
                         Activo = user.Activo
                     };
+
+                    // Store metadata for display
+                    UserCreatedAt = user.CreatedAt;
+                    UserLastLogin = user.LastLogin;
                 }
             }
         }

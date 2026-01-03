@@ -1,3 +1,4 @@
+using Ceiba.Core.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -15,14 +16,14 @@ public class SeedOrchestrator : ISeedOrchestrator
     private readonly IProductionSeedService _productionSeedService;
     private readonly IGeographicSeedService _geographicSeedService;
     private readonly IDevelopmentSeedService? _developmentSeedService;
-    private readonly UserManager<IdentityUser<Guid>> _userManager;
+    private readonly UserManager<Usuario> _userManager;
     private readonly IHostEnvironment _environment;
     private readonly ILogger<SeedOrchestrator> _logger;
 
     public SeedOrchestrator(
         IProductionSeedService productionSeedService,
         IGeographicSeedService geographicSeedService,
-        UserManager<IdentityUser<Guid>> userManager,
+        UserManager<Usuario> userManager,
         IHostEnvironment environment,
         ILogger<SeedOrchestrator> logger,
         IDevelopmentSeedService? developmentSeedService = null)
