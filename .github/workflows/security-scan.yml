@@ -36,135 +36,178 @@ jobs:
           fail-on-severity: high
           deny-licenses: GPL-2.0, GPL-3.0
 
-  # CodeQL Analysis - Disabled (requires GitHub Advanced Security for private repos)
-  # To enable: Make repo public OR purchase GitHub Advanced Security
-  # Then set repository variable ENABLE_CODEQL=true
-  #
-  # codeql-analysis:
-  #   name: CodeQL Security Analysis
-  #   runs-on: ubuntu-latest
-  #   if: vars.ENABLE_CODEQL == 'true'
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: github/codeql-action/init@v3
-  #       with:
-  #         languages: csharp
-  #     - run: dotnet build
-  #     - uses: github/codeql-action/analyze@v3
+  # CodeQL Analysis - Free for public repositories
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
 
-  # Snyk Scan - Disabled (requires SNYK_TOKEN secret and paid plan for private repos)
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+          queries: security-extended
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build for CodeQL
+        run: dotnet build --no-restore
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:csharp"
+
+  # Snyk Scan - Optional (free for public repos, requires SNYK_TOKEN)
   # To enable:
-  #   1. Create account at snyk.io
-  #   2. Get API token from Snyk settings
-  #   3. Add SNYK_TOKEN as repository secret
-  #   4. Set repository variable ENABLE_SNYK=true
-  #
-  # snyk-scan:
-  #   name: Snyk Dependency Scan
-  #   runs-on: ubuntu-latest
-  #   if: vars.ENABLE_SNYK == 'true' && secrets.SNYK_TOKEN != ''
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-dotnet@v4
-  #       with:
-  #         dotnet-version: ${{ env.DOTNET_VERSION }}
-  #     - run: dotnet restore
-  #     - uses: snyk/actions/dotnet@master
-  #       continue-on-error: true
-  #       env:
-  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-  #       with:
-  #         args: --all-projects --severity-threshold=high
-
-  # Placeholder job to satisfy dependency-review needs
+  #   1. Create free account at snyk.io
+  #   2. Get API token from Snyk settings (Account Settings > API Token)
+  #   3. Add SNYK_TOKEN as repository secret in GitHub
+  # The job will automatically run when SNYK_TOKEN secret is configured
   snyk-scan:
-    name: Snyk Scan (Disabled)
+    name: Snyk Dependency Scan
     runs-on: ubuntu-latest
-    if: false  # Always skipped - enable by uncommenting above
-    steps:
-      - run: echo "Snyk scan disabled"
 
-  # OWASP ZAP - Disabled (requires application to be running and accessible)
+    steps:
+      - name: Check if Snyk is configured
+        id: snyk-check
+        run: |
+          if [ -z "${{ secrets.SNYK_TOKEN }}" ]; then
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice::Snyk scan skipped - SNYK_TOKEN secret not configured"
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        if: steps.snyk-check.outputs.configured == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        if: steps.snyk-check.outputs.configured == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        if: steps.snyk-check.outputs.configured == 'true'
+        run: dotnet restore
+
+      - name: Run Snyk to check for vulnerabilities
+        if: steps.snyk-check.outputs.configured == 'true'
+        uses: snyk/actions/dotnet@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --all-projects --severity-threshold=high
+
+      - name: Upload Snyk results to GitHub Code Scanning
+        if: steps.snyk-check.outputs.configured == 'true' && always()
+        uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true
+        with:
+          sarif_file: snyk.sarif
+
+  # OWASP ZAP - Optional (free, requires working health endpoint)
   # To enable:
-  #   1. Ensure the application can start correctly in CI environment
-  #   2. Configure proper health check endpoints
+  #   1. Ensure the application builds and starts correctly
+  #   2. Implement /health endpoint returning "Healthy"
   #   3. Set repository variable ENABLE_OWASP_ZAP=true
-  #   4. Run only on schedule or manual trigger (resource intensive)
-  #
-  # owasp-zap-scan:
-  #   name: OWASP ZAP Dynamic Scan
-  #   runs-on: ubuntu-latest
-  #   if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && vars.ENABLE_OWASP_ZAP == 'true'
-  #   services:
-  #     postgres:
-  #       image: postgres:16-alpine
-  #       env:
-  #         POSTGRES_DB: ceiba_test
-  #         POSTGRES_USER: ceiba
-  #         POSTGRES_PASSWORD: test_password
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 10s
-  #         --health-timeout 5s
-  #         --health-retries 5
-  #       ports:
-  #         - 5432:5432
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-dotnet@v4
-  #       with:
-  #         dotnet-version: ${{ env.DOTNET_VERSION }}
-  #     - run: dotnet restore && dotnet build --no-restore --configuration Release
-  #     - name: Run database migrations
-  #       run: |
-  #         dotnet tool install --global dotnet-ef || true
-  #         export PATH="$PATH:$HOME/.dotnet/tools"
-  #         dotnet ef database update --project src/Ceiba.Infrastructure --startup-project src/Ceiba.Web \
-  #           --connection "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
-  #     - name: Start application
-  #       run: |
-  #         cd src/Ceiba.Web
-  #         nohup dotnet run --no-build --configuration Release > app.log 2>&1 &
-  #         echo $! > app.pid
-  #       env:
-  #         ASPNETCORE_ENVIRONMENT: Development
-  #         ASPNETCORE_URLS: "http://localhost:5000"
-  #         ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
-  #     - name: Wait for application
-  #       run: |
-  #         for i in {1..60}; do
-  #           if curl -s http://localhost:5000/health | grep -q "Healthy"; then exit 0; fi
-  #           sleep 2
-  #         done
-  #         exit 1
-  #     - uses: zaproxy/action-baseline@v0.14.0
-  #       with:
-  #         target: 'http://localhost:5000'
-  #         cmd_options: '-a -l WARN'
-  #         allow_issue_writing: false
-  #     - if: always()
-  #       run: kill $(cat src/Ceiba.Web/app.pid) 2>/dev/null || true
-  #     - if: always()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: zap-report
-  #         path: report_*.html
-  #         retention-days: 14
-  #         if-no-files-found: ignore
-
-  # Placeholder job to satisfy security-summary needs
+  # Only runs on schedule (weekly) or manual trigger to save resources
   owasp-zap-scan:
-    name: OWASP ZAP (Disabled)
+    name: OWASP ZAP Dynamic Scan
     runs-on: ubuntu-latest
-    if: false  # Always skipped - enable by uncommenting above
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && vars.ENABLE_OWASP_ZAP == 'true'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ceiba_test
+          POSTGRES_USER: ceiba
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
-      - run: echo "OWASP ZAP scan disabled"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build application
+        run: dotnet restore && dotnet build --no-restore --configuration Release
+
+      - name: Run database migrations
+        run: |
+          dotnet tool install --global dotnet-ef || true
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet ef database update --project src/Ceiba.Infrastructure --startup-project src/Ceiba.Web \
+            --connection "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
+
+      - name: Start application
+        run: |
+          cd src/Ceiba.Web
+          nohup dotnet run --no-build --configuration Release > app.log 2>&1 &
+          echo $! > app.pid
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_URLS: "http://localhost:5000"
+          ConnectionStrings__DefaultConnection: "Host=localhost;Database=ceiba_test;Username=ceiba;Password=test_password"
+
+      - name: Wait for application
+        run: |
+          for i in {1..60}; do
+            if curl -s http://localhost:5000/health | grep -q "Healthy"; then exit 0; fi
+            sleep 2
+          done
+          echo "Application failed to start"
+          cat src/Ceiba.Web/app.log || true
+          exit 1
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'http://localhost:5000'
+          cmd_options: '-a -l WARN'
+          allow_issue_writing: false
+
+      - name: Stop application
+        if: always()
+        run: kill $(cat src/Ceiba.Web/app.pid) 2>/dev/null || true
+
+      - name: Upload ZAP Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: report_*.html
+          retention-days: 14
+          if-no-files-found: ignore
 
   # Security Summary
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest
-    needs: [dependency-review]
+    needs: [dependency-review, codeql-analysis, snyk-scan, owasp-zap-scan]
     if: always()
 
     steps:
@@ -175,14 +218,11 @@ jobs:
           echo "| Scan | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Dependency Review | ${{ needs.dependency-review.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL | disabled |" >> $GITHUB_STEP_SUMMARY
-          echo "| Snyk | disabled |" >> $GITHUB_STEP_SUMMARY
-          echo "| OWASP ZAP | disabled |" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL | ${{ needs.codeql-analysis.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Snyk | ${{ needs.snyk-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OWASP ZAP | ${{ needs.owasp-zap-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## Disabled Scans" >> $GITHUB_STEP_SUMMARY
+          echo "## Optional Scans Configuration" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "The following scans are disabled and require additional configuration:" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **CodeQL**: Requires GitHub Advanced Security (paid for private repos)" >> $GITHUB_STEP_SUMMARY
-          echo "- **Snyk**: Requires SNYK_TOKEN secret and ENABLE_SNYK=true variable" >> $GITHUB_STEP_SUMMARY
-          echo "- **OWASP ZAP**: Requires ENABLE_OWASP_ZAP=true variable and working health endpoint" >> $GITHUB_STEP_SUMMARY
+          echo "- **Snyk**: Add SNYK_TOKEN secret (free account at snyk.io)" >> $GITHUB_STEP_SUMMARY
+          echo "- **OWASP ZAP**: Set ENABLE_OWASP_ZAP=true variable (requires /health endpoint)" >> $GITHUB_STEP_SUMMARY
