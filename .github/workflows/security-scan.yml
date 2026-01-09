@@ -51,7 +51,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: csharp
           queries: security-extended
@@ -63,7 +63,7 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:csharp"
 
@@ -109,11 +109,11 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          args: --all-projects --severity-threshold=high
+          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload Snyk results to GitHub Code Scanning
-        if: steps.snyk-check.outputs.configured == 'true' && always()
-        uses: github/codeql-action/upload-sarif@v3
+        if: steps.snyk-check.outputs.configured == 'true' && hashFiles('snyk.sarif') != ''
+        uses: github/codeql-action/upload-sarif@v4
         continue-on-error: true
         with:
           sarif_file: snyk.sarif
