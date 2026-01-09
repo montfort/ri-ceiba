@@ -102,14 +102,16 @@ jobs:
         if: steps.snyk-check.outputs.configured == 'true'
         run: dotnet restore
 
+      - name: Setup Snyk CLI
+        if: steps.snyk-check.outputs.configured == 'true'
+        uses: snyk/actions/setup@master
+
       - name: Run Snyk to check for vulnerabilities
         if: steps.snyk-check.outputs.configured == 'true'
-        uses: snyk/actions/dotnet@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
+        run: snyk test --all-projects --severity-threshold=high --sarif-file-output=snyk.sarif
 
       - name: Upload Snyk results to GitHub Code Scanning
         if: steps.snyk-check.outputs.configured == 'true' && hashFiles('snyk.sarif') != ''
