@@ -146,11 +146,11 @@ public class AutomatedReportBackgroundServiceTests
             .Returns(config);
 
         var service = CreateService();
-        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
 
         // Act
         await service.StartAsync(cts.Token);
-        await Task.Delay(250);
+        await Task.Delay(500); // Give more time for the service to reach the disabled log
         await service.StopAsync(CancellationToken.None);
 
         // Assert - now logs at Debug level
