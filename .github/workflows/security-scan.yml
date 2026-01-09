@@ -209,7 +209,7 @@ jobs:
       - name: Start application
         run: |
           cd src/Ceiba.Web
-          nohup dotnet run --no-build --configuration Release > app.log 2>&1 &
+          nohup dotnet run --no-build --no-launch-profile --configuration Release > app.log 2>&1 &
           echo $! > app.pid
         env:
           ASPNETCORE_ENVIRONMENT: Development
