@@ -126,6 +126,16 @@
             Defines table name, column mappings, indexes, and relationships.
             </summary>
         </member>
+        <member name="T:Ceiba.Infrastructure.Data.Configurations.UsuarioConfiguration">
+            <summary>
+            EF Core configuration for Usuario entity.
+            Extends Identity table with application-specific columns.
+            </summary>
+            <remarks>
+            The base USUARIO table is created by ASP.NET Identity.
+            This configuration adds: nombre, created_at, last_login_at columns.
+            </remarks>
+        </member>
         <member name="T:Ceiba.Infrastructure.Data.Configurations.ZonaConfiguration">
             <summary>
             EF Core configuration for Zona entity.
@@ -471,6 +481,30 @@
             <inheritdoc />
         </member>
         <member name="M:Ceiba.Infrastructure.Migrations.Initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.AddUsuarioCustomProperties">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddUsuarioCustomProperties.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddUsuarioCustomProperties.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddUsuarioCustomProperties.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:Ceiba.Infrastructure.Migrations.AddUsuarioActivoColumn">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddUsuarioActivoColumn.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddUsuarioActivoColumn.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Ceiba.Infrastructure.Migrations.AddUsuarioActivoColumn.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:Ceiba.Infrastructure.Repositories.ReportRepository">

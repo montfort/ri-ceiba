@@ -434,6 +434,11 @@
             DTO for creating the first administrator user during setup.
             </summary>
         </member>
+        <member name="P:Ceiba.Shared.DTOs.CreateFirstAdminDto.Nombre">
+            <summary>
+            Administrator's full display name.
+            </summary>
+        </member>
         <member name="P:Ceiba.Shared.DTOs.CreateFirstAdminDto.Email">
             <summary>
             Administrator's email address. Will also be used as username.
