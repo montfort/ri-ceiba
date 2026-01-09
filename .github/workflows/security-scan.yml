@@ -5,6 +5,8 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
+  release:
+    types: [ published ]
   schedule:
     # Run weekly security scans on Sunday at 2 AM
     - cron: '0 2 * * 0'
@@ -126,11 +128,11 @@ jobs:
   #   1. Ensure the application builds and starts correctly
   #   2. Implement /health endpoint returning "Healthy"
   #   3. Set repository variable ENABLE_OWASP_ZAP=true
-  # Only runs on schedule (weekly) or manual trigger to save resources
+  # Only runs on schedule (weekly), manual trigger, or release to save resources
   owasp-zap-scan:
     name: OWASP ZAP Dynamic Scan
     runs-on: ubuntu-latest
-    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && vars.ENABLE_OWASP_ZAP == 'true'
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'release') && vars.ENABLE_OWASP_ZAP == 'true'
 
     services:
       postgres:
