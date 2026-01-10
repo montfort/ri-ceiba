@@ -21,11 +21,11 @@
 </p>
 
 <p align="center">
-  <a href="#-características-principales">Características</a> •
-  <a href="#️-arquitectura">Arquitectura</a> •
-  <a href="#️-tecnologías">Tecnologías</a> •
-  <a href="#-instalación">Instalación</a> •
-  <a href="#-documentación">Documentación</a>
+  <a href="#caracteristicas">Características</a> •
+  <a href="#arquitectura">Arquitectura</a> •
+  <a href="#tecnologias">Tecnologías</a> •
+  <a href="#instalacion">Instalación</a> •
+  <a href="#documentacion">Documentación</a>
 </p>
 
 ---
@@ -59,6 +59,8 @@ Este análisis continuo garantiza que cada cambio en el código mantiene los est
 - **Facilitar** la toma de decisiones con datos en tiempo real
 
 ---
+
+<a id="caracteristicas"></a>
 
 ## ✨ Características Principales
 
@@ -118,6 +120,8 @@ Este análisis continuo garantiza que cada cambio en el código mantiene los est
 | Reportes automatizados | ❌ | ✅ | ❌ |
 
 ---
+
+<a id="arquitectura"></a>
 
 ## 🏗️ Arquitectura
 
@@ -196,6 +200,8 @@ ri-ceiba/
 
 ---
 
+<a id="tecnologias"></a>
+
 ## 🛠️ Tecnologías
 
 ### Backend
@@ -237,6 +243,8 @@ ri-ceiba/
 | Coverlet | Cobertura de código |
 
 ---
+
+<a id="instalacion"></a>
 
 ## 🚀 Instalación
 
@@ -322,6 +330,8 @@ dotnet test --collect:"XPlat Code Coverage"
 | Web | Flujos críticos |
 
 ---
+
+<a id="documentacion"></a>
 
 ## 📖 Documentación
 
