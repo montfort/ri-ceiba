@@ -2,7 +2,8 @@ name: SonarQube Analysis
 
 on:
   push:
-    branches: [ main, develop, '001-*' ]
+    # Only main/develop for dashboard updates (PRs handle feature branch validation)
+    branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
     types: [opened, synchronize, reopened]

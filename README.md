@@ -346,12 +346,6 @@ dotnet test --collect:"XPlat Code Coverage"
 | [tasks.md](specs/001-incident-management-system/tasks.md) | 330+ tareas de implementación |
 | [contracts/](specs/001-incident-management-system/contracts/) | Especificaciones OpenAPI 3.0 |
 
-### Wiki del Proyecto
-
-La documentación completa del proyecto está disponible en el [Wiki de GitHub](https://github.com/montfort/ri-ceiba/wiki).
-
-Los archivos fuente del wiki se mantienen junto al código en [`docs/wiki/`](docs/wiki/) para facilitar su versionado y revisión mediante pull requests.
-
 ---
 
 ## ⚙️ Configuración
