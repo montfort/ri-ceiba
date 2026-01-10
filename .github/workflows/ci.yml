@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main, develop, '001-*' ]
+    branches: [ main, develop, 'feature/**', 'fix/**', 'feat/**' ]
   pull_request:
     branches: [ main, develop ]
   workflow_dispatch:
@@ -77,10 +77,12 @@ jobs:
           retention-days: 14
 
   # Integration Tests (requires PostgreSQL)
+  # Only run on PRs or push to main/develop (skip on feature branch pushes)
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: build-and-test
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     permissions:
       contents: read
       checks: write
@@ -150,10 +152,12 @@ jobs:
           retention-days: 14
 
   # E2E Tests with Playwright
+  # Only run on PRs or push to main/develop (skip on feature branch pushes)
   e2e-tests:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: build-and-test
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     permissions:
       contents: read
 
@@ -281,10 +285,12 @@ jobs:
           retention-days: 14
 
   # Code Coverage Report
+  # Only run on PRs or push to main/develop (skip on feature branch pushes)
   coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
     needs: build-and-test
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     permissions:
       contents: read
       pull-requests: write
